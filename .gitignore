@@ -1,0 +1,16 @@
+# ⚠️ Ce dépôt n'hérite plus des règles de la racine du monorepo : il les porte lui-même.
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+__pycache__/
+*.py[cod]
+.venv/
+
+.env
+.env*.local
+
+.DS_Store
+*.log
