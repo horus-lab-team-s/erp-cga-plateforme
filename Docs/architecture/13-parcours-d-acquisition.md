@@ -14595,3 +14595,133 @@ dépôt.
 
 *Un écran qui compile n'est pas un écran qui marche, et quatre outils verts ne valent pas une page
 ouverte.*
+
+---
+
+## Pas 131 — La scission en cinq dépôts, et les six choses qui ne tenaient que par la place
+
+**Demande** : dissocier les dépôts. Le serveur, la console, la vitrine, l'application mobile, et
+un dépôt pour ce qui parle des autres.
+
+### Ce qui a été décidé, et ce qui ne l'a pas été
+
+Quatre questions se posaient, et le propriétaire du projet a tranché : le socle partagé du front
+est **recopié** dans chaque dépôt, la dérive étant acceptée ; la documentation, la recette et les
+manifestes vont dans un dépôt **plateforme** ; l'historique est **préservé** par extraction de
+sous-arbre ; l'application mobile est créée **maintenant**, avec sa charpente.
+
+Une cinquième décision a été prise ici, et elle contredit la deuxième. Le référentiel légal était
+parti avec `Docs/`. Il en est revenu.
+
+### Le référentiel n'est pas de la documentation
+
+Le serveur le lit à chaque requête, pour décider d'un taux, d'un seuil, d'un motif de refus. Sorti
+du dépôt, le serveur ne le trouvait plus, retombait sur les valeurs de repli du domaine, et
+**démarrait quand même**. C'est la forme de panne la plus désagréable qui soit : rien dans le
+journal, rien à l'écran, et un taux d'imposition faux.
+
+Un serveur qui ne peut ni démarrer ni être testé sans cloner un second dépôt est un serveur qu'on
+finit par tester ailleurs, c'est-à-dire nulle part. Le référentiel est donc dans
+`erp-cga-backend/Docs/referentiel/`, seul dossier de documentation qui y reste. La plateforme garde
+ce qui l'explique : le chapitre du dossier de conception et le circuit de contreseing du fiscaliste.
+*Le fondement se discute, la valeur s'exécute.*
+
+### Les six choses qui ne tenaient que par la place
+
+| Ce qui a cassé | Comment cela se manifestait |
+| --- | --- |
+| `RACINE_DEPOT = parents[3]` | Un niveau de trop : le serveur cherchait son référentiel chez le voisin et démarrait sur les valeurs de repli |
+| Treize tests, `parents[2]` | Même erreur, mais visible celle-là : soixante-dix fichiers introuvables |
+| L'outil d'avancement | Ne lisait que la console et déclarait cinq pages « absentes du frontend » ; elles étaient dans la vitrine |
+| `outputFileTracingRoot` | Pointait sur le dossier parent : le traçage sortait du dépôt, `server.js` atterrissait dans un sous-dossier portant le nom du répertoire de construction, et Turbopack remontait chez les dépôts voisins |
+| Les trois `Dockerfile` | Copiaient depuis `Backend_erp_cga/` et `Frontend_erp_cga/` : plus aucune image ne se construisait |
+| La racine de la console | « / » était l'accueil de la vitrine, partie avec son dépôt. Chaque écran répondait, l'adresse nue rendait 404 |
+
+La dernière mérite un mot. L'adresse nue est celle qu'on tape, celle qu'on met en favori, et celle
+que l'orchestrateur interroge pour savoir si le service est vivant. Ce n'est pas la suite de tests
+qui l'a trouvée, ni le typage, ni le contrat des écrans : c'est **la sonde de démarrage de la pile
+de démonstration**, qui attendait une réponse et n'en a pas eu.
+
+### Deux défauts qui ne venaient pas de la scission
+
+Quarante tests tombaient d'un coup en accusant le cloisonnement d'être cassé. La cause était dans la
+façon de se connecter : l'URL du rôle restreint se construisait en remplaçant le texte `cga:cga@`.
+Avec l'URL que rend `outils/postgres-local.sh` — `cga@`, sans mot de passe — le remplacement ne
+remplaçait rien, le « rôle restreint » restait le compte de départ, et celui-ci était
+superutilisateur. **Le pas 84 avait corrigé exactement cela**, dans `test_securite_lignes.py`, sans
+voir qu'il en existait deux autres copies.
+
+Le second est pire, parce qu'il touche l'outil qui juge tous les autres. Le registre des cas d'usage
+affichait **✓ validé** pour UC-31, dont les trois tests s'étaient sautés faute de base. Il retenait
+la dernière ligne de pytest contenant « passed » ou « failed », et il est tombé sur celle-ci :
+
+```
+SKIPPED [3] tests/test_concurrence.py:147: PostgreSQL injoignable —
+FATAL:  password authentication failed for user "cga"
+```
+
+Elle contient « failed », dans « password authentication failed ». C'est la panne que le pas 119
+avait corrigée, revenue par une autre porte. Une ligne de compte se reconnaît maintenant à sa forme,
+des nombres suivis d'états, et non à un mot qu'elle contient ; un cas qui comporte le moindre saut
+n'est plus validé.
+
+### La règle qui a servi partout
+
+Les outils de vérification **échouent** quand ils ne trouvent pas le dépôt qu'ils doivent lire. Les
+tests, eux, **s'ignorent** en disant lequel manque.
+
+La distinction n'est pas de la coquetterie. Un outil qui annonce « zéro écart » faute de matière à
+comparer éteint l'alarme qu'il portait. Une suite rouge par construction, parce qu'elle exige un
+second dépôt, finit par ne plus être lue du tout. Et c'est la chaîne d'intégration qui récupère les
+quatre dépôts, avec un contrôle « aucun test n'a été sauté » qui rend l'oubli impossible.
+
+`app/infrastructure/voisinage.py` porte cette règle de recherche, une seule pour tout le dépôt.
+
+### L'application de terrain
+
+Cinquième dépôt, créé de zéro. Le domaine d'abord : ce qu'est un dépôt de justificatif, et ce qu'on
+en fait quand la remise échoue. Trois règles, chacune adossée à une panne réelle du terrain.
+
+L'ordre de la file est celui de la **prise de vue**, pas celui de l'ajout : sinon la facture du 3
+arrive après celle du 17. Un refus sort de la file, une indisponibilité y reste : les confondre,
+c'est soit jeter une pièce valable parce que le réseau a manqué, soit ne jamais vider la file. Et la
+remise est idempotente par un identifiant posé sur l'appareil, sans quoi une réponse perdue en route
+ferait entrer deux fois la même facture en comptabilité.
+
+Le domaine ne dépend ni de Flutter ni du réseau, pour une raison précise : cette règle ne se vérifie
+pas à la main, il faudrait couper le réseau au bon moment vingt fois de suite. Huit cas l'éprouvent
+en une seconde.
+
+⚠️ **La file vit en mémoire.** Elle ne survit pas encore à la fermeture de l'application, ce qui est
+précisément ce que cette application existe pour ne pas perdre. Tant que ce point n'est pas fait,
+rien de tout cela ne se met entre les mains d'un adhérent, et le README le dit en premier.
+
+### Vérifié
+
+| Ce qui a été vérifié | Résultat |
+| --- | --- |
+| Suite du serveur, PostgreSQL réel, dépôt scindé | **3 761 tests**, aucun échec, aucun saut |
+| Avancement des écrans, les deux interfaces lues | **228 gestes sur 228**, 100 % |
+| Couverture des routes | **226 sur 231**, comme avant la scission |
+| Contrat des écrans | **278 appels lisibles sur 279** |
+| Registre des cas d'usage, base neuve | **75 sur 75**, aucun saut |
+| Cahier de recette réimprimé | **75 sur 75** |
+| Console et vitrine | types, style et compilation au vert |
+| Les trois images | construites ; conteneurs démarrés et **sains**, pages servies avec leurs feuilles de style |
+| Pile de démonstration | API 8010, console 3011, vitrine 3012, session ouverte et routes interrogées |
+| Application de terrain | analyse stricte sans remarque, 8 tests, APK construit |
+| Site de conception dans son dépôt | document importé, version 130, 140 sections, 102 figures, compilation au vert |
+
+### État à la fin du pas 131
+
+Cinq dépôts locaux, **cinquante-six validations au total** (9 pour le serveur, 16 pour la console,
+15 pour la vitrine, 2 pour l'application de terrain, 14 pour la plateforme), et **aucune n'est en
+ligne**. Aucun dépôt distant n'existe encore : leur création et leur envoi demandent un compte, et
+c'est une décision du propriétaire du projet, pas une étape de construction.
+
+Le monodépôt d'origine reste en place et intact, avec ses cent trente pas. La scission ne l'a pas
+touché : les cinq dépôts ont été construits à côté, par extraction de sous-arbre, et chacun porte
+l'historique de ce qu'il contient.
+
+*Ce qui ne tenait que par la place qu'il occupait ne tient plus dès qu'on le déplace, et rien de
+tout cela ne se voit en relecture.*
