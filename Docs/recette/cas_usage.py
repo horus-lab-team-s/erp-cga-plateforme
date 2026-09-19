@@ -23,6 +23,7 @@ from __future__ import annotations
 import itertools
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.error
@@ -32,6 +33,38 @@ from dataclasses import dataclass
 from pathlib import Path
 
 RACINE = Path(__file__).resolve().parents[2]
+
+#: Le dépôt du serveur, voisin de celui-ci depuis la scission.
+#:
+#: ⚠️ Ce registre rejoue de vrais tests et relit de vrais fichiers de source : il
+#: ne peut donc pas s'exécuter sans le code du serveur. Le chemin se règle par
+#: `CGA_RACINE_BACKEND` ; à défaut, on cherche le dépôt frère, puis la
+#: disposition d'avant la scission, pour qu'un monodépôt encore en place
+#: fonctionne sans réglage.
+#:
+#: ⚠️ **Absent, il fait échouer le registre, jamais afficher « tout va bien ».**
+#: C'est le défaut que le pas 119 a corrigé sur cette même recette : un cas qui
+#: ne trouve pas ce qu'il doit lire doit le dire, pas rendre vrai.
+def _depot_du_serveur() -> Path:
+    regle = os.environ.get("CGA_RACINE_BACKEND")
+    candidats = (
+        [Path(regle)]
+        if regle
+        else [RACINE.parent / "erp-cga-backend", RACINE / "Backend_erp_cga"]
+    )
+    for candidat in candidats:
+        if (candidat / "app").is_dir():
+            return candidat
+    raise SystemExit(
+        "dépôt du serveur introuvable : ce registre rejoue de vrais tests et "
+        "relit de vraies sources.\n"
+        "  Régler CGA_RACINE_BACKEND, ou cloner `erp-cga-backend` à côté de "
+        "celui-ci.\n"
+        f"  Cherché dans : {', '.join(str(c) for c in candidats)}"
+    )
+
+
+SERVEUR = _depot_du_serveur()
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 # ⚠️ `noqa: E402` : ces imports suivent `sys.path.insert` parce qu'ils désignent
@@ -137,7 +170,7 @@ def session(adresse: str) -> Client:
                 raise RecetteLimitee(
                     f"le limiteur de connexions a refusé la recette ({adresse}). Attendre cinq "
                     "minutes, ou remonter la pile : "
-                    "Backend_erp_cga/outils/pile-de-demonstration.sh neuve"
+                    "erp-cga-backend/outils/pile-de-demonstration.sh neuve"
                 )
             raise RecetteLimitee(
                 f"session refusée pour {adresse} (HTTP {code} à l'API). La pile est-elle amorcée "
@@ -910,8 +943,8 @@ def uc_exercice_clos_ferme() -> tuple[bool, str]:
 def uc_simulation_gardee() -> tuple[bool, str]:
     """La route qui fabrique un paiement disparaît dès que Tara est configuré."""
     source = (
-        RACINE
-        / "Backend_erp_cga/app/contextes/souscription/adaptateurs/entrant/routes_http.py"
+        SERVEUR
+        / "app/contextes/souscription/adaptateurs/entrant/routes_http.py"
     ).read_text(encoding="utf-8")
     garde = "if not boutique.fournisseur.simule:" in source and "status_code=409" in source
     return garde, "409 dès que des identifiants Tara réels sont configurés"
@@ -1371,6 +1404,47 @@ def _pourquoi_rien_n_a_tourne(sortie: str) -> str:
     return "cause non rapportée par pytest"
 
 
+#: La ligne de compte que pytest écrit en dernier : « 3 passed, 1 skipped in 0.42s ».
+LIGNE_DE_COMPTE = re.compile(
+    r"^=*\s*(?:\d+\s+\w+(?:,\s*)?)+\s*(?:in\s+[\d.]+s.*)?=*$"
+)
+#: Un couple « nombre + état » à l'intérieur de cette ligne.
+COMPTE = re.compile(r"(\d+)\s+(passed|failed|skipped|error|errors|xfailed|xpassed)")
+
+
+def _depouiller(sortie: str) -> tuple[str, dict[str, int]]:
+    """La ligne de compte de pytest, et ce qu'elle dit, état par état.
+
+    ⚠️ **CE DÉPOUILLEMENT REMPLACE UNE RECHERCHE DE SOUS-CHAÎNE, ET LA RAISON
+    MÉRITE D'ÊTRE LUE.**
+
+    La version précédente retenait la dernière ligne contenant « passed » ou
+    « failed ». Elle est tombée sur celle-ci, rendue par pytest pour expliquer un
+    test sauté :
+
+        SKIPPED [3] tests/test_concurrence.py:147: PostgreSQL injoignable —
+        FATAL: password authentication failed for user "cga"
+
+    Elle contient « failed », dans « password authentication failed ». Le registre
+    l'a prise pour un résumé, en a conclu que des tests avaient tourné, et a
+    affiché **✓ validé** pour un cas d'usage dont les trois tests s'étaient
+    sautés faute de base.
+
+    Une ligne de compte se reconnaît à sa forme — des nombres suivis d'états —,
+    pas à un mot qu'elle contient.
+    """
+    lignes = [
+        ligne.strip()
+        for ligne in sortie.strip().splitlines()
+        if LIGNE_DE_COMPTE.match(ligne.strip()) and COMPTE.search(ligne)
+    ]
+    if not lignes:
+        return "aucun test exécuté", {}
+    resume = lignes[-1]
+    compte = {etat: int(n) for n, etat in COMPTE.findall(resume)}
+    return resume, compte
+
+
 def executer_suite(cas: list[CasUsage]) -> dict[str, tuple[bool, str]]:
     """Lance pytest une seule fois par cible et rend le verdict de chacune.
     ⚠️ L'environnement est transmis tel quel — `CGA_URL_BASE_DE_DONNEES_TEST`
@@ -1394,25 +1468,29 @@ def executer_suite(cas: list[CasUsage]) -> dict[str, tuple[bool, str]]:
         # exception qui interromprait le registre au premier échec.
         issue = subprocess.run(
             commande,
-            cwd=RACINE / "Backend_erp_cga",
+            cwd=SERVEUR,
             capture_output=True,
             text=True,
             timeout=600,
             check=False,
             env=os.environ.copy(),
         )
-        derniere = [
-            ligne
-            for ligne in issue.stdout.strip().splitlines()
-            if "passed" in ligne or "failed" in ligne
-        ]
-        resume = derniere[-1].strip() if derniere else "aucun test exécuté"
-        # « 0 passed » ou aucune ligne de résultat : rien n'a tourné. Le cas
+        resume, compte = _depouiller(issue.stdout)
+        # « 0 passed » ou aucune ligne de compte : rien n'a tourné. Le cas
         # d'usage n'est pas validé, il est **non couvert**, et ça se dit.
-        a_tourne = bool(derniere) and not resume.startswith("no tests ran")
-        if not a_tourne:
+        a_tourne = compte.get("passed", 0) > 0
+        # ⚠️ Un cas sauté n'est PAS un cas validé, et c'est ici que se joue toute
+        # la valeur de ce registre. Les tests qui touchent à la base se sautent
+        # sans bruit quand `CGA_URL_BASE_DE_DONNEES_TEST` manque : pytest sort 0,
+        # et un registre naïf affiche « validé » pour un cas dont rien n'a été
+        # vérifié. C'est exactement la panne que le pas 119 avait corrigée.
+        rien_saute = compte.get("skipped", 0) == 0
+        if not a_tourne or not rien_saute:
             resume = f"{resume} · {_pourquoi_rien_n_a_tourne(issue.stdout)}"
-        resultats[c.reference] = (issue.returncode == 0 and a_tourne, resume)
+        resultats[c.reference] = (
+            issue.returncode == 0 and a_tourne and rien_saute,
+            resume,
+        )
     return resultats
 
 

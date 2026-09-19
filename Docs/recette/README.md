@@ -165,3 +165,37 @@ Voir [`../cahier-de-recette-cga.pdf`](../cahier-de-recette-cga.pdf), section 3, 
 `cabinet brcg douala 2026`, et trois d'entre eux **doivent** échouer à la
 connexion — suspendu, jamais activé, inexistant — avec le même message, pour ne
 pas rouvrir l'oracle d'énumération.
+
+## ⚠️ Une base neuve avant chaque passe, et entre les deux outils
+
+`cas_usage.py` et `cahier_de_recette.py` rejouent tous deux les flux « direct »,
+c'est-à-dire de vraies requêtes qui **écrivent** dans la base de démonstration.
+Enchaîner les deux sans remise à zéro fait tomber trois cas — UC-66, UC-68,
+UC-74 — pour la seule raison que le premier passage a déjà ouvert la demande,
+créé les échéances et accepté la dérogation que le second croit poser.
+
+Le défaut est fourbe parce qu'il ne ressemble pas à un défaut de recette : les
+trois constats sont précis et plausibles. Avant chaque passe :
+
+```bash
+cd ../erp-cga-backend && outils/pile-de-demonstration.sh neuve
+```
+
+## ⚠️ Le registre exige désormais une base, et refuse les cas sautés
+
+Les tests qui touchent à la base se sautent sans bruit quand
+`CGA_URL_BASE_DE_DONNEES_TEST` manque : pytest sort 0, et un cas d'usage dont
+rien n'a été vérifié s'affichait « validé ».
+
+Le registre lit maintenant la **ligne de compte** de pytest, et un cas qui
+comporte le moindre saut n'est pas validé. Le dépouillement précédent retenait
+la dernière ligne contenant « passed » ou « failed » : il est tombé sur une
+explication de saut contenant « password authentication **failed** », l'a prise
+pour un résumé, et a validé UC-31 alors que ses trois tests ne s'étaient pas
+exécutés. Une ligne de compte se reconnaît à sa forme, pas à un mot qu'elle
+contient.
+
+```bash
+CGA_URL_BASE_DE_DONNEES_TEST="postgresql+psycopg://cga@127.0.0.1:55432/cga_test" \
+  python Docs/recette/cas_usage.py
+```

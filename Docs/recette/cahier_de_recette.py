@@ -703,27 +703,50 @@ GABARIT = """<!doctype html>
 
 PILE = (
     '<span class="commentaire">'
-    "# 1 · PostgreSQL local, données de démonstration uniquement</span>\n"
-    """cd Backend_erp_cga &amp;&amp; eval "$(bash outils/postgres-local.sh start)"
+    "# Les quatre dépôts, clonés côte à côte</span>\n"
+    """git clone &#8230;/erp-cga-backend &amp;&amp; git clone &#8230;/erp-cga-console
+git clone &#8230;/erp-cga-vitrine &amp;&amp; git clone &#8230;/erp-cga-plateforme
+
+<span class="commentaire"># Toute la pile d'un coup : base, schéma, jeu de démonstration,
+# API sur 8010, console sur 3011, vitrine sur 3012</span>
+cd erp-cga-backend
+outils/pile-de-demonstration.sh neuve
+
+<span class="commentaire"># Rejouer les cas d'usage, et refaire ce cahier</span>
+cd ../erp-cga-plateforme
+python Docs/recette/cas_usage.py
+python Docs/recette/cahier_de_recette.py
+
+<span class="commentaire">
+# ─────────────────────────────────────────────────────────────────────
+# Le détail de ce que le script enchaîne, pour qui doit le reprendre à la
+# main : une étape qui échoue, une base distante, un port déjà occupé.
+# ─────────────────────────────────────────────────────────────────────
+
+# 1 · PostgreSQL local, données de démonstration uniquement</span>
+cd erp-cga-backend &amp;&amp; eval "$(bash outils/postgres-local.sh start)"
 
 <span class="commentaire"># 2 · Schéma et jeu de démonstration</span>
 export CGA_PERSISTANCE=postgresql
 python -m alembic upgrade head
 CGA_MODE_DEMONSTRATION=true python -c "from app.amorcage import amorcer; print(amorcer())"
 
-<span class="commentaire"># 3 · L'API, en mode recette</span>
+<span class="commentaire"># 3 · L'API, en mode recette. Les deux interfaces sont admises par CORS :
+# la console appelle depuis son serveur, la vitrine depuis le navigateur.</span>
 CGA_MODE_DEMONSTRATION=true CGA_ADRESSE_PUBLIQUE_SITE=http://localhost:3011 \\
-CGA_ORIGINES_CORS='["http://localhost:3011"]' \\
+CGA_ORIGINES_CORS='["http://localhost:3011","http://localhost:3012"]' \\
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 
-<span class="commentaire"># 4 · Le front, build autonome</span>
-cd Frontend_erp_cga &amp;&amp; npx next build
+<span class="commentaire"># 4 · La console, build autonome. `server.js` est à la racine de
+# `standalone` depuis la scission : le traçage ne sort plus du dépôt.</span>
+cd ../erp-cga-console &amp;&amp; npx next build
 cd .next/standalone
-API_URL=http://127.0.0.1:8010 PORT=3011 HOSTNAME=0.0.0.0 node Frontend_erp_cga/server.js
+API_URL=http://127.0.0.1:8010 PORT=3011 HOSTNAME=0.0.0.0 node server.js
 
-<span class="commentaire"># 5 · Rejouer les cas d'usage, et refaire ce cahier</span>
-python Docs/recette/cas_usage.py
-python Docs/recette/cahier_de_recette.py"""
+<span class="commentaire"># 5 · La vitrine, de même, sur 3012</span>
+cd ../erp-cga-vitrine &amp;&amp; npx next build
+cd .next/standalone
+API_URL=http://127.0.0.1:8010 PORT=3012 HOSTNAME=0.0.0.0 node server.js"""
 )
 
 

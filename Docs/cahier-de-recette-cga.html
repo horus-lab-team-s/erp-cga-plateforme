@@ -179,7 +179,7 @@
     </p>
   </div>
   <div class="meta">
-    <strong>Édition</strong> 18/09/2026<br>
+    <strong>Édition</strong> 19/09/2026<br>
     Front http://localhost:3011<br>
     API http://127.0.0.1:8010<br>
     Mot de passe commun<br>
@@ -215,27 +215,50 @@
 
 <section>
   <h2><span class="numero">2</span>Monter la pile de recette</h2>
-  <pre><span class="commentaire"># 1 · PostgreSQL local, données de démonstration uniquement</span>
-cd Backend_erp_cga &amp;&amp; eval "$(bash outils/postgres-local.sh start)"
+  <pre><span class="commentaire"># Les quatre dépôts, clonés côte à côte</span>
+git clone &#8230;/erp-cga-backend &amp;&amp; git clone &#8230;/erp-cga-console
+git clone &#8230;/erp-cga-vitrine &amp;&amp; git clone &#8230;/erp-cga-plateforme
+
+<span class="commentaire"># Toute la pile d'un coup : base, schéma, jeu de démonstration,
+# API sur 8010, console sur 3011, vitrine sur 3012</span>
+cd erp-cga-backend
+outils/pile-de-demonstration.sh neuve
+
+<span class="commentaire"># Rejouer les cas d'usage, et refaire ce cahier</span>
+cd ../erp-cga-plateforme
+python Docs/recette/cas_usage.py
+python Docs/recette/cahier_de_recette.py
+
+<span class="commentaire">
+# ─────────────────────────────────────────────────────────────────────
+# Le détail de ce que le script enchaîne, pour qui doit le reprendre à la
+# main : une étape qui échoue, une base distante, un port déjà occupé.
+# ─────────────────────────────────────────────────────────────────────
+
+# 1 · PostgreSQL local, données de démonstration uniquement</span>
+cd erp-cga-backend &amp;&amp; eval "$(bash outils/postgres-local.sh start)"
 
 <span class="commentaire"># 2 · Schéma et jeu de démonstration</span>
 export CGA_PERSISTANCE=postgresql
 python -m alembic upgrade head
 CGA_MODE_DEMONSTRATION=true python -c "from app.amorcage import amorcer; print(amorcer())"
 
-<span class="commentaire"># 3 · L'API, en mode recette</span>
+<span class="commentaire"># 3 · L'API, en mode recette. Les deux interfaces sont admises par CORS :
+# la console appelle depuis son serveur, la vitrine depuis le navigateur.</span>
 CGA_MODE_DEMONSTRATION=true CGA_ADRESSE_PUBLIQUE_SITE=http://localhost:3011 \
-CGA_ORIGINES_CORS='["http://localhost:3011"]' \
+CGA_ORIGINES_CORS='["http://localhost:3011","http://localhost:3012"]' \
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 
-<span class="commentaire"># 4 · Le front, build autonome</span>
-cd Frontend_erp_cga &amp;&amp; npx next build
+<span class="commentaire"># 4 · La console, build autonome. `server.js` est à la racine de
+# `standalone` depuis la scission : le traçage ne sort plus du dépôt.</span>
+cd ../erp-cga-console &amp;&amp; npx next build
 cd .next/standalone
-API_URL=http://127.0.0.1:8010 PORT=3011 HOSTNAME=0.0.0.0 node Frontend_erp_cga/server.js
+API_URL=http://127.0.0.1:8010 PORT=3011 HOSTNAME=0.0.0.0 node server.js
 
-<span class="commentaire"># 5 · Rejouer les cas d'usage, et refaire ce cahier</span>
-python Docs/recette/cas_usage.py
-python Docs/recette/cahier_de_recette.py</pre>
+<span class="commentaire"># 5 · La vitrine, de même, sur 3012</span>
+cd ../erp-cga-vitrine &amp;&amp; npx next build
+cd .next/standalone
+API_URL=http://127.0.0.1:8010 PORT=3012 HOSTNAME=0.0.0.0 node server.js</pre>
   <p class="note">
     <strong>HOSTNAME=0.0.0.0 est obligatoire.</strong> Avec 127.0.0.1, le serveur
     autonome Next renvoie une redirection sur chaque page, et la recette conclut à
@@ -295,8 +318,8 @@ python Docs/recette/cahier_de_recette.py</pre>
 <tr class="ok"><td class="ref">UC-04</td><td class="acteur">Compte non activé</td><td class="intitule">Être refusé à la connexion</td><td class="compte">e.tchoumba (jamais activé)</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>HTTP 200, aucun témoin, message générique</td></tr>
 <tr class="ok"><td class="ref">UC-05</td><td class="acteur">Compte inexistant</td><td class="intitule">Être refusé sans révéler qu&#x27;il n&#x27;existe pas</td><td class="compte">inconnu@nulle-part.cm</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>HTTP 200, aucun témoin, message générique</td></tr>
 <tr class="ok"><td class="ref">UC-06</td><td class="acteur">Visiteur anonyme</td><td class="intitule">Se voir refuser toute route métier</td><td class="compte">aucun : visiteur anonyme</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>6 routes, toutes 401</td></tr>
-<tr class="ok"><td class="ref">UC-07</td><td class="acteur">Attaquant</td><td class="intitule">Être freiné au-delà de 30 connexions / 5 min<div class="cible">tests/test_limitation.py</div></td><td class="compte">aucun : 31 tentatives de suite</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>15 passed, 1 warning in 4.53s</td></tr>
-<tr class="ok"><td class="ref">UC-08</td><td class="acteur">Navigateur</td><td class="intitule">Ne recevoir un témoin Secure que sur HTTPS<div class="cible">tests/test_transverse.py -k temoin</div></td><td class="compte">aucun : lire l&#x27;en-tête Set-Cookie</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>3 passed, 137 deselected, 1 warning in 1.06s</td></tr>
+<tr class="ok"><td class="ref">UC-07</td><td class="acteur">Attaquant</td><td class="intitule">Être freiné au-delà de 30 connexions / 5 min<div class="cible">tests/test_limitation.py</div></td><td class="compte">aucun : 31 tentatives de suite</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>15 passed, 1 warning in 4.49s</td></tr>
+<tr class="ok"><td class="ref">UC-08</td><td class="acteur">Navigateur</td><td class="intitule">Ne recevoir un témoin Secure que sur HTTPS<div class="cible">tests/test_transverse.py -k temoin</div></td><td class="compte">aucun : lire l&#x27;en-tête Set-Cookie</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>3 passed, 137 deselected, 1 warning in 1.01s</td></tr>
 <tr class="ok"><td class="ref">UC-09</td><td class="acteur">Tout profil</td><td class="intitule">Ne voir que les écrans de son rôle</td><td class="compte">s.onana sur /comptabilite</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>l&#x27;administrateur lit « Accès réservé »</td></tr>
 <tr class="ok"><td class="ref">UC-10</td><td class="acteur">Tout profil</td><td class="intitule">Être refusé aussi hors de l&#x27;interface</td><td class="compte">s.onana, en appelant l&#x27;API sans passer par l&#x27;écran</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>appel direct de l&#x27;API par l&#x27;administrateur : HTTP 403</td></tr>
 <tr class="ok"><td class="ref">UC-11</td><td class="acteur">Administrateur</td><td class="intitule">N&#x27;accéder à aucun dossier</td><td class="compte">s.onana</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>deux dossiers sondés : [403, 403]</td></tr>
@@ -307,14 +330,14 @@ python Docs/recette/cahier_de_recette.py</pre>
 <tr class="ok"><td class="ref">UC-28</td><td class="acteur">Direction</td><td class="intitule">Lire le journal d&#x27;audit, fermé au comptable</td><td class="compte">b.mballa, puis l.fotso</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>direction 200, comptable 403</td></tr>
 <tr class="ok"><td class="ref">UC-29</td><td class="acteur">Administrateur</td><td class="intitule">Inviter un compte, et lui seul</td><td class="compte">s.onana, puis b.mballa</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>administrateur 201 création, direction 403, la direction ne gère pas les comptes</td></tr>
 <tr class="ok"><td class="ref">UC-30</td><td class="acteur">Exploitant</td><td class="intitule">Voir /sante sonder réellement la base</td><td class="compte">exploitant : GET /sante</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>HTTP 200, base sondée par un SELECT réel</td></tr>
-<tr class="ok"><td class="ref">UC-31</td><td class="acteur">Exploitant</td><td class="intitule">Voir la chaîne d&#x27;audit tenir sous concurrence<div class="cible">tests/test_concurrence.py</div></td><td class="compte">exploitant</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>7 passed in 6.02s</td></tr>
+<tr class="ok"><td class="ref">UC-31</td><td class="acteur">Exploitant</td><td class="intitule">Voir la chaîne d&#x27;audit tenir sous concurrence<div class="cible">tests/test_concurrence.py</div></td><td class="compte">exploitant</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>7 passed in 5.74s</td></tr>
 <tr class="ok"><td class="ref">UC-32</td><td class="acteur">Exploitant</td><td class="intitule">Voir la production refuser une configuration dangereuse<div class="cible">tests/test_courriel.py::TestConfigurationDeProduction</div></td><td class="compte">exploitant</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>8 passed in 0.02s</td></tr>
-<tr class="ok"><td class="ref">UC-33</td><td class="acteur">Architecte</td><td class="intitule">Voir les frontières de contexte tenir<div class="cible">tests/test_architecture.py</div></td><td class="compte">architecte</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>137 passed in 2.32s</td></tr>
+<tr class="ok"><td class="ref">UC-33</td><td class="acteur">Architecte</td><td class="intitule">Voir les frontières de contexte tenir<div class="cible">tests/test_architecture.py</div></td><td class="compte">architecte</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>137 passed in 2.42s</td></tr>
 <tr class="groupe"><td colspan="6"><span class="lettre">M</span>Souscription en ligne<span class="compte-groupe">5 cas</span></td></tr>
-<tr class="ok"><td class="ref">UC-14</td><td class="acteur">Prospect</td><td class="intitule">Obtenir un devis sans compte<div class="cible">tests/test_souscription.py -k devis</div></td><td class="compte">aucun : la vitrine publique</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>16 passed, 81 deselected, 1 warning in 1.75s</td></tr>
-<tr class="ok"><td class="ref">UC-15</td><td class="acteur">Prospect</td><td class="intitule">Se voir exiger le NIU quand le service ouvre un accès<div class="cible">tests/test_souscription.py -k niu</div></td><td class="compte">aucun : la vitrine publique</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>2 passed, 95 deselected, 1 warning in 0.87s</td></tr>
-<tr class="ok"><td class="ref">UC-16</td><td class="acteur">Prospect</td><td class="intitule">Voir son paiement ouvrir l&#x27;accès et partir en courriel<div class="cible">tests/test_mode_demonstration.py</div></td><td class="compte">aucun, puis le lien reçu par courriel</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>14 passed, 1 warning in 4.49s</td></tr>
-<tr class="ok"><td class="ref">UC-17</td><td class="acteur">Nouvel adhérent</td><td class="intitule">Définir son mot de passe et se connecter<div class="cible">tests/test_transverse.py -k mot_de_passe</div></td><td class="compte">le lien d&#x27;activation, puis le compte créé</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>12 passed, 128 deselected, 1 warning in 1.02s</td></tr>
+<tr class="ok"><td class="ref">UC-14</td><td class="acteur">Prospect</td><td class="intitule">Obtenir un devis sans compte<div class="cible">tests/test_souscription.py -k devis</div></td><td class="compte">aucun : la vitrine publique</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>16 passed, 81 deselected, 1 warning in 1.68s</td></tr>
+<tr class="ok"><td class="ref">UC-15</td><td class="acteur">Prospect</td><td class="intitule">Se voir exiger le NIU quand le service ouvre un accès<div class="cible">tests/test_souscription.py -k niu</div></td><td class="compte">aucun : la vitrine publique</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>2 passed, 95 deselected, 1 warning in 0.82s</td></tr>
+<tr class="ok"><td class="ref">UC-16</td><td class="acteur">Prospect</td><td class="intitule">Voir son paiement ouvrir l&#x27;accès et partir en courriel<div class="cible">tests/test_mode_demonstration.py</div></td><td class="compte">aucun, puis le lien reçu par courriel</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>14 passed, 1 warning in 4.51s</td></tr>
+<tr class="ok"><td class="ref">UC-17</td><td class="acteur">Nouvel adhérent</td><td class="intitule">Définir son mot de passe et se connecter<div class="cible">tests/test_transverse.py -k mot_de_passe</div></td><td class="compte">le lien d&#x27;activation, puis le compte créé</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>12 passed, 128 deselected, 1 warning in 0.97s</td></tr>
 <tr class="ok"><td class="ref">UC-18</td><td class="acteur">Exploitant</td><td class="intitule">Voir la simulation de paiement refusée en production</td><td class="compte">exploitant : configuration Tara réelle</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>409 dès que des identifiants Tara réels sont configurés</td></tr>
 <tr class="groupe"><td colspan="6"><span class="lettre">I</span>Création d&#x27;entreprise<span class="compte-groupe">7 cas</span></td></tr>
 <tr class="ok"><td class="ref">UC-34</td><td class="acteur">Chargé de formalités</td><td class="intitule">Ouvrir le pipeline, et lui seul</td><td class="compte">p.moukouri, puis l.fotso</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>chargé de formalités 200, comptable 403</td></tr>
@@ -322,10 +345,10 @@ python Docs/recette/cahier_de_recette.py</pre>
 <tr class="ok"><td class="ref">UC-36</td><td class="acteur">Chargé de formalités</td><td class="intitule">Voir d&#x27;abord les dossiers qui dorment</td><td class="compte">p.moukouri</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>6 dossiers, du plus immobile (121 j) au plus récent, 1 à relancer au guichet</td></tr>
 <tr class="ok"><td class="ref">UC-37</td><td class="acteur">Chargé de formalités</td><td class="intitule">Être arrêté avant un dépôt CFCE incomplet</td><td class="compte">p.moukouri</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>HTTP 409, pièces manquantes nommées dans le refus</td></tr>
 <tr class="ok"><td class="ref">UC-38</td><td class="acteur">Nouvelle entreprise</td><td class="intitule">Naître au portefeuille avec ses échéances</td><td class="compte">p.moukouri, puis b.mballa au portefeuille</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>née le 2026-07-02 (RCCM), au portefeuille 200, 14 obligations calculées d&#x27;office</td></tr>
-<tr class="ok"><td class="ref">UC-39</td><td class="acteur">Chargé de formalités</td><td class="intitule">Voir le tunnel refuser tout saut d&#x27;étape<div class="cible">tests/test_creation_entreprise.py::TestTunnel</div></td><td class="compte">p.moukouri</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>10 passed in 0.04s</td></tr>
-<tr class="ok"><td class="ref">UC-40</td><td class="acteur">Fiscaliste</td><td class="intitule">Voir un capital validé bloquer là où un capital douteux avertissait<div class="cible">tests/test_creation_entreprise.py::TestDiagnostic</div></td><td class="compte">r.ebolo</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>8 passed in 0.13s</td></tr>
+<tr class="ok"><td class="ref">UC-39</td><td class="acteur">Chargé de formalités</td><td class="intitule">Voir le tunnel refuser tout saut d&#x27;étape<div class="cible">tests/test_creation_entreprise.py::TestTunnel</div></td><td class="compte">p.moukouri</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>10 passed in 0.03s</td></tr>
+<tr class="ok"><td class="ref">UC-40</td><td class="acteur">Fiscaliste</td><td class="intitule">Voir un capital validé bloquer là où un capital douteux avertissait<div class="cible">tests/test_creation_entreprise.py::TestDiagnostic</div></td><td class="compte">r.ebolo</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>8 passed in 0.12s</td></tr>
 <tr class="groupe"><td colspan="6"><span class="lettre">C</span>Collecte des pièces<span class="compte-groupe">4 cas</span></td></tr>
-<tr class="ok"><td class="ref">UC-19</td><td class="acteur">Comptable</td><td class="intitule">Enregistrer une pièce déposée au cabinet</td><td class="compte">l.fotso, puis r.ebolo</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>comptable 201 (PJ-M06554-ba5029e9e2d962d0), fiscaliste 403</td></tr>
+<tr class="ok"><td class="ref">UC-19</td><td class="acteur">Comptable</td><td class="intitule">Enregistrer une pièce déposée au cabinet</td><td class="compte">l.fotso, puis r.ebolo</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>comptable 201 (PJ-M06554-b388b232224876b2), fiscaliste 403</td></tr>
 <tr class="ok"><td class="ref">UC-20</td><td class="acteur">Adhérent</td><td class="intitule">Ne voir dans la boîte que les pièces de son dossier</td><td class="compte">jp.nkoa</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>7 pièces sur 29, un seul dossier : M081234567890P</td></tr>
 <tr class="ok"><td class="ref">UC-66</td><td class="acteur">Adhérent</td><td class="intitule">Répondre au cabinet sans fermer la demande</td><td class="compte"></td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>adhérent 201 (demande toujours OUVERTE : True), double 409, comptable 403</td></tr>
 <tr class="ok"><td class="ref">UC-67</td><td class="acteur">Adhérent</td><td class="intitule">Lire ses justificatifs d&#x27;un mois, dans ses mots</td><td class="compte"></td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>7 justificatif(s) de juillet, statuts [&#x27;A_CORRIGER&#x27;, &#x27;ENREGISTRE&#x27;, &#x27;RECU&#x27;], autre dossier 404</td></tr>
@@ -334,7 +357,7 @@ python Docs/recette/cahier_de_recette.py</pre>
 <tr class="ok"><td class="ref">UC-42</td><td class="acteur">Cadre au-dessus du plafond</td><td class="intitule">Voir le plafond CNPS n&#x27;atteindre que les bonnes branches</td><td class="compte">l.fotso sur AGRO-NKOLO SA</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>brut 1 375 000, 3 branches plafonnées  4 sur salaire réel</td></tr>
 <tr class="ok"><td class="ref">UC-43</td><td class="acteur">Salarié logé</td><td class="intitule">Voir son avantage imposé sans être versé deux fois</td><td class="compte">l.fotso sur AGRO-NKOLO SA</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>avantages 275 000 dans l&#x27;assiette  net 768 202 sans eux</td></tr>
 <tr class="ok"><td class="ref">UC-44</td><td class="acteur">Employeur</td><td class="intitule">Savoir quoi verser, et avant quand</td><td class="compte">l.fotso sur AGRO-NKOLO SA</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>effectif 3  à verser 633 455 FCFA avant le 2026-08-15  1 sortie(s) relevée(s)</td></tr>
-<tr class="ok"><td class="ref">UC-45</td><td class="acteur">Salarié</td><td class="intitule">Voir un impôt progressif, jamais un taux moyen<div class="cible">tests/test_social.py::TestIrpp</div></td><td class="compte">l.fotso</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>4 passed in 0.08s</td></tr>
+<tr class="ok"><td class="ref">UC-45</td><td class="acteur">Salarié</td><td class="intitule">Voir un impôt progressif, jamais un taux moyen<div class="cible">tests/test_social.py::TestIrpp</div></td><td class="compte">l.fotso</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>4 passed in 0.07s</td></tr>
 <tr class="ok"><td class="ref">UC-46</td><td class="acteur">Cabinet</td><td class="intitule">Voir le calcul refuser plutôt qu&#x27;amputer un bulletin<div class="cible">tests/test_social.py::TestRefusDeCalculer</div></td><td class="compte">l.fotso</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>4 passed in 0.11s</td></tr>
 <tr class="groupe"><td colspan="6"><span class="lettre">D</span>Conformité<span class="compte-groupe">5 cas</span></td></tr>
 <tr class="ok"><td class="ref">UC-73</td><td class="acteur">Réviseur</td><td class="intitule">Traiter tout le portefeuille par gravité et par enjeu</td><td class="compte"></td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>12 constat(s) ordonnés, adhérent 403, périmètre du comptable inclus : True</td></tr>
@@ -347,15 +370,15 @@ python Docs/recette/cahier_de_recette.py</pre>
 <tr class="ok"><td class="ref">UC-48</td><td class="acteur">Réviseur</td><td class="intitule">Voir les trois contrôles d&#x27;avant dépôt</td><td class="compte">a.bouba</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>3/3 contrôles verts  résultat -9 240 000 concordant par les deux chemins</td></tr>
 <tr class="ok"><td class="ref">UC-49</td><td class="acteur">Adhérent</td><td class="intitule">Ne pas payer l&#x27;impôt deux fois sur une TVA rejetée</td><td class="compte">l.fotso sur AGRO-NKOLO SA</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>379 350 FCFA de TVA rejetée  signalée et hors du tableau de passage · pièces [&#x27;PJ-2026-0001&#x27;]</td></tr>
 <tr class="ok"><td class="ref">UC-50</td><td class="acteur">Adhérent</td><td class="intitule">Voir son abattement CGA calculé après réintégrations<div class="cible">tests/test_cloture.py::TestPassageFiscal</div></td><td class="compte">l.fotso</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>11 passed in 0.23s</td></tr>
-<tr class="ok"><td class="ref">UC-51</td><td class="acteur">Comptable</td><td class="intitule">Voir une balance fausse refuser de s&#x27;équilibrer<div class="cible">tests/test_cloture.py::TestAssemblage</div></td><td class="compte">l.fotso</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>6 passed in 0.16s</td></tr>
-<tr class="ok"><td class="ref">UC-52</td><td class="acteur">Vérificateur</td><td class="intitule">Remonter d&#x27;une réintégration jusqu&#x27;à la facture<div class="cible">tests/test_cloture.py::TestChaineComplete</div></td><td class="compte">g.atangana</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>1 passed in 0.19s</td></tr>
+<tr class="ok"><td class="ref">UC-51</td><td class="acteur">Comptable</td><td class="intitule">Voir une balance fausse refuser de s&#x27;équilibrer<div class="cible">tests/test_cloture.py::TestAssemblage</div></td><td class="compte">l.fotso</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>6 passed in 0.13s</td></tr>
+<tr class="ok"><td class="ref">UC-52</td><td class="acteur">Vérificateur</td><td class="intitule">Remonter d&#x27;une réintégration jusqu&#x27;à la facture<div class="cible">tests/test_cloture.py::TestChaineComplete</div></td><td class="compte">g.atangana</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>1 passed in 0.14s</td></tr>
 <tr class="groupe"><td colspan="6"><span class="lettre">J</span>Pilotage du cabinet<span class="compte-groupe">7 cas</span></td></tr>
 <tr class="ok"><td class="ref">UC-65</td><td class="acteur">Adhérent</td><td class="intitule">Lire son mois : ce qui manque, ou que tout est complet</td><td class="compte"></td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>A_ENVOYER · « Il manque 3 justificatifs » · 3 demandée(s)</td></tr>
 <tr class="ok"><td class="ref">UC-53</td><td class="acteur">Direction</td><td class="intitule">Ouvrir le pilotage, fermé même au réviseur</td><td class="compte">b.mballa, puis a.bouba, l.fotso, jp.nkoa</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>direction 200, réviseur 403, comptable 403, adhérent 403</td></tr>
 <tr class="ok"><td class="ref">UC-54</td><td class="acteur">Direction</td><td class="intitule">Descendre du score jusqu&#x27;à la pièce qui le cause</td><td class="compte">b.mballa</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>17 composantes, 17 citant leurs éléments, chacune assortie de l&#x27;action attendue</td></tr>
 <tr class="ok"><td class="ref">UC-55</td><td class="acteur">Direction</td><td class="intitule">Voir les dossiers rangés par risque, jamais par nom</td><td class="compte">b.mballa</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>7 dossiers, scores [655.0, 635.0, 320.0, 310.0, 70.0, 65.0, 60.0], 7 à traiter et 0 à surveiller</td></tr>
 <tr class="ok"><td class="ref">UC-56</td><td class="acteur">Direction</td><td class="intitule">Voir la réserve tomber dès que la direction arrête</td><td class="compte">b.mballa</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>réserve levée : True ; écran net : True ; arrêté par : CGA Broad Range Consulting Group (agrément MINFI/DGI n° 00000048)</td></tr>
-<tr class="ok"><td class="ref">UC-57</td><td class="acteur">Cabinet</td><td class="intitule">Voir la charge ignorer les habilitations à portée ouverte<div class="cible">tests/test_pilotage.py::TestCharge</div></td><td class="compte">b.mballa</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>4 passed in 0.06s</td></tr>
+<tr class="ok"><td class="ref">UC-57</td><td class="acteur">Cabinet</td><td class="intitule">Voir la charge ignorer les habilitations à portée ouverte<div class="cible">tests/test_pilotage.py::TestCharge</div></td><td class="compte">b.mballa</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>4 passed in 0.07s</td></tr>
 <tr class="ok"><td class="ref">UC-58</td><td class="acteur">Cabinet</td><td class="intitule">Voir un poids absent valoir zéro plutôt qu&#x27;être inventé<div class="cible">tests/test_pilotage.py::TestPonderation</div></td><td class="compte">b.mballa</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>5 passed in 0.11s</td></tr>
 <tr class="groupe"><td colspan="6"><span class="lettre">E</span>Comptabilité<span class="compte-groupe">8 cas</span></td></tr>
 <tr class="ok"><td class="ref">UC-59</td><td class="acteur">Comptable</td><td class="intitule">Saisir une écriture, et lui seul</td><td class="compte">l.fotso, puis p.moukouri et jp.nkoa</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>comptable 201 en brouillon, chargé de clientèle 403, adhérent 403</td></tr>
@@ -363,9 +386,9 @@ python Docs/recette/cahier_de_recette.py</pre>
 <tr class="ok"><td class="ref">UC-61</td><td class="acteur">Vérificateur</td><td class="intitule">Voir qu&#x27;une écriture validée ne se retouche plus</td><td class="compte">l.fotso</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>validée 200 par C-004, seconde validation 409</td></tr>
 <tr class="ok"><td class="ref">UC-62</td><td class="acteur">Comptable</td><td class="intitule">Annuler par l&#x27;inverse, motivé, sans rien effacer</td><td class="compte">l.fotso</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>motif vide 403, inverse 201 rattaché à 2026/AC/000005, originale toujours validée : True</td></tr>
 <tr class="ok"><td class="ref">UC-63</td><td class="acteur">Cabinet</td><td class="intitule">Voir un exercice inconnu ou clos refuser la saisie</td><td class="compte">l.fotso</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>HTTP 409, l&#x27;exercice est nommé</td></tr>
-<tr class="ok"><td class="ref">UC-64</td><td class="acteur">Comptable</td><td class="intitule">Saisir depuis l&#x27;écran, sans JavaScript<div class="cible">tests/test_comptabilite_saisie.py::TestRoute</div></td><td class="compte">l.fotso, formulaire posté sans JavaScript</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>8 passed, 1 warning in 1.42s</td></tr>
+<tr class="ok"><td class="ref">UC-64</td><td class="acteur">Comptable</td><td class="intitule">Saisir depuis l&#x27;écran, sans JavaScript<div class="cible">tests/test_comptabilite_saisie.py::TestRoute</div></td><td class="compte">l.fotso, formulaire posté sans JavaScript</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>8 passed, 1 warning in 1.27s</td></tr>
 <tr class="ok"><td class="ref">UC-24</td><td class="acteur">Comptable</td><td class="intitule">Lire une balance équilibrée, interdite à l&#x27;adhérent</td><td class="compte">l.fotso, puis jp.nkoa</td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>comptable 200 (4 comptes)  adhérent 403  débit 11 198 700 = crédit 11 198 700</td></tr>
-<tr class="ok"><td class="ref">UC-25</td><td class="acteur">Comptable</td><td class="intitule">Voir les trois contrôles d&#x27;avant dépôt<div class="cible">tests/test_comptabilite.py</div></td><td class="compte">l.fotso</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>48 passed in 0.07s</td></tr>
+<tr class="ok"><td class="ref">UC-25</td><td class="acteur">Comptable</td><td class="intitule">Voir les trois contrôles d&#x27;avant dépôt<div class="cible">tests/test_comptabilite.py</div></td><td class="compte">l.fotso</td><td class="genre">suite</td><td class="constat"><span class="marque ok">✓</span>48 passed in 0.05s</td></tr>
 <tr class="groupe"><td colspan="6"><span class="lettre">F</span>Obligations fiscales<span class="compte-groupe">5 cas</span></td></tr>
 <tr class="ok"><td class="ref">UC-68</td><td class="acteur">Adhérent</td><td class="intitule">Lire ses échéances, une carte par obligation</td><td class="compte"></td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>6 carte(s), une par obligation : True</td></tr>
 <tr class="ok"><td class="ref">UC-69</td><td class="acteur">Adhérent</td><td class="intitule">Envoyer la preuve qu&#x27;il a déjà payé</td><td class="compte"></td><td class="genre">direct</td><td class="constat"><span class="marque ok">✓</span>Cotisations sociales CNPS : preuve reçue, carte « PREUVE_ENVOYEE », seconde fois 409</td></tr>
@@ -414,7 +437,7 @@ python Docs/recette/cahier_de_recette.py</pre>
 
 <footer>
   <span>CGA Broad Range Consulting Group · agrément MINFI/DGI n° 00000048</span>
-  <span>Engendré par Docs/recette/cahier_de_recette.py · 18/09/2026</span>
+  <span>Engendré par Docs/recette/cahier_de_recette.py · 19/09/2026</span>
 </footer>
 
 </body>
