@@ -14725,3 +14725,92 @@ l'historique de ce qu'il contient.
 
 *Ce qui ne tenait que par la place qu'il occupait ne tient plus dès qu'on le déplace, et rien de
 tout cela ne se voit en relecture.*
+
+---
+
+## Pas 132 — La file survit à la fermeture, et la charpente est démentie par le serveur
+
+**Demande** : continuer. Le point 1 de la feuille de route de l'application de terrain, que
+le pas précédent avait lui-même désigné comme le seul qui empêchait un usage réel.
+
+### Ce que la confrontation avec le serveur a démenti
+
+La charpente du pas 131 affirmait, dans son domaine et dans son README :
+
+> C'est lui qui rend la remise idempotente. Le serveur reconnaît l'identifiant et rend le
+> même accusé.
+
+**C'était faux.** Le serveur n'a jamais vu cet identifiant et ne le verra jamais. Il
+identifie la pièce par l'**empreinte de ses octets**, exactement comme son magasin de
+fichiers, et il la revérifie en relisant le fichier : une clé inventée est refusée, et une
+divergence signalerait une corruption du magasin.
+
+La propriété voulue est donc tenue, mais par un autre chemin, et un meilleur : elle ne
+dépend pas d'un numéro que le client pourrait se tromper de recopier. La docstring de
+`deposer_piece` le dit d'ailleurs explicitement, et depuis le pas 96.
+
+*Une charpente écrite avant d'avoir lu le code qu'elle appelle affirme ce qui l'arrange.*
+
+### Le cas qui manquait, et ce qu'il coûtait
+
+`Reponse` avait trois cas : accepté, refusé, indisponible. Un `401` n'entre dans aucun des
+trois, et il tombait donc dans « refusé », faute de mieux.
+
+Conséquence : un adhérent qui laisse l'application quelques jours, le temps que sa session
+expire, ouvre l'application et voit **toutes ses pièces déclarées irrécupérables**. Rien
+n'avait pourtant été refusé. Personne n'avait demandé.
+
+Le quatrième cas ne se contente pas d'exister : il ne compte **aucune tentative**. Sinon six
+ouvertures avec une session périmée suffisaient à franchir le garde-fou des six essais, et
+les pièces cessaient de partir définitivement, sans que rien ne le dise.
+
+### L'écriture atomique, et la panne qu'elle évite
+
+| Ce qu'on écrirait naïvement | Ce qui arrive |
+| --- | --- |
+| `writeAsString` sur le fichier de la file | Le système arrête l'application au milieu, sans prévenir, dès que la mémoire manque. Il reste un JSON **tronqué** |
+| Au redémarrage suivant | Ce n'est pas le dépôt en cours qui est perdu : c'est **toute la file**, y compris les pièces de la semaine précédente |
+| Sur un poste de développement | Cela n'arrive **jamais**. Rien n'arrête le processus au mauvais moment |
+
+On écrit donc à côté, on vide le tampon, puis on renomme. Le renommage est atomique : à tout
+instant, le fichier est soit l'ancien entier, soit le nouveau entier.
+
+Et un fichier qui ne se relit pas est **mis de côté** sous un autre nom, jamais écrasé.
+L'application redémarre sur une file vide, ce qui est inévitable, mais la matière reste sur
+l'appareil. Écraser transformerait un incident en perte définitive.
+
+### Ce que les tests ne pouvaient pas prouver
+
+Vingt-trois cas éprouvent la règle de renvoi et la durabilité. Aucun ne touche au réseau.
+Ils ne pouvaient donc rien dire de l'enveloppe multipart, écrite à la main dans le client.
+
+⚠️ Et c'est précisément là que ça se joue. Un `\r\n` manquant avant la ligne de séparation
+finale fait lire au serveur deux octets de trop dans le fichier. L'empreinte change alors à
+chaque envoi, **l'idempotence disparaît sans le moindre message**, et la même facture entre
+deux fois dans la comptabilité de l'adhérent. Les deux dépôts ont l'air normaux, à l'écran
+comme au journal.
+
+`outils/remise_reelle.dart` envoie une pièce contre le serveur réel, la renvoie, et vérifie
+que le serveur répond « rejeu ». C'est la seule preuve qui vaille, et elle a tenu.
+
+### Vérifié
+
+| Ce qui a été vérifié | Résultat |
+| --- | --- |
+| Cas hors ligne de l'application | **23**, dont 9 sur la durabilité seule |
+| Analyse stricte, mise en forme | sans remarque |
+| Paquet Android | construit |
+| Protocole joué contre le serveur, par `curl` | fichier `201`, pièce `201`, rejeu **`200` avec `rejeu: true`**, une seule pièce en boîte |
+| Codes de refus confrontés | type refusé `415`, dossier d'autrui `404`, sans session `401`, date trop ancienne `422` — la table de traduction est juste |
+| Remise jouée par le vrai code Dart | **12 contrôles**, enveloppe multipart comprise, session expirée comprise |
+
+### État à la fin du pas 132
+
+L'application ne photographie toujours rien : c'est désormais le **seul** point qui
+l'empêche d'être mise entre les mains d'un adhérent, et le README le dit en premier.
+
+Tout est commité et **en ligne** : `erp-cga-mobile` a reçu ce pas, et les cinq dépôts
+portent leur chaîne de vérification.
+
+*Une charpente qui n'a pas encore rencontré le code qu'elle appelle décrit surtout ce que
+son auteur croyait.*
