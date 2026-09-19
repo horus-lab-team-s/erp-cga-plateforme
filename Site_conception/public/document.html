@@ -446,7 +446,7 @@ body{margin:0}
   <div class="site-entete__barre">
     <span class="site-marque">
       <a class="site-marque__nom" href="/">Plateforme CGA Broad Range</a>
-      <span class="site-marque__detail">document version 131 · 141 sections · 103 figures</span>
+      <span class="site-marque__detail">document version 132 · 142 sections · 104 figures</span>
     </span>
     <nav class="site-nav" aria-label="Sections du site">
         <a class="site-nav__lien" href="/">Accueil</a>
@@ -464,7 +464,7 @@ body{margin:0}
 <div class="page" lang="fr">
 
   <header class="tete">
-    <p class="eyebrow">Document de conception · version 131 · destiné à l'équipe de développement</p>
+    <p class="eyebrow">Document de conception · version 132 · destiné à l'équipe de développement</p>
     <h1>Architecture multi-tenant CGA</h1>
     <p class="chapo">Une plateforme SaaS de gestion comptable, fiscale et sociale où chaque client
       dispose de son sous-domaine et de ses données cloisonnées. Ce document porte les deux moitiés
@@ -477,7 +477,7 @@ body{margin:0}
       <span><b>Mobile</b> · Flutter</span>
       <span><b>Canaux</b> · WhatsApp Business · courriel</span>
       <span><b>Hébergement</b> · serveur Contabo</span>
-      <span><b>Construit</b> · 3 chantiers, 146 pas, 3 761 tests</span>
+      <span><b>Construit</b> · 3 chantiers, 147 pas, 3 761 tests</span>
       <span><b>Décisions</b> · arrêtées le 09/09/2026, section 34</span>
       <span><b>Conception</b> · TCHAMBA TCHAKOUNTE Edwin, ingénieur informaticien</span>
     </div>
@@ -646,6 +646,7 @@ body{margin:0}
         <li><a href="#s145">135 · Le mandat à l'écran, et l'invariant que le pas précédent avait cassé</a></li>
         <li><a href="#s146">136 · Le journal dit à quel titre, et quatre outils verts ne valent pas une page ouverte</a></li>
         <li><a href="#s147">137 · Cinq dépôts, et six choses qui ne tenaient que par la place</a></li>
+        <li><a href="#s148">138 · La file qui survit, et la charpente que le serveur a démentie</a></li>
       </ol>
       <p>Annexes</p>
       <ol>
@@ -12993,6 +12994,105 @@ GET /api/comptabilite/ecritures?limite=50&amp;curseur=cur_9f2a1c</code></pre>
           écrit sans rien qui demande un appareil, et huit cas l'éprouvent en une seconde. La file vit encore en mémoire, ce qui est
           exactement ce que cette application existe pour ne pas perdre : tant que ce point n'est pas fait, elle ne se met pas entre les mains
           d'un adhérent.</p>
+      </section>
+
+      <section id="s148">
+        <h2><span class="num">138</span>La file qui survit, et la charpente que le serveur a démentie</h2>
+
+        <p>L'application de terrain savait dire ce qu'elle ferait d'un dépôt qui échoue. Elle ne savait pas garder ce dépôt : sa file vivait en
+          mémoire, et disparaissait avec l'application. C'est-à-dire qu'elle perdait exactement ce pour quoi elle existe.</p>
+
+        <h3>Ce que le serveur a démenti</h3>
+
+        <p>La première version affirmait, dans son domaine comme dans sa documentation, que l'identifiant posé sur le téléphone rendait la
+          remise rejouable : <em>le serveur reconnaît l'identifiant et rend le même accusé.</em> C'était faux. Le serveur n'a jamais vu cet
+          identifiant et ne le verra jamais.</p>
+
+        <figure>
+          <svg viewBox="0 0 720 300" role="img" aria-label="L'application supposait que le serveur reconnaissait l'identifiant engendré sur l'appareil. En réalité le serveur calcule une empreinte sur les octets du fichier, la revérifie en relisant le fichier, et c'est de là que vient l'idempotence." style="max-width:100%;height:auto;color:currentColor">
+            <defs><marker id="fl148" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+
+            <text x="10" y="18" font-size="10" fill="currentColor">CE QUE LA CHARPENTE SUPPOSAIT</text>
+            <rect x="10" y="30" width="150" height="40" rx="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.55"/>
+            <text x="85" y="47" font-size="9.5" text-anchor="middle" fill="currentColor">le téléphone</text>
+            <text x="85" y="61" font-size="8.5" text-anchor="middle" fill="currentColor">pose un identifiant</text>
+            <line x1="160" y1="50" x2="300" y2="50" stroke="#d8382b" stroke-width="1.3" stroke-dasharray="5 3" marker-end="url(#fl148)"/>
+            <text x="230" y="43" font-size="8.5" text-anchor="middle" fill="#d8382b">D-7f3a…</text>
+            <rect x="300" y="30" width="170" height="40" rx="6" fill="none" stroke="#d8382b" stroke-width="1.3" stroke-dasharray="5 3"/>
+            <text x="385" y="47" font-size="9.5" text-anchor="middle" fill="#d8382b">le serveur le reconnaît</text>
+            <text x="385" y="61" font-size="8.5" text-anchor="middle" fill="#d8382b">et rend le même accusé</text>
+            <text x="490" y="54" font-size="9" fill="#d8382b">← n'existe pas</text>
+
+            <line x1="10" y1="96" x2="710" y2="96" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
+
+            <text x="10" y="120" font-size="10" fill="currentColor">CE QUE LE SERVEUR FAIT, ET QUI VAUT MIEUX</text>
+            <rect x="10" y="134" width="150" height="46" rx="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.55"/>
+            <text x="85" y="153" font-size="9.5" text-anchor="middle" fill="currentColor">le téléphone</text>
+            <text x="85" y="168" font-size="8.5" text-anchor="middle" fill="currentColor">envoie les octets</text>
+            <line x1="160" y1="157" x2="272" y2="157" stroke="#0e9463" stroke-width="1.4" marker-end="url(#fl148)"/>
+            <text x="216" y="150" font-size="8.5" text-anchor="middle" fill="currentColor">1 · le fichier</text>
+            <rect x="272" y="134" width="164" height="46" rx="6" fill="none" stroke="#0e9463" stroke-width="1.4"/>
+            <text x="354" y="153" font-size="9.5" text-anchor="middle" fill="currentColor">le serveur calcule</text>
+            <text x="354" y="168" font-size="8.5" text-anchor="middle" fill="currentColor">une empreinte sur les octets</text>
+            <line x1="436" y1="157" x2="548" y2="157" stroke="#0e9463" stroke-width="1.4" marker-end="url(#fl148)"/>
+            <text x="492" y="150" font-size="8.5" text-anchor="middle" fill="currentColor">2 · la pièce</text>
+            <rect x="548" y="134" width="162" height="46" rx="6" fill="none" stroke="#0e9463" stroke-width="1.4"/>
+            <text x="629" y="153" font-size="9.5" text-anchor="middle" fill="currentColor">la clé dérive de l'empreinte</text>
+            <text x="629" y="168" font-size="8.5" text-anchor="middle" fill="currentColor">et il la revérifie</text>
+
+            <rect x="10" y="206" width="700" height="38" rx="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+            <text x="360" y="230" font-size="9.5" text-anchor="middle" fill="currentColor">Mêmes octets renvoyés → même empreinte → même clé → la pièce inchangée, en 200, « rejeu »</text>
+
+            <text x="10" y="270" font-size="9" fill="currentColor">La propriété voulue est tenue, mais elle ne dépend plus d'un numéro que le client pourrait se tromper de recopier.</text>
+            <text x="10" y="286" font-size="9" fill="currentColor">Un identifiant tiré au sort aurait laissé au seul détecteur de doublons le soin d'attraper un rejeu.</text>
+          </svg>
+          <figcaption>Une charpente qui n'a pas encore rencontré le code qu'elle appelle décrit surtout ce que son auteur croyait.</figcaption>
+        </figure>
+
+        <h3>Le cas qui manquait, et ce qu'il coûtait</h3>
+
+        <p>La réponse du serveur se rangeait dans trois cas : accepté, refusé, indisponible. Un refus d'authentification n'entre dans aucun des
+          trois, et il tombait donc dans « refusé », faute de mieux.</p>
+
+        <div class="note piege">
+          <p class="titre">Ce que l'adhérent voyait</p>
+          <p>Il laisse l'application quelques jours, le temps que sa session expire. Il la rouvre, et <strong>toutes ses pièces en attente sont
+            déclarées irrécupérables</strong>. Rien n'avait pourtant été refusé. Personne n'avait même demandé.</p>
+          <p>Le quatrième cas ne se contente pas d'exister : il ne compte <strong>aucune tentative</strong>. Sinon six ouvertures avec une
+            session périmée suffisaient à franchir le garde-fou des six essais, et les pièces cessaient de partir définitivement, en silence.</p>
+        </div>
+
+        <h3>Pourquoi l'écriture est atomique</h3>
+
+        <div class="tableau">
+          <table>
+            <thead><tr><th style="width:38%">Ce qu'on écrirait naïvement</th><th style="width:62%">Ce qui arrive</th></tr></thead>
+            <tbody>
+              <tr><td>Écrire par-dessus le fichier de la file</td><td>Le système arrête l'application au milieu, sans prévenir, dès que la mémoire manque. Il reste un fichier tronqué</td></tr>
+              <tr><td>Au redémarrage suivant</td><td>Ce n'est pas le dépôt en cours qui est perdu : c'est <strong>toute la file</strong>, y compris les pièces de la semaine précédente</td></tr>
+              <tr><td>Sur un poste de développement</td><td>Cela n'arrive <strong>jamais</strong>. Rien n'y arrête le processus au mauvais moment</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>On écrit donc à côté, on vide le tampon, puis on renomme. Le renommage est atomique : à tout instant, le fichier est soit l'ancien
+          entier, soit le nouveau entier. Et un fichier qui ne se relit pas est <strong>mis de côté</strong> sous un autre nom, jamais écrasé.
+          L'application redémarre sur une file vide, ce qui est inévitable, mais la matière reste sur l'appareil : écraser transformerait un
+          incident en perte définitive.</p>
+
+        <h3>Ce que les tests ne pouvaient pas prouver</h3>
+
+        <p>Vingt-trois cas éprouvent la règle de renvoi et la durabilité, et aucun ne touche au réseau. Ils ne pouvaient donc rien dire de
+          l'enveloppe d'envoi, écrite à la main.</p>
+
+        <p>⚠️ Et c'est là que ça se joue. Une fin de ligne manquante avant la séparation finale fait lire au serveur deux octets de trop dans le
+          fichier. L'empreinte change alors à chaque envoi, <strong>l'idempotence disparaît sans le moindre message</strong>, et la même facture
+          entre deux fois dans la comptabilité de l'adhérent. Les deux dépôts ont l'air normaux, à l'écran comme au journal.</p>
+
+        <p>Un outil joue donc la remise contre le serveur réel : il envoie une pièce, la renvoie, et vérifie que le serveur répond « rejeu ».
+          Puis il ferme la session et vérifie que la file s'arrête sans condamner la pièce. C'est la seule preuve qui vaille, et c'est le même
+          principe que la sonde qui a trouvé l'adresse nue manquante au pas précédent : <em>ce qui n'est pas exercé pour de bon n'est pas
+          vérifié.</em></p>
       </section>
 
       <section id="s23">
