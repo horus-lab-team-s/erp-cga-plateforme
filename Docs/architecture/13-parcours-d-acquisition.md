@@ -14814,3 +14814,95 @@ portent leur chaîne de vérification.
 
 *Une charpente qui n'a pas encore rencontré le code qu'elle appelle décrit surtout ce que
 son auteur croyait.*
+
+---
+
+## Pas 133 — La prise de vue, et le refus que le cabinet n'avait pas prononcé
+
+**Demande** : continuer. Le dernier point qui empêchait de mettre l'application de terrain
+entre les mains d'un adhérent, désigné comme tel par les deux pas précédents.
+
+### Le défaut que la règle évite, et qu'aucun écran n'aurait montré
+
+L'appareil photo du système range son résultat dans un **cache**. Le système vide les caches
+quand la place manque, sans prévenir et sans demander. Garder ce chemin dans la file
+paraissait naturel : c'est celui que l'appareil rend.
+
+Voici ce que cela produisait :
+
+| Le samedi | L'adhérent photographie six factures. Pas de réseau, elles entrent dans la file |
+| --- | --- |
+| Dans la nuit | Le téléphone se remplit. Le système reprend la place du cache |
+| Le lundi | Le réseau revient. La file tente ses six remises, ne trouve plus aucun fichier |
+| À l'écran | Les six dépôts sortent de la file comme **refusés** |
+
+⚠️ **Le pire n'est pas la perte : c'est qu'elle ressemble à un refus du cabinet.** L'adhérent
+croit que ses pièces ont été rejetées, appelle son comptable, et le comptable ne trouve
+trace de rien.
+
+Les octets sont donc recopiés à côté de la file, dans le dossier des documents, que le
+système ne reprend jamais. Le fichier de cache peut alors disparaître : il ne sert plus.
+
+### L'ordre de l'effacement n'est pas négociable
+
+Une copie qui reste après la remise remplit le téléphone en quelques semaines. Une copie
+effacée avant l'accusé de réception perd la pièce si la réponse se perd en route. On efface
+donc **après** un vidage, jamais pendant.
+
+Et une pièce **refusée** garde sa copie. L'adhérent doit pouvoir regarder ce que le cabinet
+n'a pas pris : effacer une pièce refusée en même temps qu'une pièce reçue reviendrait à
+traiter les deux comme réglées.
+
+### La réduction de l'image n'est pas une optimisation
+
+Un téléphone récent produit des images de plusieurs dizaines de mégaoctets. Le serveur
+refuse au-delà de vingt, avec un `413` que la file traduit en « refusé, rien ne changera » —
+ce qui est exact, et désastreux. L'adhérent verrait ses factures rejetées sans comprendre,
+alors que le cabinet n'a rien refusé.
+
+Deux mille pixels de large suffisent à relire le numéro et le montant d'une facture, et la
+qualité 85 est le point où la compression cesse de se voir. On reste à quelques centaines de
+kilooctets, ce qui fait aussi partir la pièce sur un réseau médiocre.
+
+### Le dossier se lit sur le serveur, jamais sur l'appareil
+
+`/transverse/moi` rend déjà `dossiers`. L'application le relit à chaque ouverture de session
+et ne le garde pas : un adhérent peut avoir deux entreprises, en perdre une, en gagner une
+autre. Une liste retenue sur l'appareil proposerait un dossier que le serveur refuse, et le
+refus arriverait **après la photo**, quand il est trop tard pour la reprendre.
+
+On ne demande rien quand il n'y a qu'un dossier, ce qui est le cas de presque tous les
+adhérents : une question dont la réponse est forcée est une étape de plus entre la facture
+en main et la photo prise.
+
+### Vérifié
+
+| Ce qui a été vérifié | Résultat |
+| --- | --- |
+| Cas hors ligne | **33**, dont 10 sur la prise de vue seule |
+| Analyse stricte, mise en forme, paquet Android | au vert |
+| Chaîne entière contre le serveur, base neuve | **18 contrôles** : prise de vue, copie survivant au vidage du cache, remise, rejeu, effacement, session expirée |
+| Pièces créées côté serveur | **0 avant, 1 après** une prise de vue *et* un rejeu |
+
+Ce dernier chiffre est la preuve qui compte. Le rejeu envoie les **mêmes octets** : si
+l'enveloppe multipart écrite à la main ajoutait ou retranchait un seul octet, l'empreinte
+changerait et le serveur créerait une seconde pièce. Il n'en a créé qu'une.
+
+### ⚠️ Ce qui n'a jamais tourné sur un téléphone
+
+Aucun appareil Android ou iOS n'a exécuté cette application : il n'y en a pas sur la machine
+où elle est écrite. L'adaptateur de l'appareil photo fait quinze lignes et n'a jamais été
+exécuté ; l'autorisation d'accès, l'orientation de l'image et le chemin réel du dossier des
+documents restent à regarder au premier essai. Le README les liste, et le dire ici vaut
+mieux que de laisser croire que « 33 cas au vert » signifie « cela marche ».
+
+### État à la fin du pas 133
+
+L'application fait maintenant ce pour quoi elle existe : photographier une pièce,
+l'enregistrer sur l'appareil, et la faire partir. Ce qui reste — le renvoi en tâche de fond,
+la session gardée entre deux lancements, l'envoi en plusieurs morceaux — améliore l'usage
+sans conditionner le premier.
+
+Tout est commité et **en ligne**.
+
+*Une perte qui ressemble à un refus est pire qu'une panne : elle accuse quelqu'un.*
