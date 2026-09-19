@@ -13,7 +13,21 @@ import type { NextConfig } from "next";
  */
 const config: NextConfig = {
   reactStrictMode: true,
-  output: "standalone",
+  // ⚠️ PAS DE SORTIE AUTONOME SUR VERCEL, ET CE N'EST PAS UN CAPRICE.
+  //
+  // Next.js 16.3 a un défaut connu (vercel/next.js#96646) : dès qu'un adaptateur
+  // de déploiement est présent — celui de Vercel l'est —, Turbopack CESSE
+  // d'écrire `.next/next-server.js.nft.json`, le relevé des fichiers dont le
+  // serveur a besoin. Or le finalisateur de `standalone` continue de le lire,
+  // sans rattrapage. La construction s'effondre sur un `ENOENT` à la toute fin,
+  // après avoir engendré toutes les pages.
+  //
+  // ⚠️ Le défaut NE SE REPRODUIT PAS en local : sans adaptateur, le relevé est
+  // bien écrit, et la construction passe des deux façons. Chercher la cause ici
+  // ne mène donc nulle part, et c'est pour cela que ce commentaire existe.
+  //
+  // À retirer quand le correctif sera livré (prévu pour 16.4).
+  output: process.env.VERCEL ? undefined : "standalone",
 
   /**
    * ⚠️ Le document est servi par un fichier, pas par un composant React.
