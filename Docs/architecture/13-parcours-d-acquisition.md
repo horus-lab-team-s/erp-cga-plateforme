@@ -14906,3 +14906,96 @@ sans conditionner le premier.
 Tout est commité et **en ligne**.
 
 *Une perte qui ressemble à un refus est pire qu'une panne : elle accuse quelqu'un.*
+
+---
+
+## Pas 134 — La pile en conteneurs tourne pour la première fois, et elle cloisonnait à vide
+
+**Demande** : continuer. Le déploiement étant en cours côté vitrine et site de conception, le
+dernier artefact de déploiement jamais exercé était la pile complète en conteneurs.
+
+### Les images se construisaient, la pile n'avait jamais tourné
+
+Le pas 131 avait vérifié que les trois images se construisent, et que deux conteneurs
+démarrent et se déclarent sains. Personne n'avait jamais monté les **six services
+ensemble** : base, rôles, migration, API, console, vitrine.
+
+Deux choses ont sauté aux yeux dès le premier essai.
+
+### Les ports de l'hôte étaient codés en dur
+
+`8000` et `3001` étaient pris par deux autres projets de la machine. La pile refusait de
+monter, avec un message qui parle de liaison de port et non du produit : on croit à une
+panne de la pile.
+
+Les ports **de l'hôte** se règlent désormais. Les ports **internes** ne bougent pas : ce
+sont eux que les services emploient entre eux, et les changer casserait `api:8000`.
+
+```bash
+PORT_API=8100 PORT_CONSOLE=3100 PORT_VITRINE=3101 docker compose up --build
+```
+
+### ⚠️ Et la pile cloisonnait à vide
+
+L'image officielle de PostgreSQL crée `POSTGRES_USER` en **superutilisateur**. La pile
+connectait l'application avec lui. Une application connectée en superutilisateur contourne
+toutes les politiques de sécurité au niveau des lignes, sans exception possible : le
+cloisonnement multi-cabinet reposait sur le seul filtre applicatif, et le moindre SQL
+textuel le traversait.
+
+**La pile le disait pourtant à chaque démarrage :**
+
+```
+CLOISONNEMENT NON APPLIQUÉ : le rôle « cga » est superutilisateur
+```
+
+Personne ne lit le journal d'un conteneur qui démarre bien. Il a fallu monter la pile pour
+de bon, et regarder, pour que la ligne se voie. C'est le diagnostic du pas 128 qui parlait,
+et il avait raison depuis le premier jour.
+
+### Ce qui rend ce défaut instructif
+
+`outils/roles-postgresql.sql` existait, complet et idempotent. Les manifestes Kubernetes
+l'employaient, avec deux secrets distincts, et leur README expliquait précisément pourquoi :
+
+> Le même rôle pour les deux rend le cloisonnement inopérant *sans qu'aucune erreur ne se
+> produise*.
+
+La conception était juste, la production était juste, et c'est la **pile locale** — celle
+sur laquelle on essaie, celle qu'on montre — qui ne suivait pas. Un écart dans ce
+sens-là est le plus dangereux : on éprouve le produit dans des conditions plus permissives
+que celles où il tournera, et tout ce qu'on vérifie dessus vaut moins qu'on ne le croit.
+
+La pile joue donc le script avant la migration, migre avec `cga_migration` qui possède les
+tables, et sert avec `cga_app` qui ne possède rien.
+
+### Vérifié, base entièrement neuve
+
+| Ce qui a été vérifié | Résultat |
+| --- | --- |
+| Les six services | montés, tous **sains** |
+| Les migrations | jouées jusqu'à la dernière révision, `c4e9a2b73d61` |
+| `GET /sante` | **`"cloisonnement": "APPLIQUE"`** |
+| Le journal de l'API | plus aucun avertissement de cloisonnement |
+| Amorçage sous le rôle restreint | 12 comptes, 6 dossiers, 30 pièces, 14 écritures |
+| Session d'un adhérent | ouverte, 8 pièces lues sur son dossier |
+| Dossier d'un autre locataire | **404**, jamais 403 |
+| Console et vitrine en conteneur | connexion, accueil et blog servis |
+
+### Ce qu'il reste à savoir pour déployer
+
+La vitrine engendre ses pages **à la construction de l'image**, quand aucune API n'existe :
+elles portent donc le contenu de secours, et le contenu réel n'arrive qu'à la première
+revalidation, au plus tard cinq minutes après la première visite. C'est le fonctionnement
+normal de la régénération incrémentale, et cela ne pose de problème que si le secours dérive
+du contenu réel. Il n'en dérive pas aujourd'hui : quatorze articles de part et d'autre, les
+mêmes.
+
+### État à la fin du pas 134
+
+Une commande monte le produit entier, cloisonnement appliqué. Ce qui manque pour une mise en
+service n'est plus du logiciel : c'est un serveur, un nom de domaine, un certificat, et les
+cinquante et une valeurs légales qui attendent encore un contreseing.
+
+*Une pile d'essai plus permissive que la production ne prouve pas ce qu'on croit qu'elle
+prouve.*

@@ -4,7 +4,11 @@
 #     docker compose up --build
 #
 # Puis http://localhost:3000 pour la console et http://localhost:3001 pour le
-# site public. Les identifiants de démonstration sont ceux de `app/amorcage.py`,
+# site public. ⚠️ Ces ports se règlent — `PORT_API`, `PORT_CONSOLE`,
+# `PORT_VITRINE` — parce que sur un poste de développement quelque chose occupe
+# toujours 8000 :
+#
+#     PORT_API=8100 PORT_CONSOLE=3100 PORT_VITRINE=3101 docker compose up --build Les identifiants de démonstration sont ceux de `app/amorcage.py`,
 # dans le dépôt du serveur.
 #
 # ⚠️ LES QUATRE DÉPÔTS DOIVENT ÊTRE CLONÉS CÔTE À CÔTE
@@ -18,6 +22,18 @@
 #     git clone …/erp-cga-console
 #     git clone …/erp-cga-vitrine
 #     git clone …/erp-cga-plateforme && cd erp-cga-plateforme
+#
+# ⚠️ LA BASE MONTE VIDE. Les migrations créent le schéma ; elles ne versent aucune
+# donnée, et c'est voulu — un amorçage automatique finirait par s'exécuter contre
+# une base réelle. Pour une démonstration :
+#
+#     docker compose exec -e CGA_MODE_DEMONSTRATION=true api \
+#       python -c "from app.amorcage import amorcer; print(amorcer())"
+#
+# Vérifier que le cloisonnement s'applique vraiment, et ne pas s'en remettre au
+# fait que la pile démarre :
+#
+#     curl -s localhost:${PORT_API:-8000}/sante     → "cloisonnement": "APPLIQUE"
 #
 # ⚠️ CE FICHIER N'EST PAS UNE CONFIGURATION DE PRODUCTION
 #
@@ -62,6 +78,44 @@ services:
       retries: 10
     restart: unless-stopped
 
+  # ── Les deux rôles PostgreSQL ─────────────────────────────────────────────
+  #
+  # ⚠️ SANS CE SERVICE, LE CLOISONNEMENT MULTI-CABINET NE S'APPLIQUE PAS.
+  #
+  # L'image officielle de PostgreSQL crée `POSTGRES_USER` en SUPERUTILISATEUR.
+  # Une application connectée avec lui contourne toutes les politiques de
+  # sécurité au niveau des lignes, sans exception possible : le cloisonnement
+  # repose alors sur le seul filtre applicatif, et le moindre SQL textuel le
+  # traverse.
+  #
+  # La pile le disait pourtant à chaque démarrage, dans le journal de l'API :
+  #
+  #     CLOISONNEMENT NON APPLIQUÉ : le rôle « cga » est superutilisateur
+  #
+  # Personne ne lit le journal d'un conteneur qui démarre bien. Il a fallu
+  # monter la pile pour de bon, et regarder, pour que la ligne se voie.
+  #
+  # Le script crée `cga_migration`, qui possède les tables, et `cga_app`, qui
+  # ne possède rien et reste soumis aux politiques. Il est idempotent et se
+  # rejoue à chaque montée sans dommage.
+  roles:
+    image: postgres:16-alpine
+    volumes:
+      - ../erp-cga-backend/outils/roles-postgresql.sql:/roles.sql:ro
+    environment:
+      PGPASSWORD: cga
+    # ⚠️ Les mots de passe sont en clair, comme celui de la base : voir l'en-tête,
+    # ce fichier n'est pas une configuration de production.
+    command: >-
+      psql -h base -U cga -d cga
+           -v mot_de_passe_migration="'migration'"
+           -v mot_de_passe_app="'app'"
+           -f /roles.sql
+    depends_on:
+      base:
+        condition: service_healthy
+    restart: "no"
+
   # ── La migration ──────────────────────────────────────────────────────────
   #
   # Un service à part, qui s'exécute une fois et sort. C'est délibéré : mise à
@@ -73,10 +127,15 @@ services:
       context: ../erp-cga-backend
     command: ["alembic", "upgrade", "head"]
     environment:
-      CGA_URL_BASE_DE_DONNEES: postgresql+psycopg://cga:cga@base:5432/cga
+      # ⚠️ `cga_migration` et non `cga` : c'est le rôle qui doit POSSÉDER les
+      # tables. Migrer avec le superutilisateur les lui donnerait, et le
+      # propriétaire d'une table contourne ses propres politiques.
+      CGA_URL_BASE_DE_DONNEES: postgresql+psycopg://cga_migration:migration@base:5432/cga
     depends_on:
       base:
         condition: service_healthy
+      roles:
+        condition: service_completed_successfully
     restart: "no"
 
   # ── L'API ─────────────────────────────────────────────────────────────────
@@ -86,7 +145,10 @@ services:
     environment:
       CGA_ENVIRONNEMENT: local
       CGA_PERSISTANCE: postgresql
-      CGA_URL_BASE_DE_DONNEES: postgresql+psycopg://cga:cga@base:5432/cga
+      # ⚠️ `cga_app` : sans superutilisateur, sans BYPASSRLS, propriétaire de
+      # rien. C'est la condition pour que les politiques s'appliquent à lui.
+      # `GET /sante` rend « cloisonnement: APPLIQUE » quand c'est le cas.
+      CGA_URL_BASE_DE_DONNEES: postgresql+psycopg://cga_app:app@base:5432/cga
       CGA_ORIGINES_CORS: '["http://localhost:3000","http://localhost:3001"]'
       CGA_ADRESSE_PUBLIQUE: http://localhost:8000
       CGA_ADRESSE_PUBLIQUE_SITE: http://localhost:3000
@@ -106,7 +168,18 @@ services:
       # devant un vérificateur.
       - justificatifs:/application/fichiers
     ports:
-      - "8000:8000"
+      # ⚠️ LE PORT DE L'HÔTE SE RÈGLE, ET CE N'EST PAS DU CONFORT.
+      #
+      # Codé en dur, il entre en conflit avec tout ce qui tourne déjà sur la
+      # machine — et sur un poste de développement, quelque chose tourne
+      # toujours sur 8000. La pile refuse alors de monter, avec un message qui
+      # parle de liaison de port et non du projet, et l'on croit à une panne de
+      # la pile. C'est arrivé au premier essai : 8000 et 3001 étaient pris par
+      # deux autres projets.
+      #
+      # Le port INTERNE, lui, ne bouge pas : c'est celui que les services
+      # emploient entre eux, et le changer casserait `api:8000`.
+      - "${PORT_API:-8000}:8000"
     depends_on:
       base:
         condition: service_healthy
@@ -127,7 +200,7 @@ services:
       # `api`.
       API_URL: http://api:8000
     ports:
-      - "3000:3000"
+      - "${PORT_CONSOLE:-3000}:3000"
     depends_on:
       api:
         condition: service_started
@@ -146,7 +219,7 @@ services:
     environment:
       API_URL: http://api:8000
     ports:
-      - "3001:3000"
+      - "${PORT_VITRINE:-3001}:3000"
     depends_on:
       api:
         condition: service_started
