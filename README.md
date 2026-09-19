@@ -24,13 +24,22 @@ Conception et réalisation : **TCHAMBA TCHAKOUNTE Edwin**, ingénieur informatic
 | `Docs/architecture/document-de-conception/` | **La source unique** du document publié : 136 sections, 102 figures |
 | `Docs/architecture/avancement/grille-des-ecrans.yaml` | La cible que l'outil d'avancement mesure |
 | `Docs/recette/` | Le registre des soixante-quinze cas d'usage, et le cahier qu'il engendre |
-| `Docs/referentiel/` | Les paramètres légaux datés, leurs fondements et leur statut de validation |
 | `Site_conception/` | Le site qui sert le document, déployable avec ce dossier pour racine |
 | `deploiement/kubernetes/` | Les manifestes, dans leur ordre d'application |
 
-⚠️ **Le référentiel légal est ici, et le serveur le lit par un chemin réglable.** Il n'est
-pas du code : c'est la matière que le fiscaliste relit et contresigne, et son domicile
-naturel est le dépôt de la conception. Le serveur le désigne par `CGA_DOSSIER_REFERENTIEL`.
+## ⚠️ Où est passé le référentiel légal
+
+Il était ici. Il est maintenant dans `erp-cga-backend`, sous `Docs/referentiel/`, et ce
+déplacement mérite d'être expliqué parce qu'il contredit la règle qui a présidé à ce dépôt.
+
+Toute la documentation est venue ici. Le référentiel n'en est pas : le serveur le lit **à
+chaque requête**, pour décider d'un taux, d'un seuil, d'un motif de refus. Un serveur qui
+ne peut ni démarrer ni être testé sans cloner un second dépôt est un serveur qu'on finit
+par tester ailleurs, c'est-à-dire nulle part. Le fondement se discute, la valeur s'exécute.
+
+Ce qui reste ici, c'est ce qui l'explique : `Docs/architecture/02-referentiel-normatif.md`,
+et le circuit de contreseing du fiscaliste. Son historique d'avant la scission est dans le
+journal de ce dépôt.
 
 ## ⚠️ Ce que la scission a rendu fragile, et qui doit être surveillé
 

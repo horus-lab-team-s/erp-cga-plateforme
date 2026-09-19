@@ -1,10 +1,23 @@
-# La pile complète : base, migration, API, front.
+# La pile complète : base, migration, API, console, vitrine.
 #
 # ─────────────────────────────────────────────────────────────────────────────
 #     docker compose up --build
 #
-# Puis http://localhost:3000. Les identifiants de démonstration sont ceux de
-# `app/amorcage.py`.
+# Puis http://localhost:3000 pour la console et http://localhost:3001 pour le
+# site public. Les identifiants de démonstration sont ceux de `app/amorcage.py`,
+# dans le dépôt du serveur.
+#
+# ⚠️ LES QUATRE DÉPÔTS DOIVENT ÊTRE CLONÉS CÔTE À CÔTE
+#
+# Ce fichier construit des images à partir de dépôts VOISINS : `../erp-cga-backend`,
+# `../erp-cga-console`, `../erp-cga-vitrine`. C'est la contrepartie de la
+# scission, et elle est délibérée : recopier les sources ici créerait une
+# seconde vérité sur ce qu'est le produit.
+#
+#     git clone …/erp-cga-backend
+#     git clone …/erp-cga-console
+#     git clone …/erp-cga-vitrine
+#     git clone …/erp-cga-plateforme && cd erp-cga-plateforme
 #
 # ⚠️ CE FICHIER N'EST PAS UNE CONFIGURATION DE PRODUCTION
 #
@@ -57,8 +70,7 @@ services:
   # pour arbitrer un démarrage simultané est un pari, pas une conception.
   migration:
     build:
-      context: .
-      dockerfile: Backend_erp_cga/Dockerfile
+      context: ../erp-cga-backend
     command: ["alembic", "upgrade", "head"]
     environment:
       CGA_URL_BASE_DE_DONNEES: postgresql+psycopg://cga:cga@base:5432/cga
@@ -70,13 +82,12 @@ services:
   # ── L'API ─────────────────────────────────────────────────────────────────
   api:
     build:
-      context: .
-      dockerfile: Backend_erp_cga/Dockerfile
+      context: ../erp-cga-backend
     environment:
       CGA_ENVIRONNEMENT: local
       CGA_PERSISTANCE: postgresql
       CGA_URL_BASE_DE_DONNEES: postgresql+psycopg://cga:cga@base:5432/cga
-      CGA_ORIGINES_CORS: '["http://localhost:3000"]'
+      CGA_ORIGINES_CORS: '["http://localhost:3000","http://localhost:3001"]'
       CGA_ADRESSE_PUBLIQUE: http://localhost:8000
       CGA_ADRESSE_PUBLIQUE_SITE: http://localhost:3000
       CGA_DOSSIER_FICHIERS: /application/fichiers
@@ -103,11 +114,10 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
-  # ── Le front ──────────────────────────────────────────────────────────────
-  front:
+  # ── La console ────────────────────────────────────────────────────────────
+  console:
     build:
-      context: .
-      dockerfile: Frontend_erp_cga/Dockerfile
+      context: ../erp-cga-console
     environment:
       # ⚠️ `api:8000` est le nom du service sur le réseau interne, joignable
       # seulement depuis un autre conteneur. Correct ici parce que le front
@@ -118,6 +128,25 @@ services:
       API_URL: http://api:8000
     ports:
       - "3000:3000"
+    depends_on:
+      api:
+        condition: service_started
+    restart: unless-stopped
+
+  # ── La vitrine ────────────────────────────────────────────────────────────
+  #
+  # ⚠️ Deux images et non une, depuis la scission. C'était une seule application
+  # servant le site public et l'espace de travail, et c'est justement ce que la
+  # scission a défait : le site public se déploie quand le cabinet publie un
+  # article, la console quand un comptable a besoin d'un écran. Les lier obligeait
+  # à redéployer l'un pour l'autre.
+  vitrine:
+    build:
+      context: ../erp-cga-vitrine
+    environment:
+      API_URL: http://api:8000
+    ports:
+      - "3001:3000"
     depends_on:
       api:
         condition: service_started
