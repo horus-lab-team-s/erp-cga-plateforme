@@ -296,7 +296,22 @@ function importer() {
         version: numero,
         sections: sections.length,
         figures,
-        importeLe: new Date().toISOString(),
+        // ⚠️ IL N'Y A PAS D'HORODATAGE ICI, ET C'EST DÉLIBÉRÉ.
+        //
+        // Il y en avait un — `new Date().toISOString()` — que rien ne lisait. Il
+        // rendait l'importation NON DÉTERMINISTE : deux passages sur le même
+        // document engendraient deux contenus différents. Conséquence, le contrôle
+        // d'intégration qui rejoue l'importation et compare était rouge à chaque
+        // fois, pour une date, et il aurait fini par être désactivé ou ignoré.
+        //
+        // Un contrôle qu'on apprend à ignorer ne protège plus rien. Or celui-ci
+        // porte sur la seule chose qui compte pour ce site : que la page publiée
+        // dise la même chose que le document. Il a d'ailleurs trouvé une vraie
+        // dérive du même coup, un « 145 pas » publié alors que le document en
+        // annonçait 146.
+        //
+        // La date d'un contenu engendré est celle de son commit. Git la connaît,
+        // elle est juste, et elle ne change pas quand on reconstruit.
         sommaire: sections,
       },
       null,
