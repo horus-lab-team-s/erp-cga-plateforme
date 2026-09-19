@@ -1,11 +1,11 @@
 {
   "titre": "Architecture multi-tenant CGA",
   "chapo": "Une plateforme SaaS de gestion comptable, fiscale et sociale où chaque client dispose de son sous-domaine et de ses données cloisonnées. Ce document porte les deux moitiés du projet : ce qui est déjà construit, en partie II, avec les schémas de ce qui tourne réellement, et la conception cible dans les cinq parties qui suivent. Il est écrit pour être lu par quelqu'un qui découvre le projet, et l'ordre est voulu : on voit le terrain avant d'y poser la suite.",
-  "ligneDeVersion": "Document de conception · version 130 · destiné à l'équipe de développement",
-  "version": 130,
-  "sections": 140,
-  "figures": 102,
-  "importeLe": "2026-09-19T11:09:44.114Z",
+  "ligneDeVersion": "Document de conception · version 131 · destiné à l'équipe de développement",
+  "version": 131,
+  "sections": 141,
+  "figures": 103,
+  "importeLe": "2026-09-19T11:27:19.159Z",
   "sommaire": [
     {
       "ancre": "s1",
@@ -686,6 +686,11 @@
       "ancre": "s146",
       "numero": "136",
       "titre": "Le journal dit à quel titre, et quatre outils verts ne valent pas une page ouverte"
+    },
+    {
+      "ancre": "s147",
+      "numero": "137",
+      "titre": "Cinq dépôts, et six choses qui ne tenaient que par la place"
     },
     {
       "ancre": "s23",

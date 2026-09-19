@@ -446,7 +446,7 @@ body{margin:0}
   <div class="site-entete__barre">
     <span class="site-marque">
       <a class="site-marque__nom" href="/">Plateforme CGA Broad Range</a>
-      <span class="site-marque__detail">document version 130 · 140 sections · 102 figures</span>
+      <span class="site-marque__detail">document version 131 · 141 sections · 103 figures</span>
     </span>
     <nav class="site-nav" aria-label="Sections du site">
         <a class="site-nav__lien" href="/">Accueil</a>
@@ -464,7 +464,7 @@ body{margin:0}
 <div class="page" lang="fr">
 
   <header class="tete">
-    <p class="eyebrow">Document de conception · version 130 · destiné à l'équipe de développement</p>
+    <p class="eyebrow">Document de conception · version 131 · destiné à l'équipe de développement</p>
     <h1>Architecture multi-tenant CGA</h1>
     <p class="chapo">Une plateforme SaaS de gestion comptable, fiscale et sociale où chaque client
       dispose de son sous-domaine et de ses données cloisonnées. Ce document porte les deux moitiés
@@ -645,6 +645,7 @@ body{margin:0}
         <li><a href="#s144">134 · Le script d'installation est joué, et le chantier du socle se ferme</a></li>
         <li><a href="#s145">135 · Le mandat à l'écran, et l'invariant que le pas précédent avait cassé</a></li>
         <li><a href="#s146">136 · Le journal dit à quel titre, et quatre outils verts ne valent pas une page ouverte</a></li>
+        <li><a href="#s147">137 · Cinq dépôts, et six choses qui ne tenaient que par la place</a></li>
       </ol>
       <p>Annexes</p>
       <ol>
@@ -12880,6 +12881,118 @@ GET /api/comptabilite/ecritures?limite=50&amp;curseur=cur_9f2a1c</code></pre>
           démarrage : une pile de démonstration n'est pas une installation de production.</p>
 
         <p><em>Un écran qui compile n'est pas un écran qui marche, et quatre outils verts ne valent pas une page ouverte.</em></p>
+      </section>
+
+      <section id="s147">
+        <h2><span class="num">137</span>Cinq dépôts, et six choses qui ne tenaient que par la place</h2>
+
+        <p>Le produit tenait dans un dépôt unique. Il en tient cinq : le serveur, la console du cabinet, le site public, l'application de
+          terrain, et un dépôt pour ce qui parle des quatre autres. La raison est de rythme, pas de goût : le site public se redéploie quand
+          le cabinet publie un article, la console quand un comptable a besoin d'un écran, et le serveur quand une règle fiscale change. Les
+          lier obligeait à redéployer les trois pour l'un.</p>
+
+        <p>La scission n'a presque rien cassé de ce qui était <em>écrit</em>. Elle a cassé ce qui n'était pas écrit du tout : tout ce qui
+          tenait parce que deux dossiers se trouvaient au même endroit.</p>
+
+        <figure>
+          <svg viewBox="0 0 720 260" role="img" aria-label="Avant la scission, la configuration du serveur calculait la racine du dépôt trois niveaux au-dessus du module et trouvait le référentiel légal. Après, le même calcul désignait le dossier parent, où il n'y avait rien : le serveur retombait sur ses valeurs de repli et démarrait quand même." style="max-width:100%;height:auto;color:currentColor">
+            <defs><marker id="fl147" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+
+            <text x="10" y="18" font-size="10" fill="currentColor">LE MÊME CALCUL, AVANT ET APRÈS</text>
+
+            <text x="10" y="44" font-size="9" fill="currentColor">AVANT · un dépôt</text>
+            <rect x="10" y="54" width="300" height="34" rx="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.55"/>
+            <text x="160" y="75" font-size="9.5" text-anchor="middle" fill="currentColor">monodépôt</text>
+            <rect x="26" y="98" width="130" height="30" rx="5" fill="none" stroke="currentColor" stroke-width="1" opacity="0.55"/>
+            <text x="91" y="117" font-size="9" text-anchor="middle" fill="currentColor">Backend_erp_cga/</text>
+            <rect x="170" y="98" width="126" height="30" rx="5" fill="none" stroke="#0e9463" stroke-width="1.4"/>
+            <text x="233" y="117" font-size="9" text-anchor="middle" fill="currentColor">Docs/referentiel/</text>
+            <path d="M91,98 L91,92 L233,92 L233,98" fill="none" stroke="#0e9463" stroke-width="1.3" marker-end="url(#fl147)"/>
+            <text x="162" y="148" font-size="8.5" text-anchor="middle" fill="#0e9463">trois niveaux au-dessus : trouvé</text>
+
+            <text x="392" y="44" font-size="9" fill="currentColor">APRÈS · cinq dépôts</text>
+            <rect x="392" y="54" width="318" height="34" rx="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.35" stroke-dasharray="4 3"/>
+            <text x="551" y="75" font-size="9.5" text-anchor="middle" fill="currentColor">le dossier qui contient les dépôts</text>
+            <rect x="404" y="98" width="140" height="30" rx="5" fill="none" stroke="currentColor" stroke-width="1" opacity="0.55"/>
+            <text x="474" y="117" font-size="9" text-anchor="middle" fill="currentColor">erp-cga-backend/</text>
+            <rect x="560" y="98" width="140" height="30" rx="5" fill="none" stroke="#d8382b" stroke-width="1.3" stroke-dasharray="4 3"/>
+            <text x="630" y="117" font-size="9" text-anchor="middle" fill="#d8382b">rien ici</text>
+            <path d="M474,98 L474,92 L630,92 L630,98" fill="none" stroke="#d8382b" stroke-width="1.3" marker-end="url(#fl147)"/>
+            <text x="551" y="148" font-size="8.5" text-anchor="middle" fill="#d8382b">trois niveaux au-dessus : vide</text>
+
+            <line x1="10" y1="172" x2="710" y2="172" stroke="currentColor" stroke-width="0.8" opacity="0.3"/>
+            <text x="10" y="194" font-size="9.5" fill="currentColor">Et ensuite ?</text>
+            <rect x="10" y="204" width="330" height="44" rx="6" fill="none" stroke="#d8382b" stroke-width="1.3"/>
+            <text x="175" y="222" font-size="9" text-anchor="middle" fill="currentColor">le serveur retombe sur ses valeurs de repli</text>
+            <text x="175" y="238" font-size="9" text-anchor="middle" fill="currentColor">et <tspan font-weight="700">démarre quand même</tspan></text>
+            <rect x="380" y="204" width="330" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.55"/>
+            <text x="545" y="222" font-size="9" text-anchor="middle" fill="currentColor">rien au journal, rien à l'écran</text>
+            <text x="545" y="238" font-size="9" text-anchor="middle" fill="currentColor">cela se voit sur un taux d'imposition</text>
+          </svg>
+          <figcaption>Le référentiel légal est resté dans le dépôt du serveur, et c'est pour cette figure. Le fondement se discute, la valeur
+            s'exécute.</figcaption>
+        </figure>
+
+        <h3>Ce qui a cassé</h3>
+
+        <div class="tableau">
+          <table>
+            <thead><tr><th>Ce qui tenait par la place</th><th>Ce que cela donnait, une fois déplacé</th></tr></thead>
+            <tbody>
+              <tr><td>La racine du dépôt, calculée par le nombre de dossiers au-dessus du module</td><td>Un niveau de trop. Le serveur cherchait son référentiel chez le voisin et démarrait sur ses valeurs de repli</td></tr>
+              <tr><td>Treize fichiers de test, même calcul</td><td>La même erreur, mais visible : soixante-dix fichiers introuvables d'un coup</td></tr>
+              <tr><td>L'outil qui mesure l'avancement des écrans</td><td>Ne lisait qu'une interface et déclarait cinq pages absentes ; elles étaient dans l'autre</td></tr>
+              <tr><td>La racine de traçage du constructeur de l'interface</td><td>Pointait sur le dossier parent : la sortie autonome sortait du dépôt, et l'outil remontait jusque chez les dépôts voisins</td></tr>
+              <tr><td>Les trois descriptions d'image</td><td>Copiaient depuis des dossiers qui n'existent plus : plus aucune image ne se construisait</td></tr>
+              <tr><td>L'adresse nue de la console</td><td>C'était l'accueil du site public, parti avec son dépôt. Chaque écran répondait, la racine rendait 404</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>La dernière ligne est la plus instructive. L'adresse nue est celle qu'on tape, celle qu'on met en favori, et celle que
+          l'orchestrateur interroge pour savoir si le service est vivant. Ni la suite de tests, ni le typage, ni le contrat des écrans ne l'ont
+          vue : c'est la sonde de démarrage de la pile de démonstration, qui attendait une réponse et n'en a pas eu.</p>
+
+        <h3>La règle qui a servi partout</h3>
+
+        <p>Trois questions du projet portent sur plusieurs dépôts à la fois : l'invariant « tout ce que le serveur permet est à l'écran »,
+          les manifestes de déploiement, et les illustrations des articles. Chacune pourrait chercher son dépôt à sa façon. Trois façons de
+          chercher, c'est trois façons de se tromper et trois messages d'erreur à comprendre. Il n'y en a qu'une, et elle distingue deux
+          comportements.</p>
+
+        <p><strong>Un outil de vérification qui ne trouve pas ce qu'il doit lire échoue.</strong> S'il annonçait « zéro écart » faute de
+          matière à comparer, il éteindrait l'alarme qu'il était censé porter. <strong>Un test qui ne trouve pas un dépôt voisin est
+          ignoré</strong>, et dit lequel manque : le faire échouer rendrait le dépôt intestable seul, et une suite rouge par construction
+          finit par ne plus être lue du tout. C'est la chaîne d'intégration qui récupère les quatre dépôts, avec un contrôle « aucun test n'a
+          été sauté » qui rend l'oubli impossible.</p>
+
+        <h3>Deux défauts qui ne venaient pas de la scission</h3>
+
+        <p>Quarante cas tombaient ensemble en accusant le cloisonnement multi-locataire d'être cassé. La cause était dans la manière de se
+          connecter : l'adresse du rôle restreint se fabriquait en remplaçant un morceau de texte. Avec une adresse sans mot de passe, le
+          remplacement ne remplaçait rien, le rôle « restreint » restait le compte de départ, et celui-ci contournait toutes les politiques.
+          Ce défaut avait déjà été corrigé, à un seul de ses trois endroits.</p>
+
+        <p>Le second touche l'outil qui juge tous les autres. Le registre des cas d'usage affichait <strong>validé</strong> pour un cas dont
+          les trois contrôles s'étaient sautés faute de base. Il retenait la dernière ligne contenant « réussi » ou « échoué », et il est
+          tombé sur une explication de saut où le mot « échoué » apparaissait à l'intérieur d'un message d'authentification. Une ligne de
+          compte se reconnaît à sa forme, des nombres suivis d'états, et non à un mot qu'elle contient.</p>
+
+        <h3>L'application de terrain</h3>
+
+        <p>Le cinquième dépôt n'existait pas. Le produit se voyait sur un écran large et se remplissait depuis un bureau, alors que l'adhérent
+          est dans sa boutique avec une facture en main et un réseau incertain. Cette application n'est pas la console en petit : ce qu'elle
+          fait, et qui ne peut se faire ailleurs, c'est enregistrer une pièce sur l'appareil et la faire partir toute seule.</p>
+
+        <p>Trois règles la gouvernent, chacune adossée à une panne réelle. L'ordre de la file est celui de la <strong>prise de vue</strong>,
+          faute de quoi la facture du 3 arrive après celle du 17. Un refus sort de la file, une indisponibilité y reste : les confondre, c'est
+          soit jeter une pièce valable parce que le réseau a manqué, soit ne jamais vider la file. Et la remise est idempotente par un
+          identifiant posé sur l'appareil, sans quoi une réponse perdue en route ferait entrer deux fois la même facture en comptabilité.</p>
+
+        <p>Cette règle ne se vérifie pas à la main : il faudrait couper le réseau au bon moment, vingt fois de suite. Le domaine a donc été
+          écrit sans rien qui demande un appareil, et huit cas l'éprouvent en une seconde. La file vit encore en mémoire, ce qui est
+          exactement ce que cette application existe pour ne pas perdre : tant que ce point n'est pas fait, elle ne se met pas entre les mains
+          d'un adhérent.</p>
       </section>
 
       <section id="s23">
