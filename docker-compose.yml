@@ -191,6 +191,12 @@ services:
   console:
     build:
       context: ../erp-cga-console
+      # ⚠️ EN ARGUMENT DE CONSTRUCTION, et non en variable d'environnement.
+      # Tout ce qui porte `NEXT_PUBLIC_` est recopié dans le paquet envoyé au
+      # navigateur au moment de la compilation : le poser au démarrage ne change
+      # rien, et le lien garde l'adresse par défaut sans que rien ne le signale.
+      args:
+        NEXT_PUBLIC_ADRESSE_VITRINE: http://localhost:${PORT_VITRINE:-3001}
     environment:
       # ⚠️ `api:8000` est le nom du service sur le réseau interne, joignable
       # seulement depuis un autre conteneur. Correct ici parce que le front
@@ -216,6 +222,9 @@ services:
   vitrine:
     build:
       context: ../erp-cga-vitrine
+      # ⚠️ Voir la console : à la construction, jamais au démarrage.
+      args:
+        NEXT_PUBLIC_ADRESSE_CONSOLE: http://localhost:${PORT_CONSOLE:-3000}
     environment:
       API_URL: http://api:8000
     ports:
