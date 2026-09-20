@@ -369,7 +369,7 @@
 <div class="page" lang="fr">
 
   <header class="tete">
-    <p class="eyebrow">Document de conception · version 136 · destiné à l'équipe de développement</p>
+    <p class="eyebrow">Document de conception · version 137 · destiné à l'équipe de développement</p>
     <h1>Architecture multi-tenant CGA</h1>
     <p class="chapo">Une plateforme SaaS de gestion comptable, fiscale et sociale où chaque client
       dispose de son sous-domaine et de ses données cloisonnées. Ce document porte les deux moitiés
@@ -382,7 +382,7 @@
       <span><b>Mobile</b> · Flutter</span>
       <span><b>Canaux</b> · WhatsApp Business · courriel</span>
       <span><b>Hébergement</b> · serveur Contabo</span>
-      <span><b>Construit</b> · 3 chantiers, 151 pas, 3 764 tests</span>
+      <span><b>Construit</b> · 3 chantiers, 152 pas, 3 764 tests</span>
       <span><b>Décisions</b> · arrêtées le 09/09/2026, section 34</span>
       <span><b>Conception</b> · TCHAMBA TCHAKOUNTE Edwin, ingénieur informaticien</span>
     </div>
@@ -556,6 +556,7 @@
         <li><a href="#s150">140 · La pile en conteneurs, et le cloisonnement qui s'appliquait à vide</a></li>
         <li><a href="#s151">141 · L'historique, et la liste vide qui voulait dire trois choses</a></li>
         <li><a href="#s152">142 · Un mécanisme identique, et deux produits selon l'endroit où on le pose</a></li>
+        <li><a href="#s153">143 · Ce que l'utilisateur voit quand une page ne rend pas du tout</a></li>
       </ol>
       <p>Annexes</p>
       <ol>
@@ -13479,6 +13480,92 @@ GET /api/comptabilite/ecritures?limite=50&amp;curseur=cur_9f2a1c</code></pre>
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section id="s153">
+        <h2><span class="num">143</span>Ce que l'utilisateur voit quand une page ne rend pas du tout</h2>
+
+        <p>La section précédente traitait d'une adresse qui n'existe pas. Celle-ci traite du cas voisin
+          et plus grave : une page qui existe, et qui <strong>échoue</strong>.</p>
+
+        <div class="tbl-enveloppe">
+          <table>
+            <thead><tr><th style="width:40%">Ce que le serveur rendait</th><th style="width:60%">Ce que le visiteur voyait</th></tr></thead>
+            <tbody>
+              <tr><td>HTTP 500, <strong>corps vide</strong></td><td><code>This page couldn't load. A server error occurred.</code> En anglais, sans marque, sans navigation, avec un numéro d'erreur brut en pied de page.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Mesuré en provoquant la panne sur une route d'épreuve, puis retirée. Le premier essai a
+          raté et il est instructif : la page échouait au <strong>pré-rendu</strong>, donc à la
+          construction, qui s'interrompait. Le cas réel est une panne <em>en service</em>, et il a
+          fallu forcer le rendu dynamique pour le reproduire.</p>
+
+        <h3>Ce qui n'était pas couvert est ce qui est le plus exposé</h3>
+
+        <div class="tbl-enveloppe">
+          <table>
+            <thead><tr><th style="width:20%">Surface</th><th style="width:24%">Couvert</th><th style="width:56%">Non couvert</th></tr></thead>
+            <tbody>
+              <tr><td>Site public</td><td>rien</td><td>les quatorze pages</td></tr>
+              <tr><td>Espace de travail</td><td>le groupe des écrans collaborateur</td><td>connexion, activation d'un compte, oubli et réinitialisation de mot de passe, bibliothèque, courriels, et tout l'espace adhérent</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Ce sont les écrans où l'on n'est <strong>pas encore identifié</strong>, donc ceux qu'un
+          inconnu atteint, et ceux où une panne coûte le plus cher : un adhérent qui n'arrive pas à
+          activer son compte n'a personne à qui le dire.</p>
+
+        <h3>Le placement décide, comme à la section précédente</h3>
+
+        <ul>
+          <li><strong>Site public</strong>, dans le groupe du site : la page d'erreur garde l'en-tête,
+            le menu et le pied. Le visiteur peut continuer ailleurs, seule chose utile à lui offrir à
+            cet instant.</li>
+          <li><strong>Espace de travail</strong>, hors des groupes authentifiés : on ne sait pas qui
+            est devant l'écran, et servir la coquille authentifiée révélerait la barre latérale et la
+            liste des écrans.</li>
+        </ul>
+
+        <p>Le filet des écrans collaborateur reste en place et garde la priorité, par imbrication : il
+          sait distinguer un refus d'habilitation d'une panne, ce que le filet général ne peut pas
+          faire puisqu'il couvre aussi des pages où personne n'est connecté.</p>
+
+        <div class="note piege">
+          <p class="titre">Deux vérifications qui ne prouvaient rien</p>
+          <p><strong>La première</strong> interrogeait l'écran de travail en panne sans session. Le
+            groupe redirige les requêtes non authentifiées vers la connexion : la page d'épreuve n'a
+            jamais été atteinte, et le test mesurait la page de connexion.</p>
+          <p><strong>La seconde</strong>, avec une session, cherchait dans le HTML servi le libellé de
+            chacun des deux filets pour savoir lequel avait répondu. Elle a désigné le mauvais. La
+            raison est générale : <strong>la charge envoyée au navigateur embarque tout le catalogue
+            de traductions</strong>, donc les libellés des deux filets s'y trouvent quoi qu'il
+            arrive.</p>
+          <p>Chercher un texte dans le HTML servi ne dit pas quel composant a rendu. Seul le rendu à
+            l'écran départage.</p>
+        </div>
+
+        <h3>Le dernier filet, et une limite que rien ne corrige</h3>
+
+        <p>Un filet global rattrape le cas où le <strong>gabarit racine lui-même</strong> échoue. Il
+          rend alors son propre document, sans traduction ni feuille de style, puisque c'est
+          précisément ce gabarit qui les fournit : faire dépendre le filet de dernier recours des
+          mécanismes qui viennent d'échouer n'aurait aucun sens.</p>
+
+        <div class="note alerte">
+          <p class="titre">Sans JavaScript, la page reste blanche</p>
+          <p>Sur une panne de racine, le cadre rend un corps vide côté serveur, et c'est le navigateur
+            qui peint la page d'erreur. Un visiteur sans JavaScript voit donc une page blanche.
+            <strong>C'est une limite du cadre, pas un choix</strong>, et rien dans le produit ne peut
+            la corriger. Elle est écrite ici pour que personne ne la redécouvre en croyant à un
+            défaut.</p>
+        </div>
+
+        <p>Une page qui ne rend pas est le seul moment où l'utilisateur n'a plus que ce que le
+          logiciel lui dit. C'est aussi le seul endroit où personne ne va regarder avant que cela
+          n'arrive.</p>
       </section>
 
       <section id="s23">

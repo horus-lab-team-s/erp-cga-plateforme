@@ -15268,3 +15268,89 @@ place : une clé que personne n'affiche se relit comme vivante et trompe le proc
 
 *Un mécanisme identique, posé dans un groupe de routes ou hors de lui, sert dans un cas une
 navigation utile et dans l'autre la barre latérale d'un espace authentifié à un inconnu.*
+
+## Pas 137 — Quand une page tombait, le visiteur voyait une page blanche
+
+**Demande** : continuer. La page « introuvable » du pas précédent laissait une question ouverte,
+de la même famille : que voit-on quand une page ne rend pas *du tout* ?
+
+### La mesure, faite en provoquant la panne
+
+Une route d'épreuve qui lève une exception, posée puis retirée. ⚠️ **Premier essai raté, et
+instructif** : la page échouait au **pré-rendu**, donc à la construction, qui s'interrompait. Le cas
+réel est une panne **en service** — API injoignable, donnée inattendue — et il a fallu forcer le
+rendu dynamique pour le reproduire.
+
+| Ce que le serveur rendait | Ce que le visiteur voyait |
+| --- | --- |
+| HTTP 500, **corps vide** | « This page couldn't load. A server error occurred. » |
+
+En anglais, sans marque, sans navigation, avec un numéro d'erreur brut en pied de page. Aucun
+chemin de retour.
+
+### L'inventaire des trous
+
+| Surface | Ce qui était couvert | Ce qui ne l'était pas |
+| --- | --- | --- |
+| Vitrine | rien | les quatorze pages publiques |
+| Console | le groupe `(collaborateur)` | connexion, activation, oubli et réinitialisation de mot de passe, bibliothèque, courriels, et tout l'espace `(adherent)` |
+
+⚠️ Ce qui n'était pas couvert côté console est **ce qui est le plus exposé** : les écrans où l'on
+n'est pas encore identifié, donc ceux qu'un inconnu atteint, et ceux où une panne coûte le plus
+cher. Un adhérent qui n'arrive pas à activer son compte n'a personne à qui le dire.
+
+### Où poser le filet, encore une fois
+
+Le placement décide de ce que la page sert, exactement comme au pas précédent.
+
+- **Vitrine**, dans le groupe du site : la page d'erreur garde l'en-tête, le menu et le pied. Le
+  visiteur peut continuer ailleurs, ce qui est la seule chose utile à lui offrir à cet instant.
+- **Console**, hors des groupes authentifiés : on ne sait pas qui est devant l'écran, et servir la
+  coquille authentifiée révélerait la barre latérale et la liste des écrans.
+
+Le filet du groupe `(collaborateur)` reste : il sait distinguer un refus d'habilitation d'une
+panne, ce que le filet général ne peut pas faire puisqu'il couvre aussi des pages où personne
+n'est connecté.
+
+### La vérification qui ne prouvait rien, deux fois
+
+⚠️ **Premier essai** : une requête vers l'écran de travail en panne, sans session. Le groupe
+redirige en 307 vers la connexion ; la page d'épreuve n'a jamais été atteinte. Le test mesurait la
+page de connexion.
+
+⚠️ **Deuxième essai** : avec une session, en cherchant dans le HTML servi le libellé de chacun des
+deux filets pour savoir lequel avait répondu. Le résultat annonçait le mauvais filet. La raison est
+générale et vaut d'être retenue : **la charge RSC embarque tout le catalogue de traductions**, donc
+les libellés des deux filets s'y trouvent quoi qu'il arrive.
+
+*Chercher un texte dans le HTML servi ne dit pas quel composant a rendu.* Seul le rendu à l'écran
+départage : la capture montre la barre latérale intacte et le message propre au groupe de travail,
+avec sa référence d'incident. La priorité par imbrication est respectée.
+
+### Le dernier filet, et sa limite
+
+`app/global-error.tsx` rattrape le cas où le **gabarit racine lui-même** échoue. Il rend alors son
+propre `<html>`, sans traduction ni feuille de style, puisque c'est précisément ce gabarit qui les
+fournit : faire dépendre le filet de dernier recours des mécanismes qui viennent d'échouer n'aurait
+aucun sens.
+
+Éprouvé en conditionnant une panne du gabarit à une variable d'environnement, pour que la
+construction reste possible et que la panne ne survienne qu'en service.
+
+⚠️ **Une limite à connaître** : sur une panne de racine, le cadre rend un corps vide côté serveur
+et c'est le navigateur qui peint la page. **Sans JavaScript, le visiteur voit une page blanche.**
+C'est une limite de `global-error`, pas un choix, et rien dans le produit ne peut la corriger.
+
+### État à la fin du pas 137
+
+| Ce qui a été éprouvé | Résultat |
+| --- | --- |
+| Page en panne sur la vitrine | page française, en-tête et pied du site, référence d'incident, réessai |
+| Page publique en panne sur la console | page de marque, cul-de-sac, référence d'incident |
+| Écran de travail en panne, avec session de comptable | filet du groupe, barre latérale intacte |
+| Gabarit racine en panne | dernier filet, page de marque minimale |
+| Le site après retrait des routes d'épreuve | accueil, contact, formations en 200, adresse inconnue en 404 |
+| `eslint` et compilation sur les deux dépôts | verts |
+
+*Une page qui ne rend pas est le seul moment où l'utilisateur n'a plus que ce que le logiciel lui
+dit ; c'est aussi le seul endroit où personne ne va regarder avant que cela n'arrive.*
