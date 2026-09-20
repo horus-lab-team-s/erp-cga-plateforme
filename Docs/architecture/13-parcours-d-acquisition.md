@@ -14999,3 +14999,137 @@ cinquante et une valeurs légales qui attendent encore un contreseing.
 
 *Une pile d'essai plus permissive que la production ne prouve pas ce qu'on croit qu'elle
 prouve.*
+
+## Pas 135 — L'application de terrain ne savait que faire partir une pièce
+
+**Demande** : « le mobile là n'est même pas un peu complet, même l'historique de base je n'ai
+pas côté mobile ; je veux maintenant que l'on passe à des tests plus complets et plus
+parlants ».
+
+Le constat était juste, et il se voyait à l'écran. Une fois la file vidée, l'accueil affichait
+« Tout est parti » et **plus rien en dessous** : aucune trace des douze justificatifs déjà
+remis. L'adhérent ne pouvait répondre à aucune des trois questions qu'il se pose réellement.
+
+| La question | Ce que l'application répondait |
+| --- | --- |
+| « Est-ce que j'ai envoyé la facture de mardi ? » | rien |
+| « Le cabinet l'a-t-il seulement regardée ? » | rien |
+| « Combien de pièces ai-je fournies ce mois-ci ? » | rien |
+
+Faute de réponse dans l'application, il appelle le cabinet. Le produit promet d'épargner cet
+appel ; il le provoquait.
+
+### Pourquoi l'historique ne se garde pas sur l'appareil
+
+La tentation était de cesser d'oublier les dépôts remis. La file les efface dès que le serveur
+les accepte, et c'était voulu : elle est un **sas**, pas une archive. Trois raisons ont écarté
+l'idée, et elles tiennent toutes les trois.
+
+1. **Un historique local se fige sur « envoyée ».** L'appareil sait qu'il a remis la pièce ; il
+   ne saura jamais que le comptable l'a lue, rapprochée, puis comptabilisée. Or c'est cela que
+   l'adhérent veut savoir : non pas que sa photo est partie, mais qu'elle a **servi**.
+2. **Un historique local meurt avec le téléphone.** Réinstallation, appareil changé, téléphone
+   perdu : l'archive disparaît alors que le cabinet détient toujours les pièces. Montrer un
+   historique vide à quelqu'un qui a déposé deux cents justificatifs serait pire que ne rien
+   montrer.
+3. **Un historique local ignore les autres canaux.** Le serveur en compte six. Sur ce dossier,
+   cinq pièces sur douze ne sont pas passées par le téléphone : deux par courriel, deux par le
+   portail, une par WhatsApp. Un « historique » qui les tairait induirait en erreur sur ce qui
+   a été fourni.
+
+L'historique se lit donc sur `GET /collecte/pieces`, seule source qui sache répondre. La file
+reste ce qu'elle est : **ce qui n'est pas encore parti**.
+
+### Une liste vide veut dire trois choses, et deux appellent un geste
+
+C'est la leçon que la file d'attente avait déjà coûtée avec `Vidage`, mais elle se paie plus
+cher ici : la file se rattrape au réveil suivant, l'historique se lit et **se croit**.
+
+| Ce qui s'est passé | Ce qu'il faut dire | Ce qu'une simple liste vide aurait dit |
+| --- | --- | --- |
+| Rien n'a jamais été déposé | « Aucune pièce remise » | « Aucune pièce remise » |
+| Le réseau manque | « Pas de réseau » | « Aucune pièce remise » |
+| La session a expiré | « Reconnectez-vous » | « Aucune pièce remise » |
+
+La lecture rend donc un `Historique` qui porte son sort, et non une liste. Sans cela,
+l'application aurait annoncé « aucune pièce remise » à un adhérent qui en a fourni deux cents.
+
+### Ce que l'écran montre, et pourquoi ce n'est pas une pastille
+
+Une pastille d'état qui passe de gris à coloré demande de croire sur parole. Les champs que le
+cabinet remplit en lisant le document, eux, se constatent : voir **« CIMENCAM DOUALA ·
+127 500 F »** remplacer « Pièce du 20 septembre » sous sa propre photo, c'est la preuve
+visible que quelqu'un l'a ouverte et l'a comprise.
+
+L'avancement est écrit **en mots et en segments**, jamais par la couleur seule — la règle du
+dossier de design. Et la barre porte l'indigo de l'institution, non le magenta : elle montre le
+travail du cabinet, pas une action demandée à l'adhérent.
+
+### Deux défauts que seule l'épreuve sur l'appareil a montrés
+
+Les quatre-vingt-dix cas d'essai passaient au vert avant que l'application ne soit installée.
+Ni l'un ni l'autre de ces défauts n'y apparaissait.
+
+**Une ligne vide occupait quand même sa place.** Une pièce photographiée que le cabinet n'a pas
+encore ouverte n'a ni émetteur, ni référence, et son canal est le téléphone : les trois
+morceaux de la ligne de détail manquent. Le texte vide restait entre ses deux marges et
+creusait sous le titre un blanc que rien n'occupait. Une fois la ligne rendue conditionnelle,
+cinq cartes tiennent là où quatre entraient.
+
+**Revenir dans l'application ne relisait rien** — et ce défaut a été trouvé par accident. Le
+téléphone est passé sur une autre application pendant l'essai ; le comptable a lu une pièce
+dans l'intervalle ; au retour, l'historique affichait encore l'état d'avant, « Reçue par le
+cabinet » sur une pièce déjà lue et « 7 prises en compte » au lieu de 8.
+
+⚠️ **Rien ne signalait que la liste était périmée**, et c'est ce qui rend le défaut grave : un
+écran qui se trompe sans le dire vaut moins qu'un écran vide. Le geste de tirer vers le bas
+existait, mais il suppose qu'on se doute que la liste a vieilli. Personne ne s'en doute.
+L'écran redemande désormais au serveur à chaque retour au premier plan — au retour seulement,
+car sur Android un simple déroulé du volet de notifications ferait sinon des appels que rien
+ne justifie, sur un forfait que l'adhérent paie.
+
+### Un commentaire qui mentait
+
+Le commentaire de la barre d'avancement affirmait employer « le magenta de l'action » ; la
+ligne suivante prenait l'indigo, et c'est l'indigo qui était juste. Le commentaire a été
+corrigé, pas le code.
+
+⚠️ Un commentaire faux coûte plus cher qu'un commentaire absent : le prochain lecteur corrige
+le **code** pour le mettre d'accord avec lui.
+
+### Vérifié de bout en bout, sur un TECNO KM5 relié en USB
+
+La chaîne complète, et non l'écran seul : le téléphone de l'adhérent, le serveur, et la console
+du cabinet.
+
+| Ce qui a été éprouvé | Résultat |
+| --- | --- |
+| Cas d'essai | **90**, tous verts, contre 60 avant ce pas |
+| L'historique s'ouvre | 12 pièces, 3 états, 4 canaux, 7 identifiées |
+| Groupement par mois | Septembre 4, Juillet 8, le plus récent en tête |
+| Montants | « 1 958 085 F », tranches de trois séparées par une espace |
+| Canaux | « reçue par courriel », « déposée sur le portail », « reçue par WhatsApp » — le mobile n'est jamais cité |
+| **Pont réseau coupé**, puis geste de rafraîchir | **« Pas de réseau »**, et non « aucune pièce remise » |
+| Pont rétabli, même geste | la liste revient : le message est rattrapable |
+| Le comptable lit une pièce (`POST /pieces/{id}/lecture`) | la photo prise sur ce téléphone devient **CIMENCAM DOUALA · 127 500 F · Lue par le cabinet**, le bilan passe de 7 à 8 |
+| L'application en arrière-plan, le cabinet lit une seconde pièce | au retour, **sans aucun geste** : 8 → 9, et STATION TRADEX BONABERI · 18 750 F |
+
+### Le piège que le jeu d'essai ne montrait pas
+
+Le serveur sérialise 45 000 F en `45000`, que la plateforme décode en **entier**. Une lecture
+directe vers un décimal aurait levé une exception sur la moitié des factures du Cameroun —
+celles dont le montant est rond — et l'historique **entier** serait tombé sur une seule ligne
+mal formée. Le défaut n'apparaît pas sur un jeu d'essai dont les montants portent des
+centimes. Un cas d'essai le tient désormais.
+
+À noter pour qui reprendra ce code : la route de **liste** rend un nombre, la route de
+**lecture** rend une chaîne. Le modèle mobile ne lit que la première.
+
+### État à la fin du pas 135
+
+L'application de terrain répond enfin aux trois questions. Ce qui manque pour une mise en
+service n'a pas changé : un serveur, un nom de domaine, un certificat, et les cinquante et une
+valeurs légales qui attendent encore un contreseing.
+
+*Quatre-vingt-dix cas verts n'ont montré ni le blanc sous le titre, ni la liste périmée au
+retour. L'appareil, lui, a montré les deux.*
