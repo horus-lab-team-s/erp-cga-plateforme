@@ -15133,3 +15133,53 @@ valeurs légales qui attendent encore un contreseing.
 
 *Quatre-vingt-dix cas verts n'ont montré ni le blanc sous le titre, ni la liste périmée au
 retour. L'appareil, lui, a montré les deux.*
+
+### Complément au pas 135 : les cent sept figures du document
+
+La mesure de contraste faite sur la figure de l'historique valait pour les autres. Le dossier de
+conception définit depuis le premier jour des variables de thème qui portent **deux valeurs**, une
+par fond. Trente-quatre textes de figure, sur douze sections, les contournaient en écrivant
+l'hexadécimal : ils gardaient donc la teinte du mode clair sur le fond sombre, entre 3,22 et 4,37
+selon la teinte.
+
+| Teinte en dur | Fond clair | Fond sombre | Reprise sur |
+| --- | --- | --- | --- |
+| `#0e9463` | 3,64 | 4,91 | `--accent`, 5,04 et 9,87 |
+| `#d8382b` | 4,37 | 4,08 | `--rouge`, 6,07 et 7,21 |
+| `#2b7fd4` | 3,88 | 4,60 | `--azur`, 5,75 et 7,63 |
+| `#c95a2b` | 3,97 | 4,50 | `--ambre`, 5,25 et 8,98 |
+| `#c47a06` | 3,22 | 5,54 | `--ambre`, 5,25 et 8,98 |
+
+Deux cent soixante-treize déclarations reprises, traits compris pour que le trait et son libellé ne
+se séparent pas d'un mode à l'autre. Mesuré ensuite dans un navigateur, sur les deux fonds :
+**2 125 textes de figure, aucun sous 4,5**, le plus faible à 5,00.
+
+### Le contrôle qui ne voyait pas le défaut qu'il visait
+
+⚠️ La reprise a d'abord **cassé la moitié des figures**, et il faut le dire parce que la leçon est
+plus utile que la correction.
+
+L'attribut était ajouté en fin de balise sans traiter la barre des balises auto-fermantes : on
+obtenait `<rect …/ style="…">`. L'analyseur ne referme alors plus l'élément, et **deux cent
+trente-neuf rectangles avalaient comme enfants tout ce qui les suivait**. Les textes héritaient de
+leur trait, perdaient toute géométrie, et les figures s'affichaient à moitié vides.
+
+Le contrôle écrit pour s'en prémunir comparait les balises et les profondeurs de l'arbre analysé.
+Il annonçait « aucun écart », et il avait tort : il tenait `rect` pour une balise vide, donc sans
+effet sur la profondeur, ce qui le rendait aveugle **exactement là où il fallait qu'il voie**.
+
+Deux fois de suite, la vérification a échoué avant le code :
+
+| Ce qui a été vérifié | Pourquoi cela ne prouvait rien |
+| --- | --- |
+| Balises et profondeurs de l'arbre | `rect` compté comme balise vide : le défaut ne change aucune profondeur |
+| Le même contrôle, face au défaut refabriqué | Le motif remplacé n'existait pas dans le fichier : rien n'était cassé, donc rien n'était éprouvé |
+
+*Un contrôle qu'on n'a pas confronté au défaut qu'il vise ne prouve rien.* Celui qui l'a remplacé
+compte les fermetures, et il a été passé sur une version volontairement cassée avant d'être cru :
+1 435 fermetures contre 1 434, une barre égarée contre zéro.
+
+Restent trois cent cinquante-trois contours neutres à 1,87, le `--trait-fort` qui encadre les
+boîtes sans signification propre. Ils sont d'origine et n'ont pas été touchés : les relever
+changerait l'aspect de toutes les figures, et c'est une décision de dessin, non la correction d'un
+défaut.
