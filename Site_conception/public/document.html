@@ -446,7 +446,7 @@ body{margin:0}
   <div class="site-entete__barre">
     <span class="site-marque">
       <a class="site-marque__nom" href="/">Plateforme CGA Broad Range</a>
-      <span class="site-marque__detail">document version 135 · 145 sections · 107 figures</span>
+      <span class="site-marque__detail">document version 136 · 146 sections · 107 figures</span>
     </span>
     <nav class="site-nav" aria-label="Sections du site">
         <a class="site-nav__lien" href="/">Accueil</a>
@@ -464,7 +464,7 @@ body{margin:0}
 <div class="page" lang="fr">
 
   <header class="tete">
-    <p class="eyebrow">Document de conception · version 135 · destiné à l'équipe de développement</p>
+    <p class="eyebrow">Document de conception · version 136 · destiné à l'équipe de développement</p>
     <h1>Architecture multi-tenant CGA</h1>
     <p class="chapo">Une plateforme SaaS de gestion comptable, fiscale et sociale où chaque client
       dispose de son sous-domaine et de ses données cloisonnées. Ce document porte les deux moitiés
@@ -477,7 +477,7 @@ body{margin:0}
       <span><b>Mobile</b> · Flutter</span>
       <span><b>Canaux</b> · WhatsApp Business · courriel</span>
       <span><b>Hébergement</b> · serveur Contabo</span>
-      <span><b>Construit</b> · 3 chantiers, 150 pas, 3 764 tests</span>
+      <span><b>Construit</b> · 3 chantiers, 151 pas, 3 764 tests</span>
       <span><b>Décisions</b> · arrêtées le 09/09/2026, section 34</span>
       <span><b>Conception</b> · TCHAMBA TCHAKOUNTE Edwin, ingénieur informaticien</span>
     </div>
@@ -650,6 +650,7 @@ body{margin:0}
         <li><a href="#s149">139 · La prise de vue, et le refus que le cabinet n'avait pas prononcé</a></li>
         <li><a href="#s150">140 · La pile en conteneurs, et le cloisonnement qui s'appliquait à vide</a></li>
         <li><a href="#s151">141 · L'historique, et la liste vide qui voulait dire trois choses</a></li>
+        <li><a href="#s152">142 · Un mécanisme identique, et deux produits selon l'endroit où on le pose</a></li>
       </ol>
       <p>Annexes</p>
       <ol>
@@ -13488,6 +13489,91 @@ GET /api/comptabilite/ecritures?limite=50&amp;curseur=cur_9f2a1c</code></pre>
 
         <p>Ce qui manque pour une mise en service n'a pas changé : un serveur, un nom de domaine, un certificat, et les valeurs légales qui
           attendent encore le contreseing du fiscaliste.</p>
+      </section>
+
+      <section id="s152">
+        <h2><span class="num">142</span>Un mécanisme identique, et deux produits selon l'endroit où on le pose</h2>
+
+        <p>Les deux surfaces répondaient à une adresse inconnue par la page interne de Next :
+          <code>404: This page could not be found.</code>, en anglais, sans marque et sans navigation,
+          sur un produit francophone. Le visiteur arrivé par un lien partagé sur WhatsApp n'avait
+          <strong>aucune sortie</strong> : le bouton « précédent » ne mène nulle part quand on ouvre
+          un lien directement.</p>
+
+        <h3>Pourquoi un <code>not-found.tsx</code> n'y suffisait pas</h3>
+
+        <p>Le gabarit racine des deux applications est <code>app/[locale]/layout.tsx</code> : c'est lui
+          qui rend <code>&lt;html&gt;</code> et <code>&lt;body&gt;</code>. Une adresse inconnue ne
+          correspond à <strong>aucun segment</strong> ; le cadre n'entre donc dans aucun gabarit, et
+          sert sa page interne, qui ne connaît ni la marque ni la langue du produit.</p>
+
+        <div class="note piege">
+          <p class="titre">Le drapeau expérimental qui aurait réglé la question</p>
+          <p>Next 16 offre <code>app/global-not-found.tsx</code> pour exactement ce cas, derrière le
+            drapeau expérimental <code>globalNotFound</code>, désactivé par défaut. On ne l'active
+            pas : le jour où le drapeau change de sémantique, c'est la page d'erreur qui casse, et
+            <strong>une page d'erreur cassée ne se signale à personne</strong>. Une route
+            attrape-tout n'a rien d'expérimental, correspond à n'importe quelle adresse, entre donc
+            dans un gabarit, et ne masque aucune page réelle : le cadre donne toujours la priorité
+            aux segments statiques.</p>
+        </div>
+
+        <h3>L'endroit où on la pose décide de ce qu'elle sert</h3>
+
+        <p>C'est le point de cette section, et il vaut au-delà des pages d'erreur.</p>
+
+        <div class="tbl-enveloppe">
+          <table>
+            <thead><tr><th style="width:18%">Surface</th><th style="width:34%">Emplacement</th><th style="width:48%">Ce que la page hérite</th></tr></thead>
+            <tbody>
+              <tr><td>Vitrine</td><td><strong>dans</strong> le groupe de routes du site</td><td>En-tête, navigation et pied : le visiteur garde tous ses chemins, ce qui est précisément ce qui lui manquait.</td></tr>
+              <tr><td>Espace de travail</td><td><strong>hors</strong> des groupes authentifiés</td><td>Rien. La page se suffit à elle-même, comme la page de connexion et pour la même raison.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Le choix de l'espace de travail est le plus important des deux. Dans un groupe authentifié,
+          la page d'erreur hériterait de la barre latérale, du nom du collaborateur et de la liste des
+          écrans, <strong>servis à quelqu'un dont on ne sait pas s'il est connecté</strong>. On ne
+          sait jamais qui tape une adresse au hasard.</p>
+
+        <h3>Trois défauts que seule la mesure à l'écran a montrés</h3>
+
+        <p><strong>Le geste principal était invisible.</strong> La classe <code>bouton</code> seule
+          n'est qu'une <em>forme</em> : rayon, graisse, marges, bordure transparente, et aucune
+          couleur. Sur l'aplat d'indigo, le libellé sortait en indigo-700 sur indigo-900, mesuré à
+          <strong>1,42:1</strong>. Avec la variante principale il est à 7,41, et la sortie secondaire,
+          passée sur la variante claire dessinée pour les fonds sombres, à 10,65.</p>
+
+        <p><strong>Deux classes prises à l'envers sur la vitrine.</strong> La carte d'avantage porte un
+          blanc à 6 % d'opacité, fait pour le fond indigo : posée sur une section claire elle
+          disparaît, et les quatre pistes se présentaient comme quatre titres nus. Son titre interne
+          est blanc lui aussi, et la phrase qui les introduit s'effaçait sur le blanc.</p>
+
+        <p><strong>Une piste de sortie menait à une page qui n'existe pas.</strong> La première version
+          proposait un index des services ; il n'y en a pas, le menu du site pointe « Nos services »
+          sur la page de création d'entreprise. Proposer un lien mort sur une page d'erreur aurait été
+          le comble, et c'est exactement ce qu'une relecture du code n'aurait pas attrapé.</p>
+
+        <h3>Une clé de traduction retirée avant d'avoir servi</h3>
+
+        <p>Elle devait afficher l'adresse demandée, ce qui aide à diagnostiquer un mauvais lien. Une
+          page rendue côté serveur ne reçoit pas le chemin demandé. La clé a donc été retirée plutôt
+          que laissée en place : <strong>une clé que personne n'affiche se relit comme vivante</strong>
+          et trompe le prochain lecteur.</p>
+
+        <div class="tbl-enveloppe">
+          <table>
+            <thead><tr><th style="width:56%">Ce qui a été éprouvé sur les applications servies</th><th style="width:44%">Résultat</th></tr></thead>
+            <tbody>
+              <tr><td>Les quatre sorties de la page du site</td><td><strong>200</strong>, en français comme en anglais</td></tr>
+              <tr><td>Adresses imbriquées, article de blog inexistant, service inexistant</td><td>404</td></tr>
+              <tr><td>Les écrans réels de l'espace de travail</td><td>200, aucun masqué par la route attrape-tout</td></tr>
+              <tr><td>Les deux langues</td><td>chacune répond dans la sienne</td></tr>
+              <tr><td>Auditeur de liens internes du site</td><td>30 adresses citées, <strong>0 cassée</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section id="s23">

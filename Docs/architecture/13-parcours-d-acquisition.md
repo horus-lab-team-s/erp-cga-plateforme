@@ -15183,3 +15183,88 @@ Restent trois cent cinquante-trois contours neutres à 1,87, le `--trait-fort` q
 boîtes sans signification propre. Ils sont d'origine et n'ont pas été touchés : les relever
 changerait l'aspect de toutes les figures, et c'est une décision de dessin, non la correction d'un
 défaut.
+
+## Pas 136 — Les deux surfaces répondaient à une adresse inconnue en anglais
+
+**Demande** : continuer. La page 404 de la console figurait depuis longtemps sur la liste des
+choses en retard ; la mesure a montré que la vitrine avait exactement le même défaut.
+
+| Surface | Ce qu'une adresse inconnue rendait |
+| --- | --- |
+| Console | `404: This page could not be found.` |
+| Vitrine | `404: This page could not be found.` |
+
+En anglais, sans marque, sans navigation, sur un produit francophone. Le visiteur arrivé par un
+lien partagé sur WhatsApp n'avait **aucune sortie** : le bouton « précédent » ne mène nulle part
+quand on ouvre un lien directement.
+
+### Pourquoi le défaut existait, et pourquoi il ne se voyait pas
+
+Le gabarit racine des deux applications est `app/[locale]/layout.tsx` : c'est lui qui rend `<html>`
+et `<body>`. Une adresse inconnue ne correspond à **aucun segment** ; Next ne peut donc entrer dans
+aucun gabarit, et il sert sa page interne, qui ne connaît ni la marque ni la langue du produit.
+
+Un `not-found.tsx` ordinaire n'y change rien, pour la même raison. Next 16 offre bien
+`app/global-not-found.tsx`, mais derrière le drapeau expérimental `globalNotFound`, désactivé par
+défaut. ⚠️ **On n'active pas un drapeau expérimental sur un produit qui tient la comptabilité de
+tiers** : le jour où le drapeau change de sémantique, c'est la page d'erreur qui casse, et une page
+d'erreur cassée ne se signale à personne.
+
+Une route attrape-tout n'a rien d'expérimental. Elle correspond à n'importe quelle adresse, entre
+donc dans un gabarit, et appelle `notFound()`. Elle ne masque aucune page réelle : Next donne
+toujours la priorité aux segments statiques, quel que soit l'ordre des fichiers.
+
+### Où la poser, et ce que le placement décide
+
+⚠️ Le même mécanisme, posé à deux endroits différents, donne deux produits différents.
+
+| Surface | Emplacement | Ce que la page hérite |
+| --- | --- | --- |
+| Vitrine | **dans** le groupe `(vitrine)` | en-tête, navigation, pied : le visiteur garde tous ses chemins |
+| Console | **hors** des groupes `(collaborateur)` et `(adherent)` | rien : la page se suffit à elle-même |
+
+Le choix de la console est le plus important des deux. Dans un groupe authentifié, la page d'erreur
+hériterait de la barre latérale, du nom du collaborateur et de la liste des écrans — **servis à
+quelqu'un dont on ne sait pas s'il est connecté**. On ne sait jamais qui tape une adresse au
+hasard.
+
+### Trois défauts que seule la mesure à l'écran a montrés
+
+**Le geste principal était invisible.** `bouton` seul n'est qu'une **forme** : rayon, graisse,
+marges, bordure transparente, et aucune couleur. Sur l'aplat d'indigo, le libellé sortait en
+indigo-700 sur indigo-900, mesuré à **1,42:1**. Avec `bouton--principal` il est à 7,41, et la sortie
+secondaire, passée en `bouton--clair` qui est dessinée pour les fonds sombres, à 10,65. Le blanc
+plein de `bouton--inverse` inversait en plus la hiérarchie : l'œil partait vers la sortie plutôt que
+vers le retour au travail.
+
+**Deux classes prises à l'envers côté vitrine.** `avantage` seul porte un blanc à 6 % d'opacité,
+fait pour le fond indigo : posé sur une section claire, il disparaît, et les quatre pistes se
+présentaient comme quatre titres nus. `avantage__titre` est le titre **interne** d'une carte, blanc
+lui aussi, et la phrase « Ce que vous cherchiez se trouve peut-être ici » s'effaçait sur le blanc.
+
+**Une piste de sortie menait à une page qui n'existe pas.** La première version proposait
+`/services` : il n'y a pas d'index des services, le menu du site pointe « Nos services » sur
+`/creer-mon-entreprise`. ⚠️ **Proposer un lien mort sur une page d'erreur** aurait été le comble, et
+c'est exactement ce qu'une relecture du code n'aurait pas attrapé.
+
+### Une clé de traduction retirée avant d'avoir servi
+
+`adresseEssayee` devait afficher l'adresse demandée, ce qui aide à diagnostiquer un mauvais lien.
+Une page rendue côté serveur ne reçoit pas le chemin demandé, et rien dans le dépôt ne le lui
+donnerait sans passer par un composant client. La clé a donc été retirée plutôt que laissée en
+place : une clé que personne n'affiche se relit comme vivante et trompe le prochain lecteur.
+
+### Vérifié sur les deux applications servies
+
+| Ce qui a été éprouvé | Résultat |
+| --- | --- |
+| Les quatre sorties de la page vitrine | **200**, en français comme en anglais |
+| Adresses imbriquées, article de blog inexistant, service inexistant | 404 |
+| Les écrans réels de la console | `/`, `/connexion`, `/mot-de-passe-oublie`, `/bibliotheque`, `/courriels`, `/tableau-de-bord` : **200**, aucun masqué |
+| Adresses inconnues de la console | 404, y compris `/tableau-de-bord/inexistant` |
+| Les deux langues | chacune répond dans la sienne |
+| Auditeur de liens internes de la vitrine | 30 adresses citées, **0 cassée** |
+| `eslint` sur les deux dépôts | vert |
+
+*Un mécanisme identique, posé dans un groupe de routes ou hors de lui, sert dans un cas une
+navigation utile et dans l'autre la barre latérale d'un espace authentifié à un inconnu.*
