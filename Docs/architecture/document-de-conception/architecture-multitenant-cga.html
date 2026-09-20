@@ -369,7 +369,7 @@
 <div class="page" lang="fr">
 
   <header class="tete">
-    <p class="eyebrow">Document de conception · version 134 · destiné à l'équipe de développement</p>
+    <p class="eyebrow">Document de conception · version 135 · destiné à l'équipe de développement</p>
     <h1>Architecture multi-tenant CGA</h1>
     <p class="chapo">Une plateforme SaaS de gestion comptable, fiscale et sociale où chaque client
       dispose de son sous-domaine et de ses données cloisonnées. Ce document porte les deux moitiés
@@ -554,6 +554,7 @@
         <li><a href="#s148">138 · La file qui survit, et la charpente que le serveur a démentie</a></li>
         <li><a href="#s149">139 · La prise de vue, et le refus que le cabinet n'avait pas prononcé</a></li>
         <li><a href="#s150">140 · La pile en conteneurs, et le cloisonnement qui s'appliquait à vide</a></li>
+        <li><a href="#s151">141 · L'historique, et la liste vide qui voulait dire trois choses</a></li>
       </ol>
       <p>Annexes</p>
       <ol>
@@ -13186,6 +13187,168 @@ GET /api/comptabilite/ecritures?limite=50&amp;curseur=cur_9f2a1c</code></pre>
 
         <p>Ce qui manque n'est plus du logiciel : un serveur, un nom de domaine, un certificat, et les valeurs légales qui attendent encore le
           contreseing du fiscaliste.</p>
+      </section>
+
+      <section id="s151">
+        <h2><span class="num">141</span>L'historique, et la liste vide qui voulait dire trois choses</h2>
+
+        <p>L'application de terrain savait faire partir une pièce, et c'est tout ce qu'elle savait faire. Une fois la file vidée, l'écran
+          d'accueil affichait « Tout est parti » et plus rien en dessous : aucune trace des douze justificatifs déjà remis. Trois questions
+          restaient sans réponse, et ce sont les seules que l'adhérent se pose une semaine plus tard.</p>
+
+        <div class="tbl-enveloppe">
+          <table>
+            <thead><tr><th style="width:52%">La question</th><th style="width:48%">Ce que l'application répondait</th></tr></thead>
+            <tbody>
+              <tr><td>« Est-ce que j'ai envoyé la facture de mardi ? »</td><td>rien</td></tr>
+              <tr><td>« Le cabinet l'a-t-il seulement regardée ? »</td><td>rien</td></tr>
+              <tr><td>« Combien de pièces ai-je fournies ce mois-ci ? »</td><td>rien</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Faute de réponse dans l'application, l'adhérent appelle le cabinet. Le produit promet d'épargner cet appel ; il le
+          <strong>provoquait</strong>.</p>
+
+        <h3>Pourquoi l'historique ne se garde pas sur l'appareil</h3>
+
+        <p>La correction facile était de cesser d'oublier les dépôts remis. La file les efface dès que le serveur les accepte, et c'était
+          voulu : elle est un <strong>sas</strong>, pas une archive. Trois raisons ont écarté l'idée, et elles tiennent toutes les trois.</p>
+
+        <figure>
+          <svg viewBox="0 0 720 268" role="img" aria-label="Six canaux alimentent le dossier et un seul est ce téléphone. La pièce progresse ensuite par cinq états, de reçue à archivée. Un historique tenu sur l'appareil s'arrêterait au premier état et ne verrait qu'un canal sur six, tandis que le serveur suit les cinq états et tous les canaux. C'est en passant à l'état lue que la pièce reçoit l'émetteur et le montant que le cabinet a lus sur le document." style="max-width:100%;height:auto;color:currentColor">
+            <defs><marker id="fl151" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+
+            <text x="10" y="14" font-size="10" fill="currentColor">CE QUI ENTRE DANS LE DOSSIER : SIX CANAUX, UN SEUL EST CE TÉLÉPHONE</text>
+            <rect x="10" y="22" width="700" height="50" rx="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
+            <rect x="22" y="34" width="104" height="26" rx="4" fill="none" stroke="#d8382b" stroke-width="1.3"/>
+            <text x="74" y="51" font-size="9.5" text-anchor="middle" fill="currentColor">ce téléphone</text>
+            <text x="192" y="51" font-size="9.5" text-anchor="middle" fill="currentColor">courriel</text>
+            <text x="300" y="51" font-size="9.5" text-anchor="middle" fill="currentColor">portail</text>
+            <text x="408" y="51" font-size="9.5" text-anchor="middle" fill="currentColor">WhatsApp</text>
+            <text x="522" y="51" font-size="9.5" text-anchor="middle" fill="currentColor">import bancaire</text>
+            <text x="648" y="51" font-size="9.5" text-anchor="middle" fill="currentColor">dépôt au cabinet</text>
+
+            <line x1="112" y1="72" x2="112" y2="104" stroke="currentColor" stroke-width="1.1" marker-end="url(#fl151)"/>
+
+            <rect x="56" y="110" width="112" height="44" rx="6" fill="none" stroke="#d8382b" stroke-width="1.3" stroke-dasharray="4 3"/>
+            <text x="112" y="137" font-size="10" text-anchor="middle" fill="currentColor">Reçue</text>
+            <line x1="168" y1="132" x2="180" y2="132" stroke="currentColor" stroke-width="1.1" marker-end="url(#fl151)"/>
+            <rect x="180" y="110" width="112" height="44" rx="6" fill="none" stroke="#0e9463" stroke-width="1.3"/>
+            <text x="236" y="137" font-size="10" text-anchor="middle" fill="currentColor">Lue</text>
+            <line x1="292" y1="132" x2="304" y2="132" stroke="currentColor" stroke-width="1.1" marker-end="url(#fl151)"/>
+            <rect x="304" y="110" width="112" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.55"/>
+            <text x="360" y="137" font-size="10" text-anchor="middle" fill="currentColor">Rapprochée</text>
+            <line x1="416" y1="132" x2="428" y2="132" stroke="currentColor" stroke-width="1.1" marker-end="url(#fl151)"/>
+            <rect x="428" y="110" width="112" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.55"/>
+            <text x="484" y="137" font-size="10" text-anchor="middle" fill="currentColor">Comptabilisée</text>
+            <line x1="540" y1="132" x2="552" y2="132" stroke="currentColor" stroke-width="1.1" marker-end="url(#fl151)"/>
+            <rect x="552" y="110" width="112" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.55"/>
+            <text x="608" y="137" font-size="10" text-anchor="middle" fill="currentColor">Archivée</text>
+
+            <path d="M56,158 L56,166 L168,166 L168,158" fill="none" stroke="#d8382b" stroke-width="1.2" stroke-dasharray="4 3"/>
+            <text x="56" y="180" font-size="9" fill="currentColor">l'appareil s'arrêterait ici</text>
+            <text x="704" y="180" font-size="9.5" text-anchor="end" fill="currentColor">le serveur suit les cinq états ; c'est lui que l'écran interroge</text>
+
+            <line x1="236" y1="154" x2="236" y2="196" stroke="#0e9463" stroke-width="1.2" marker-end="url(#fl151)"/>
+            <rect x="120" y="200" width="232" height="44" rx="6" fill="none" stroke="#0e9463" stroke-width="1.3"/>
+            <text x="236" y="219" font-size="10" text-anchor="middle" fill="currentColor">CIMENCAM DOUALA</text>
+            <text x="236" y="234" font-size="10" text-anchor="middle" fill="currentColor">127 500 F · F-2026-0512</text>
+            <text x="368" y="216" font-size="9" fill="currentColor">l'émetteur et le montant que le cabinet a lus</text>
+            <text x="368" y="230" font-size="9" fill="currentColor">sur le document : une preuve qui se constate,</text>
+            <text x="368" y="244" font-size="9" fill="currentColor">là où une pastille demande de croire sur parole.</text>
+          </svg>
+          <figcaption>Un historique tenu sur l'appareil ne connaîtrait qu'un canal sur six et ne dépasserait jamais le premier des cinq
+            états. Il se figerait sur « envoyée », au moment précis où l'adhérent veut savoir si sa pièce a servi.</figcaption>
+        </figure>
+
+        <div class="tbl-enveloppe">
+          <table>
+            <thead><tr><th style="width:34%">La raison</th><th style="width:66%">Ce qu'elle coûte si on l'ignore</th></tr></thead>
+            <tbody>
+              <tr><td>Il se <strong>fige sur « envoyée »</strong></td><td>L'appareil sait qu'il a remis la pièce ; il ne saura jamais que le comptable l'a lue, rapprochée, puis comptabilisée. Or c'est cela que l'adhérent veut savoir : non pas que sa photo est partie, mais qu'elle a <strong>servi</strong>.</td></tr>
+              <tr><td>Il <strong>meurt avec le téléphone</strong></td><td>Réinstallation, appareil changé, téléphone perdu : l'archive disparaît alors que le cabinet détient toujours les pièces. Montrer un historique vide à quelqu'un qui a déposé deux cents justificatifs est pire que ne rien montrer.</td></tr>
+              <tr><td>Il <strong>ignore les autres canaux</strong></td><td>Le serveur en compte six. Sur le dossier d'essai, cinq pièces sur douze ne sont pas passées par le téléphone : deux par courriel, deux par le portail, une par WhatsApp. Un « historique » qui les tairait induirait en erreur sur ce qui a été fourni.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Une liste vide veut dire trois choses, et deux appellent un geste</h3>
+
+        <p>C'est la leçon que la file d'attente avait déjà coûtée à la section 138, mais elle se paie plus cher ici : la file se rattrape au
+          réveil suivant, l'historique se lit et <strong>se croit</strong>.</p>
+
+        <div class="tbl-enveloppe">
+          <table>
+            <thead><tr><th style="width:30%">Ce qui s'est passé</th><th style="width:34%">Ce qu'il faut dire</th><th style="width:36%">Ce qu'une liste vide aurait dit</th></tr></thead>
+            <tbody>
+              <tr><td>Rien n'a jamais été déposé</td><td>« Aucune pièce remise »</td><td>« Aucune pièce remise »</td></tr>
+              <tr><td>Le réseau manque</td><td>« Pas de réseau »</td><td><strong>« Aucune pièce remise »</strong></td></tr>
+              <tr><td>La session a expiré</td><td>« Reconnectez-vous »</td><td><strong>« Aucune pièce remise »</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>La lecture rend donc un objet qui <strong>porte son sort</strong>, et non une liste nue. Sans cette distinction, l'application
+          aurait annoncé « aucune pièce remise » à un adhérent qui en a fourni deux cents, et il aurait rappelé le cabinet en urgence.</p>
+
+        <h3>Deux défauts que quatre-vingt-dix cas au vert n'ont pas montrés</h3>
+
+        <p>Les cas d'essai passaient tous avant que l'application ne soit installée. Ni l'un ni l'autre de ces défauts n'y apparaissait.</p>
+
+        <p><strong>Une ligne vide occupait quand même sa place.</strong> Une pièce photographiée que le cabinet n'a pas encore ouverte n'a ni
+          émetteur, ni référence, et son canal est le téléphone : les trois morceaux de la ligne de détail manquent. Le texte vide restait
+          entre ses deux marges et creusait sous le titre un blanc que rien n'occupait. Une fois la ligne rendue conditionnelle, cinq cartes
+          tiennent là où quatre entraient.</p>
+
+        <p><strong>Revenir dans l'application ne relisait rien</strong>, et ce défaut a été trouvé par accident : le téléphone est passé sur
+          une autre application pendant l'essai, le comptable a lu une pièce dans l'intervalle, et au retour l'écran affichait encore l'état
+          d'avant : « Reçue par le cabinet » sur une pièce déjà lue, et sept prises en compte au lieu de huit.</p>
+
+        <p>Rien ne signalait que la liste était périmée, et c'est ce qui rend le défaut grave : <strong>un écran qui se trompe sans le dire
+          vaut moins qu'un écran vide</strong>. Le geste de tirer vers le bas existait, mais il suppose qu'on se doute que la liste a vieilli.
+          Personne ne s'en doute. L'écran redemande désormais au serveur à chaque retour au premier plan, et à ce moment-là seulement : sur
+          Android, un simple déroulé du volet de notifications ferait sinon des appels que rien ne justifie, sur un forfait que l'adhérent
+          paie.</p>
+
+        <h3>Un commentaire qui mentait</h3>
+
+        <p>Le commentaire de la barre d'avancement affirmait employer le magenta de l'action ; la ligne suivante prenait l'indigo, et c'est
+          l'indigo qui était juste, car cette barre montre le travail du cabinet et non une action demandée à l'adhérent. C'est le
+          <strong>commentaire</strong> qui a été corrigé, pas le code.</p>
+
+        <p>Un commentaire faux coûte plus cher qu'un commentaire absent : le prochain lecteur corrige le <em>code</em> pour le mettre d'accord
+          avec lui.</p>
+
+        <h3>Vérifié sur un TECNO KM5, et sur les trois surfaces</h3>
+
+        <div class="tbl-enveloppe">
+          <table>
+            <thead><tr><th style="width:52%">Ce qui a été éprouvé</th><th style="width:48%">Résultat</th></tr></thead>
+            <tbody>
+              <tr><td>Cas d'essai de l'application de terrain</td><td><strong>90</strong>, tous verts, contre 60 avant cette section</td></tr>
+              <tr><td>L'historique s'ouvre</td><td>12 pièces, 3 états, 4 canaux, 7 identifiées</td></tr>
+              <tr><td>Groupement</td><td>Septembre 4, Juillet 8, le mois le plus récent en tête</td></tr>
+              <tr><td>Pont réseau coupé, puis geste de rafraîchir</td><td><strong>« Pas de réseau »</strong>, et non « aucune pièce remise »</td></tr>
+              <tr><td>Pont rétabli, même geste</td><td>la liste revient : le message est rattrapable</td></tr>
+              <tr><td>Le comptable lit une pièce depuis le cabinet</td><td>la photo prise sur ce téléphone devient <strong>CIMENCAM DOUALA · 127 500 F · Lue par le cabinet</strong>, le bilan passe de 7 à 8</td></tr>
+              <tr><td>L'application en arrière-plan, le cabinet lit une seconde pièce</td><td>au retour, <strong>sans aucun geste</strong> : 8 → 9, et STATION TRADEX BONABERI · 18 750 F</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Le piège que le jeu d'essai ne montrait pas</h3>
+
+        <p>Le serveur sérialise 45 000 F en <code>45000</code>, que la plateforme décode en <strong>entier</strong>. Une lecture directe vers
+          un décimal aurait levé une exception sur la moitié des factures du Cameroun, celles dont le montant est rond, et l'historique
+          <em>entier</em> serait tombé sur une seule ligne mal formée. Le défaut n'apparaît pas sur un jeu d'essai dont les montants portent
+          des centimes.</p>
+
+        <p>À noter pour qui reprendra ce code : la route de <strong>liste</strong> rend un nombre, la route de <strong>lecture</strong> rend
+          une chaîne. Le modèle de l'application ne lit que la première.</p>
+
+        <p>Ce qui manque pour une mise en service n'a pas changé : un serveur, un nom de domaine, un certificat, et les valeurs légales qui
+          attendent encore le contreseing du fiscaliste.</p>
       </section>
 
       <section id="s23">
