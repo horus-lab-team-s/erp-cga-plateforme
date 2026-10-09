@@ -151,11 +151,28 @@ services:
       CGA_URL_BASE_DE_DONNEES: postgresql+psycopg://cga_app:app@base:5432/cga
       CGA_ORIGINES_CORS: '["http://localhost:3000","http://localhost:3001"]'
       CGA_ADRESSE_PUBLIQUE: http://localhost:8000
-      CGA_ADRESSE_PUBLIQUE_SITE: http://localhost:3000
+      # ⚠️ Les ports de l'HÔTE, ceux que le navigateur ouvre : un lien reçu par
+      # courriel est ouvert depuis le poste, jamais depuis le réseau des conteneurs.
+      CGA_ADRESSE_PUBLIQUE_SITE: http://localhost:${PORT_CONSOLE:-3000}
+      CGA_ADRESSE_PUBLIQUE_VITRINE: http://localhost:${PORT_VITRINE:-3001}
       CGA_DOSSIER_FICHIERS: /application/fichiers
-      # ⚠️ Aucun relais de messagerie : les courriels sont **retenus**, pas
-      # envoyés. C'est voulu — une pile locale ne doit écrire à personne. Voir
-      # `notifications_smtp.py`.
+      # ⚠️ UN RELAIS DE MESSAGERIE QUI N'ÉCRIT À PERSONNE : `courrier`, plus bas.
+      # Les courriels partent vraiment, par SMTP, comme en production ; ils
+      # s'arrêtent dans le relais au lieu d'atteindre une boîte réelle. C'est ce
+      # qui permet de LIRE ce que le client reçoit (la proforma et son lien) sur
+      # http://localhost:${PORT_COURRIER:-8025}, sans écrire à quiconque.
+      # Sans TLS : le relais est local et n'authentifie personne.
+      CGA_SMTP_HOTE: courrier
+      CGA_SMTP_PORT: "1025"
+      CGA_SMTP_CHIFFREMENT: "false"
+      CGA_COURRIEL_REPONDRE_A: contact@cga-brcgroup.com
+      # ⚠️ L'ORDONNANCEUR TOURNE DANS LE PROCESSUS, comme en production il tourne
+      # dans son propre déploiement (`deploiement/kubernetes/30-ordonnanceur.yaml`).
+      # Sans lui, la pile de démonstration n'exécutait AUCUN travail : pas de
+      # relais, donc aucune demande affectée à son arrivée, aucune relance, aucun
+      # espace ouvert sur paiement. Le paiement y est simulé et les courriels
+      # s'arrêtent au relais `courrier` : rien ne sort de la machine.
+      CGA_ORDONNANCEUR_EN_PROCESSUS: "true"
       #
       # ⚠️ Aucune clé de chiffrement non plus : les secrets TOTP sont écrits en
       # clair. Acceptable ici — données de démonstration —, refusé en production
@@ -185,6 +202,8 @@ services:
         condition: service_healthy
       migration:
         condition: service_completed_successfully
+      courrier:
+        condition: service_started
     restart: unless-stopped
 
   # ── La console ────────────────────────────────────────────────────────────
@@ -232,6 +251,16 @@ services:
     depends_on:
       api:
         condition: service_started
+    restart: unless-stopped
+
+  # ── Le relais de messagerie de démonstration ─────────────────────────────
+  # Il reçoit tous les courriels de la pile et n'en remet aucun : une pile locale
+  # ne doit écrire à personne. Sa page montre chaque message tel que le client le
+  # lirait, texte et HTML.
+  courrier:
+    image: axllent/mailpit:latest
+    ports:
+      - "${PORT_COURRIER:-8025}:8025"
     restart: unless-stopped
 
 volumes:

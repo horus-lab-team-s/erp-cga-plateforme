@@ -162,6 +162,61 @@ COMPTE_DU_CAS: dict[str, str] = {
     "UC-62": "l.fotso",
     "UC-63": "l.fotso",
     "UC-64": "l.fotso, formulaire posté sans JavaScript",
+    # ── Les cas de l'espace adhérent (pas 112 à 118) ─────────────────────────
+    "UC-65": "jp.nkoa",
+    "UC-66": "jp.nkoa, sur une demande ouverte du cabinet",
+    "UC-67": "jp.nkoa, puis le même sur un dossier qui n'est pas le sien",
+    "UC-68": "jp.nkoa",
+    "UC-69": "jp.nkoa",
+    "UC-70": "jp.nkoa",
+    "UC-71": "jp.nkoa, puis a.bouba pour vérifier le refus",
+    "UC-72": "p.moukouri (chargé de clientèle), puis le lien rendu",
+    "UC-73": "a.bouba (réviseur)",
+    "UC-74": "a.bouba (réviseur), puis l.fotso pour le refus",
+    "UC-75": "s.onana, sur un second locataire",
+    # ── L'application mobile (pas 131) ───────────────────────────────────────
+    #
+    # ⚠️ CES CAS NE SE REJOUENT PAS DANS UN NAVIGATEUR. Ils demandent
+    # l'application installée sur un téléphone Android, branchée sur la pile de
+    # démonstration par `adb reverse`, et un compte ADHÉRENT — le compte d'un
+    # collaborateur n'ouvre pas l'espace adhérent.
+    "UC-76": "mc.essomba, sur le téléphone : photographier, puis ne rien toucher",
+    "UC-77": "mc.essomba : couper le réseau, photographier, le rendre, revenir",
+    "UC-78": "mc.essomba : lire la phrase sous « Une pièce attend »",
+    "UC-79": "mc.essomba : descendre l'accueil jusqu'aux raccourcis",
+    "UC-80": "mc.essomba : onglet Documents, taper « fevrier » sans accent",
+    "UC-81": "mc.essomba : Pièces remises, taper un émetteur puis un mois",
+    "UC-82": "mc.essomba : chercher une chaîne qui n'existe nulle part",
+    # ── La création souscrite depuis le site (pas 132) ───────────────────────
+    "UC-83": "aucun : le formulaire public de la vitrine, démarche « CREATION »",
+    "UC-84": "p.moukouri (lecture), b.mballa (chiffrage), l.fotso pour le refus",
+    "UC-85": "s.onana confirme l'encaissement ; le dossier CRE-… s'ouvre seul",
+    "UC-86": "p.moukouri : transmettre une proforma, et relire le lien rendu",
+    "UC-87": "p.moukouri : /acquisition, panneau « Créations payées »",
+    "UC-88": "p.moukouri : ouvrir un dossier FORMATION depuis /acquisition",
+    "UC-89": "p.moukouri emet en cochant l’envoi ; relire la boite sur :8026",
+    "UC-90": "b.mballa : un montant sous le plancher, refuse puis motive",
+    "UC-91": "Formulaire public : une demande avec adresse, puis la boîte du prospect",
+    "UC-92": "Relais rejoué trois fois : la boîte n'en contient toujours qu'un",
+    "UC-93": "Société immatriculée en septembre : sa patente ne date pas de février",
+    "UC-94": "Compte sans prénom : « Bonjour NGONO », jamais « Bonjour  »",
+    "UC-95": "Registre des services : quatorze sondes, zéro service non interrogé",
+    "UC-96": "Référentiel amputé de CNPS_PLAFOND_MENSUEL : la sonde le nomme",
+    "UC-97": "Référentiel sans taux d'abattement : panne, avant la première liasse",
+    "UC-98": "454 requêtes, 132 refus métier, zéro 5xx : taux d'erreur à 0 %",
+    "UC-99": "p.moukouri rouvre un dossier émis la veille : le lien est là",
+    "UC-100": "Trois lectures du lien : la proforma reste EMISE, la relance vit",
+    "UC-101": "p.moukouri appelle une cliente : le dossier passe EN_CONVERSATION",
+    "UC-102": "b.mballa arrête 75 000 F : la proforma sort, intervalle réduit à un point",
+    "UC-103": "Sans décision du gérant, la formation reste refusée en 404",
+    "UC-104": "Après « J'accepte », un courriel dit quoi, quand et au nom de qui",
+    "UC-105": "Relais de messagerie en panne : l'accord est enregistré quand même",
+    "UC-106": "Un corps qui finit par « {{4}} » est refusé au chargement",
+    "UC-107": "Trois demandes, trois réponses : « Vous avez répondu à 3 demandes »",
+    "UC-108": "Base absente : un encadré rouge, et le motif nommé",
+    "UC-109": "Lien du courriel d'ouverture : elle voit, elle dépose, sans mot de passe",
+    "UC-110": "p.moukouri télécharge la pièce d'identité reçue, en-têtes de protection",
+    "UC-111": "Dix-huit gabarits, sept modèles : aucun cadratin dans ce qu'il lit",
 }
 
 #: Les six dossiers du jeu de démonstration, et ce que chacun met en scène.
@@ -845,6 +900,25 @@ def imprimer() -> bool:
     return True
 
 
+def _cas_sans_compte() -> list[str]:
+    """Les cas d'usage pour lesquels aucun compte n'est indiqué au testeur.
+
+    ⚠️ **CE GARDE A ÉTÉ AJOUTÉ PARCE QUE LA TABLE AVAIT DÉCROCHÉ EN SILENCE.**
+
+    `COMPTE_DU_CAS` est la seule partie du cahier écrite à la main : elle dit à
+    un testeur humain quel compte employer pour rejouer un cas. Le rendu la lit
+    avec `.get(..., "")`. Dix-huit cas d'usage ont donc été imprimés avec une
+    case vide, sans que rien ne le signale — un testeur devant UC-70 n'avait
+    aucun moyen de savoir sous quelle identité se connecter, et le cahier avait
+    pourtant l'air complet.
+
+    Le manque ne fait pas échouer l'engendrement : le cahier reste juste sur les
+    quatre-vingts autres. Il est dit à voix haute, avec la liste, pour qu'on le
+    comble.
+    """
+    return [c.reference for c in REGISTRE if not COMPTE_DU_CAS.get(c.reference)]
+
+
 def main() -> int:
     mode = "complet"
     if "--sans-executer" in sys.argv:
@@ -859,6 +933,15 @@ def main() -> int:
         # qui accuse le produit d'échecs que la recette a provoqués elle-même.
         print(f"CAHIER NON ENGENDRÉ : {limite}", file=sys.stderr)
         return 2
+    manquants = _cas_sans_compte()
+    if manquants:
+        print(
+            f"⚠️  {len(manquants)} cas sans compte indiqué au testeur : "
+            f"{', '.join(manquants)}\n"
+            "    Compléter COMPTE_DU_CAS : sans cela, la colonne est vide et le "
+            "testeur ne sait pas sous quelle identité rejouer.",
+            file=sys.stderr,
+        )
     SORTIE_HTML.write_text(rendre(verdicts), encoding="utf-8")
     print(f"HTML : {SORTIE_HTML.relative_to(RACINE)}")
     if imprimer():

@@ -9,6 +9,3892 @@ ce qui a été décidé et pourquoi, ce qui a été livré, ce qui reste.
 
 ---
 
+## 30 septembre 2026 (suite 2) — Elle suit sa création, sans compte
+
+Le cabinet a tranché après avoir nommé la contrainte lui-même : **on ne peut
+écrire librement sur la messagerie instantanée que dans les vingt-quatre heures
+qui suivent le dernier mot du client.** Hors de cette fenêtre, il faut un modèle
+approuvé, et aucun des sept ne l'est. Une formalité dure des semaines.
+
+Bâtir la chaîne documentaire d'une création sur cette horloge, c'est la remettre
+à autrui. Décision : **un espace de suivi, ouvert par un lien signé, sans
+compte.**
+
+### Ce qui existe maintenant
+
+    GET  /creations/{ref}/suivi          son dossier, son étape, ses pièces
+    POST /collecte/fichiers-scelles      elle téléverse son document
+    POST /creations/{ref}/suivi/pieces   il se rattache à la pièce attendue
+    GET  /collecte/fichiers/{empreinte}  le cabinet l'ouvre
+    POST /collecte/fichiers-de-formalite le cabinet dépose ce qu'il reçoit
+
+Et la page, `/fr/mon-dossier/{ref}?s=…`, dessinée d'abord pour 360 px : c'est sur
+un téléphone qu'elle l'ouvrira, et pour y photographier des documents.
+
+Vérifié dans un navigateur, sur la pile :
+
+    avant le dépôt : manquants 7 · déjà reçus 1
+    après le dépôt : manquants 6 · déjà reçus 2
+
+### Le lien n'expire pas, et c'est le cœur de sa conception
+
+Sa durée de vie est **celle du dossier** : il ouvre tant que la formalité est en
+cours, et cesse dès qu'elle est convertie ou abandonnée.
+
+Les deux autres options ont été écartées et le code dit pourquoi :
+
+- **inventer trente ou quatre-vingt-dix jours** l'aurait enfermée dehors au milieu
+  de sa formalité, et le référentiel ne porte aucun délai validé : j'aurais écrit
+  une durée que personne n'a décidée ;
+- **le sceller sur l'étape** l'aurait invalidé à chaque jalon franchi, c'est-à-dire
+  précisément quand elle a une raison de revenir.
+
+Il n'est pas non plus à usage unique, contrairement à celui de la proforma : on
+n'accepte qu'une fois, on suit pendant des semaines.
+
+⚠️ **Et toujours pas de mot de passe.** La décision du 27 septembre tient, avec sa
+raison : « un formulaire à identifiants pour envoyer la photo d'une carte
+d'identité ferait abandonner la moitié des dossiers ». Le compte arrive avec la
+société, au NIU.
+
+### Le sceau vit à `partage/`, et cela a servi deux fois
+
+La Création émet le lien, la Collecte range le fichier, et le graphe n'autorise
+pas ces deux-là à se voir. Leur ouvrir une arête se serait fait en une ligne —
+c'est exactement ce que ce graphe existe pour empêcher.
+
+⚠️ **Le sceau s'est d'abord appelé `exiger`**, comme la garde de permission du
+Transverse. Le cas qui tient close la liste des routes publiques s'y est trompé :
+il a cru la route gardée parce qu'elle appelait « exiger ». Un lecteur pressé s'y
+serait trompé de même, et aurait cru qu'un sceau vaut une habilitation. **Il ne
+vaut pas** : il prouve que le cabinet a émis un lien, jamais qui le présente.
+Renommé `exiger_le_sceau`, et le nom est long exprès.
+
+### Quatre défauts trouvés en le faisant pour de vrai
+
+**La fonction était à moitié bâtie.** Elle déposait, le fichier arrivait au
+magasin, l'empreinte s'inscrivait — et **personne ne pouvait l'ouvrir** : le seul
+téléchargement passait par un identifiant de pièce, donc par un NIU, qu'une
+formalité n'a pas.
+
+**Le compte ne bougeait pas.** La ligne disait « document reçu », mais « il nous
+manque 8 documents » restait à huit. Une cliente qui envoie neuf pièces a besoin
+de voir le compte descendre : sans cela, elle renvoie deux fois le même document
+par précaution.
+
+**Une empreinte tronquée rendait 500.** Le magasin refuse déjà toute clé qui n'est
+pas un SHA-256 ; ma route n'attrapait pas ce refus. Elle rend 404, la même
+réponse qu'une empreinte inconnue : distinguer les deux dirait à un curieux que
+sa forme est bonne.
+
+**Le cabinet n'avait pas le chemin que je venais de donner à la cliente.** Un
+collaborateur qui recevait la même pièce autrement ne pouvait que cocher une
+case. Le dossier portait deux sortes de pièces reçues, et six mois plus tard on
+ne savait plus laquelle portait son document. Le geste existant a été étendu :
+« Joindre et marquer reçue », le fichier restant facultatif — une pièce vue au
+guichet et rendue au client existe.
+
+### Les messages, repris de fond en comble
+
+Le cabinet ne veut **aucun tiret cadratin** dans ce qu'un client lit. Mesuré :
+trente-sept dans les courriels rendus, dont trente-quatre venaient du pied de
+page et de son séparateur, répétés sur dix-huit gabarits. Plus un dans un modèle
+WhatsApp, et **dix libellés servis** — clôture, comptabilité, catalogue,
+obligations, checklist de création.
+
+La signature emploie maintenant `-- `, le séparateur que la RFC 3676 pose et que
+les messageries reconnaissent. Cinq cas tiennent la règle : texte, HTML, objet,
+modèles WhatsApp, séparateur.
+
+⚠️ **Un libellé de pièce est COPIÉ dans le dossier à son ouverture.** Les dossiers
+ouverts avant la correction gardent donc leur cadratin. Reprendre leurs données
+demande l'accord du cabinet.
+
+Côté style, une amélioration qui se voit **avant d'ouvrir** : chaque message
+s'annonçait « CGA Broad Range Consulting Group », dix-huit fois la même ligne. Il
+porte désormais le début du premier paragraphe.
+
+### Trois leçons sur la chaîne de vérification
+
+**Un cas de recette reconnaissait un courriel à sa formule.** Le flux cherchait
+« bien reçu » dans l'objet ; l'objet a changé en retirant le cadratin, et il a
+déclaré qu'aucun courriel n'était arrivé — alors qu'il était là. Il reconnaît
+désormais l'accusé **à sa référence** : une formulation se reprend, une référence
+non.
+
+**Deux sessions pytest sur la même base se marchent dessus**, et produisent des
+échecs qui ressemblent exactement à des défauts du produit. Six échecs se sont
+ainsi évanouis en rejouant seul.
+
+**Une suite qui tourne sur un arbre qui bouge** rend des verdicts sur un code qui
+n'existe nulle part. Un échec de la liste close des routes publiques venait de
+là.
+
+**Non commité** — rien n'a été porté à l'index ni à l'historique.
+
+## 30 septembre 2026 (suite) — La souscription de création, pas à pas
+
+Demande du cabinet : « est-ce que la souscription jusqu'à fixation de prix marche
+déjà côté demande de création d'entreprise ? » Joué sur la pile, pas à pas, dix
+étapes.
+
+### Ce que le produit a répondu
+
+    ✓  1. Elle dépose sa demande depuis le site            201
+    ✓  2. Le dossier entre dans la file                    DEPOSEE
+    ✓  3. Un responsable est désigné                       AFFECTEE · C-001
+    ✓  4. Le questionnaire de création est publié          13 questions, version 2
+    ✓  5. Chiffrer AVANT de qualifier                      409 · les 9 manquantes nommées
+    ✓  6. La qualification est enregistrée                 complète · 10/13 · QUALIFIEE
+    ✓  7. Le chiffrage rend un INTERVALLE                  200 000 / 250 000 / 375 000
+    ✓  8. Un comptable arrête le prix                      403 · permission nommée
+    ✓  9. 150 000 F sous le plancher, sans motif           422
+    ✓ 10. Le même prix, motif à l'appui                    201 · PRO-2026-0041
+
+**Oui, la chaîne marche de bout en bout.**
+
+### Trois choses que la relecture confirme
+
+**Le refus du pas 9 est une phrase, pas un code** : « un écart accordé sans raison
+écrite est un écart que personne ne saura défendre six mois plus tard ».
+
+**Le chiffrage avoue ce qu'il n'a pas pu calculer** :
+
+    ⚠ TAR-STA-001 : sans réponse à « statuts_apportes », ajustement non appliqué
+
+Et ce n'est pas enterré dans l'API : la console l'affiche sous « À vérifier avant
+d'arrêter un prix ». Vérifié après l'avoir vu, parce qu'un aveu que l'écran cache
+ne vaut rien.
+
+**Le document dit que la séparation des tâches n'a pas été tenue** —
+`separation_respectee: False` — le même compte ayant chiffré et validé. Le produit
+le déclare au lieu de faire semblant.
+
+### Mon erreur, et ce qu'elle prouve
+
+J'ai envoyé `MOINS_DE_50M` pour le chiffre d'affaires. Le produit a rendu 422 **en
+nommant les valeurs admises** : `MOINS_10M`, `DE_10M_A_50M`, `DE_50M_A_250M`,
+`PLUS_250M`. Il m'a corrigé en une seconde. C'est ce qu'on demande à un refus.
+
+### Un cas de recette qui expirait à minuit
+
+La suite a rendu trois échecs, dans **mes** cas de la veille. `JOUR =
+"2026-09-29"`, écrit en dur : la route refuse un prix fixé dans le passé — « un
+devis déjà émis changerait de prix » —, la fixation rendait 422, `FORMATION`
+retrouvait son absence de prix ferme, et le chiffrage repartait sur la
+qualification pour finir en **404**.
+
+Ils ont donc passé le jour de leur écriture et sont tombés le lendemain. La date
+se calcule désormais.
+
+⚠️ **Et une seconde leçon du même incident.** Deux des trois cas appelaient l'aide
+`_fixer` **sans regarder ce qu'elle rendait**. L'échec est ressorti trois pas plus
+loin, sous la forme « aucun questionnaire pour FORMATION » — un message qui envoie
+chercher exactement là où il n'y a rien. L'aide vérifie maintenant son propre
+succès.
+
+Cherché ailleurs : les deux autres dates écrites en dur dans les cas sont des
+dates d'exercice, pas « aujourd'hui ». Elles ne sont pas fragiles.
+
+### Une réserve sur le fond
+
+L'intervalle vient du barème `2026.1`, dont les valeurs sont encore `A_VALIDER` :
+personne au cabinet ne les a arrêtées. **La mécanique est juste, les montants sont
+illustratifs.** Le barème reste à fixer.
+
+**Non commité** — rien n'a été porté à l'index ni à l'historique.
+
+## 30 septembre 2026 — L'espace de l'adhérente, écran par écran
+
+Cinq écrans, parcourus un à un sur la pile : mon entreprise, mes échéances, mes
+documents, mes rappels, mon mois. Un défaut trouvé, et il est du genre que ce
+chantier connaît bien.
+
+### Le produit ne l'entendait pas
+
+Le dossier de démonstration portait trois demandes de pièces ouvertes, et **les
+trois avaient une réponse de l'adhérente** :
+
+    DP-2026-002 · « Je n'ai pas ce document »
+    DP-2026-009 · « Je n'ai pas ce document »
+    DP-2026-010 · « Je l'aurai la semaine prochaine · annoncée pour le 28/09/2026 »
+
+Le bandeau — **le premier texte qu'elle lit en ouvrant son espace** — annonçait :
+
+    Il manque 3 justificatifs
+    La date prévue est passée : envoyez-les dès que possible, le cabinet vous attend.
+
+Elle avait parlé trois fois. Le modèle porte pourtant sa réponse, et son
+commentaire dit l'intention : « sa dernière réponse, telle que le cabinet la
+lit : **l'adhérent voit qu'elle est arrivée** ». La liste la montrait ; le bandeau
+ne la regardait pas.
+
+⚠️ Une demande répondue **reste ouverte** : le cabinet a toujours besoin de la
+pièce. Mais elle n'attend plus un geste d'elle — elle attend une suite du cabinet,
+qui doit insister, accepter un substitut, ou clore.
+
+**Deux corrections, et aucune ne prétend que le cabinet a agi :**
+
+- `{pieces}` ne compte plus que les demandes **sans réponse**. Le cas mixte, le
+  plus fréquent, annonce donc « il manque 1 justificatif » là où il en annonçait
+  deux ;
+- la **date limite** se lit sur ce qu'elle doit encore envoyer. La lui rappeler
+  sur une pièce qu'elle a dit ne pas avoir la mettait en faute pour rien ;
+- quand tout a reçu une réponse, un texte nouveau au référentiel :
+
+      Vous avez répondu à 3 demandes
+      Le cabinet en prend connaissance et vous dira la suite. Rien à faire de
+      votre côté pour l'instant.
+
+Relu sur la pile après reconstruction : c'est bien ce qu'elle lit, et plus aucune
+injonction à envoyer. Un cas vérifie d'ailleurs l'absence du mot « envoyez ».
+
+### Deux fausses pistes, vérifiées et écartées
+
+- **« Mon mois » montre août le 30 septembre.** Correct : l'en-tête du référentiel
+  le dit, « le mois observé est le mois précédent — c'est sa déclaration que le
+  cabinet prépare ».
+- **`jours = 0` sur toutes les échéances.** Conforme : le champ porte les jours de
+  retard ou les jours restants, et vaut zéro dans les autres états. Son propre
+  commentaire le dit.
+
+Les noter ici a un intérêt : ce sont deux choses que j'ai crues fausses avant de
+lire. **Un doute vérifié coûte dix minutes ; un doute corrigé à tort coûte un
+défaut.**
+
+### Un cas de recette abîmait le jeu qu'il traversait
+
+En parcourant les échéances, aucune carte « à venir » ni « en retard » : les
+dix-huit étaient `PREUVE_ENVOYEE` ou `DEPOSEE`. C'est **mon** UC-69 qui avait fait
+cela : il prenait `prouvables[0]`, la première de la réponse, et avait attaché des
+quittances à des échéances de **novembre**, depuis septembre.
+
+Le produit l'accepte — on peut payer d'avance —, mais le jeu de démonstration s'en
+trouvait appauvri : plus une seule carte à montrer dans le cas principal de cet
+écran. **Un cas de recette qui abîme le jeu qu'il traverse ne le dit à personne.**
+
+Il choisit désormais la plus ancienne, ce qui place tout ce qui est échu avant
+tout ce qui vient.
+
+⚠️ **Et une leçon sur mon propre commentaire.** J'avais d'abord écrit un tri
+comparant l'échéance à « aujourd'hui », en lisant `a_la_date` dans la réponse. Ce
+champ **n'existe pas** : le tri se dégradait en un tri par date, qui donnait le bon
+résultat pour une mauvaise raison, et le commentaire décrivait un code qui
+n'existait pas. Réécrit pour dire ce que le code fait.
+
+### Trois cent quatre-vingt-sept cas sautés, et la suite sortait à zéro
+
+Découvert en relançant la suite après la correction : la base de test locale avait
+disparu — **le répertoire de données lui-même**, pas seulement le serveur. Elle vit
+dans un répertoire temporaire et « se jette », c'est écrit dans l'outil et c'est
+voulu.
+
+Ce qui ne l'est pas, c'est ce que la suite en dit :
+
+    3542 passed, 387 skipped, 4 errors     → exit 0
+
+Trois cent quatre-vingt-sept cas — tout ce qui touche à la persistance, au
+cloisonnement et aux parcours de bout en bout — n'avaient **rien vérifié**. Lu
+vite, « 3542 passed » ressemble à un succès. C'est arrivé **trois fois** dans la
+journée, et j'ai relancé sans m'interroger les deux premières.
+
+La chaîne d'intégration a un garde pour cela, et il est bien écrit : « une
+variable mal nommée, un service PostgreSQL qui démarre trop tard […] dans les
+trois cas la suite reste **verte** en n'ayant rien vérifié ». **En local, rien ne
+prévenait.**
+
+Le garde existe maintenant à sa place, dans `conftest.py` :
+
+    ================= BASE ABSENTE : LA SUITE N'A PAS TOUT VÉRIFIÉ =================
+      387 cas sautés faute de PostgreSQL sur postgresql+psycopg://…
+      Motif : connection refused
+      Démarrer l'instance : eval "$(outils/postgres-local.sh start)"
+
+⚠️ **Il ne fait pas échouer la suite** : sauter est légitime quand on travaille
+sans base, et transformer cela en erreur obligerait à monter une base pour
+vérifier une fonction pure. Il rend l'omission impossible à ne pas voir, ce qui
+est exactement ce qui manquait.
+
+Éprouvé dans les deux sens : bruyant sans base, silencieux avec.
+
+### Ce qui reste, et qui demande votre accord
+
+Le jeu de démonstration ne porte plus d'échéance « à venir » ni « en retard ». Le
+rétablir demande de **retirer des preuves de paiement** en base : c'est une
+suppression de données, et je ne la fais pas sans votre accord. `recaler_la_
+demonstration` n'y suffit pas — il ajoute des accusés, il n'en retire aucun.
+
+**Non commité** — rien n'a été porté à l'index ni à l'historique.
+
+## 29 septembre 2026 (suite 5) — Les gabarits, relus un par un
+
+Demande du cabinet : vérifier le **format des gabarits, pas à pas**. Vingt-quatre
+au total — sept modèles WhatsApp, dix-sept gabarits de courriel — plus le
+document de proforma. Rendus et relus un par un.
+
+### Les sept modèles WhatsApp
+
+Un défaut de forme, qui aurait coûté un cycle de soumission :
+
+    cga_relance_proforma · le corps SE TERMINE par un emplacement
+
+Il finissait sur « {{4}} » seul. La plateforme refuse ces modèles. Le refus
+serait arrivé **des semaines après l'écriture**, dans son vocabulaire à elle, à
+quelqu'un qui n'avait pas écrit le texte — c'est précisément ce que le README du
+dossier redoute pour l'approbation, et que personne n'avait transposé à la forme.
+
+Corrigé, et le lien introduit par une phrase, comme `cga_envoi_proforma` le fait
+déjà : une adresse jetée sur une ligne nue ne dit pas au client ce qu'elle ouvre.
+
+**Trois règles de forme entrent au domaine** — ne pas commencer par un
+emplacement, ne pas finir par un, ne pas en coller deux — avec leurs cas, et une
+contre-épreuve qui vérifie que les sept modèles réels passent encore. ⚠️ **Seules
+les règles dont on est sûr sont vérifiées** : deviner celles de catégorie, de
+longueur ou de bouton ferait refuser des modèles valides, ce qui coûte plus cher
+que de les laisser passer.
+
+### Les dix-sept gabarits de courriel
+
+Rendus avec le contexte de leur appelant, puis relus : **aucun emplacement non
+rempli, aucune double espace, aucun objet vide**. Les montants emploient déjà
+l'espace fine insécable, la même que la vitrine — `75 000 FCFA` se lit pareil des
+deux côtés.
+
+⚠️ **Mon propre contrôle était fautif**, et il a fallu le voir : il signalait
+vingt-sept « espaces avant une ponctuation ». En français, `:` et `;` **prennent**
+une espace avant. Les gabarits étaient corrects ; c'est la sonde qui accusait.
+
+### Le gabarit qui n'existe pas
+
+**Il n'y a pas de document de proforma.** Le code le dit lui-même :
+
+    # Le contenu du document PDF n'est pas encore produit : son empreinte porte
+    # donc ce que le système sait de figé.
+
+La cliente lit une page et clique. Elle ne reçoit aucun document à garder, et la
+page ne porte pas de feuille d'impression. À instruire avec le cabinet.
+
+### Ce que la relecture a fait trouver, et qui est plus grave
+
+En vérifiant ce que la cliente reçoit **après** avoir cliqué, sur la pile :
+
+    avant  : ['Nous avons bien reçu votre demande — dos-…',
+              'Votre proposition PRO-2026-0039 : 75 000 FCFA']
+    après  : les deux mêmes
+
+**Elle engage son entreprise et ne reçoit rien.** La page le dit en toutes
+lettres — « mon accord engage l'entreprise que je représente » — et le domaine le
+confirme : une proforma acceptée **vaut contrat**. Ni le montant accepté, ni la
+date, ni le nom déclaré. Le cabinet, lui, avait tout.
+
+C'est le même défaut que l'accusé de dépôt corrigé la veille, un cran plus loin
+dans le parcours — et un cran plus grave, puisqu'il s'agit d'un engagement.
+
+Un gabarit `proforma.acceptation` part désormais. Relu dans la boîte, sur la
+pile :
+
+    C'est noté, Sylvie NGONO
+    Vous avez accepté la proposition PRO-2026-0040, d'un montant de
+    75 000 FCFA, le 29/09/2026 à 16h08.
+    Cet accord a été donné au nom de Sylvie NGONO, gérante. Conservez ce
+    message : il est la trace de ce que vous avez accepté, et de la date.
+
+⚠️ **IL NE LÈVE JAMAIS.** L'accord EST enregistré et le dossier a suivi : rendre
+une erreur parce qu'un serveur de messagerie n'a pas répondu ferait **perdre une
+signature contractuelle**, pour un accusé. Un cas force la panne du relais et
+vérifie que l'acceptation passe quand même.
+
+⚠️ **Et un piège évité de justesse.** Le premier cas écrit passait au vert en ne
+vérifiant rien : le dossier d'essai partagé ne porte **pas** d'adresse — elle est
+facultative au formulaire public. Il a fallu une cliente joignable pour que le
+cas mesure quelque chose, et le cas « sans adresse » garde désormais l'autre
+bord.
+
+### Ce que cette passe apprend
+
+Un gabarit ne se relit jamais tout seul. Celui qui manquait — l'accusé
+d'acceptation — ne pouvait pas être trouvé en relisant les gabarits **existants** :
+il a fallu suivre la cliente jusqu'à sa boîte, après le geste. **Ce qu'on vérifie,
+ce n'est pas ce que le produit envoie, c'est ce qu'elle reçoit.**
+
+**Non commité** — rien n'a été porté à l'index ni à l'historique.
+
+## 29 septembre 2026 (suite 4) — Les deux parcours qu'on ne jouait plus
+
+Le cahier compte quatre flux de bout en bout. Deux sont joués à chaque passe — le
+parcours M→I et le cahier des cas. Les deux autres, la **saisie comptable** et la
+**paie**, ne l'avaient pas été de la session. Joués : trois défauts, aucun dans le
+produit, tous dans la chaîne qui le vérifie.
+
+### 1. Deux flux sur quatre ne pouvaient pas être pointés sur une pile
+
+`flux_saisie.py` et `flux_social.py` portaient leurs adresses **écrites en dur**
+(`:8010`, `:3011`), quand les deux autres les lisent de l'environnement. Joués sur
+la pile de démonstration, ils rendaient sept étapes rouges d'affilée, toutes sur
+« Connection refused ».
+
+**Un faux rouge ne dit rien du produit et fait douter du cahier.** C'est la même
+faute que le cas UC-69 qui mangeait son terrain, à un autre endroit. Les quatre
+flux lisent désormais les mêmes variables, avec les mêmes valeurs par défaut :
+deux conventions pour une question finissent toujours par diverger.
+
+### 2. Un chemin de brouillon resté dans le dépôt
+
+`flux_social.py` ouvrait ses imports sur `/tmp/cga-pg`, resté d'une mise au point.
+Sur une machine qui n'a pas ce dossier, le flux **ne démarre pas du tout**, et
+rien dans le message ne dit que la cause est une ligne du dépôt. Remplacé par le
+dossier du fichier lui-même.
+
+### 3. Un cas de recette accusait le produit d'un défaut qu'il n'a pas
+
+Étape 6 de la paie : « Valeurs non validées signalées », rouge à 2 lignes sur 9.
+Le cas exigeait que **toutes** les lignes du bulletin soient marquées `A_VALIDER`.
+
+C'était juste quand le référentiel entier l'était. Vérifié ligne à ligne sur la
+pile, puis au référentiel :
+
+    CNPS_PVID_S · CFC_S · CNPS_PVID_P · CNPS_PF · CNPS_AT · CFC_P · FNE  → VALIDE
+    IRPP · TDL (barèmes progressifs)                                     → non validés
+
+**Le produit marque exactement les deux bonnes lignes.** C'est le cas qui avait
+vieilli.
+
+⚠️ **Un drapeau uniforme ne vaut rien.** S'il est vrai partout, il ne dit plus
+lequel des chiffres repose sur une valeur que personne n'a validée, et le
+comptable cesse de le lire. Le cas vérifie donc qu'il **discrimine**, et sur quoi.
+
+⚠️ **L'attente est fermée**, et non « au moins celles-là » : le jour où le cabinet
+validera le barème de l'IRPP, ce cas tombera. C'est voulu — quelqu'un reviendra y
+constater que le produit a cessé d'alerter, au lieu de le découvrir sur une fiche
+de paie. C'est la convention déjà tenue pour la liste des services sans sonde.
+
+Les deux flux passent désormais en entier : **8/8** pour la saisie comptable,
+**15/15** pour la paie.
+
+### Ce que cette passe apprend
+
+Les trois défauts sont dans la chaîne de vérification, pas dans le produit. Un
+outil de contrôle vieillit comme le reste, et il vieillit plus discrètement :
+personne ne relit un cas vert, et un cas rouge qu'on a pris l'habitude de voir
+rouge ne se distingue plus d'une panne réelle.
+
+**Un flux qu'on ne joue pas ne protège rien.** Les deux qui ont dérivé sont
+exactement ceux qui ne tournaient plus.
+
+**Non commité** — rien n'a été porté à l'index ni à l'historique.
+
+## 29 septembre 2026 (suite 3) — Le site vendait ce que le cabinet ne pouvait pas facturer
+
+Reprise du point laissé ouvert : `FORMATION`, `DOMICILIATION` et `PONCTUEL`,
+« invendables par le tunnel ». Confronté au réel plutôt que cru sur parole, le
+défaut s'est révélé plus profond que sa description.
+
+### Ce que la pile a montré, pas à pas
+
+    1. une visiteuse demande une FORMATION depuis le site   → 201
+    2. le dossier entre dans la file du cabinet             → DEPOSEE
+    3. un responsable est désigné                            → AFFECTEE
+    4. le gérant arrête le prix à 75 000 F, motif à l'appui  → 201
+    5. le chargé de clientèle émet la proforma               → 404
+
+        « aucun questionnaire pour le service FORMATION »
+
+**Le cabinet pouvait décider un prix et ne pas pouvoir le facturer.** Le site
+public proposait ces services, une cliente demandait, un responsable était
+mobilisé — et le dossier mourait là, sans que rien ne le signale.
+
+### Trois maillons manquants, et non un
+
+En remontant la chaîne, ce n'était pas « il manque un questionnaire » :
+
+1. **Le chiffrage exigeait une qualification de tous les services.** La
+   qualification existe pour **calculer** un prix que personne ne connaît
+   d'avance ; l'exiger d'un prix déjà arrêté était une règle du sur-étude
+   appliquée à tout.
+2. **`QUALIFIÉE` ne s'atteint que par la qualification**, et le graphe des états
+   n'offrait aucune autre route vers `CHIFFRÉE`. Les faire passer par `QUALIFIÉE`
+   aurait été un mensonge : rien n'a été qualifié.
+3. **`premier_contact` n'avait aucune route.** Le domaine le portait,
+   `enregistrer_un_appel` aussi, et **rien ne les appelait depuis l'extérieur** :
+   le seul chemin vers `EN_CONVERSATION` passait par l'enregistrement d'une
+   qualification.
+
+⚠️ **Le troisième point dépasse largement ces trois services.**
+`premier_echange_le` mesure « la réactivité du cabinet ». Un responsable qui
+appelait son client sans pouvoir le qualifier — parce que le client n'était pas
+prêt, parce qu'il fallait un devis d'abord — laissait le dossier `AFFECTÉE`, et
+**la veille des vingt-quatre heures le réaffectait à un collègue qui rappelait le
+même client**. Le carnet des rappels ne rattrapait rien : les rappels ne naissent
+qu'à la relance, jamais à l'affectation.
+
+### Ce qui a été livré
+
+- **Une route pour le geste qui manquait** : « j'ai joint le client ». Rejouable,
+  elle ne réécrit pas la date du premier échange et refuse un dossier que
+  personne ne tient. Le panneau est à l'écran de la fiche, avec son champ « ce
+  qui a été dit ».
+- **Un prix arrêté par le gérant se chiffre sans qualification.** L'intervalle
+  est réduit à un point : plancher = référence = plafond. Le responsable garde le
+  droit de s'en écarter, et le motif reste exigé comme ailleurs.
+- **Une arête de plus au graphe** : `EN_CONVERSATION → CHIFFRÉE`. Le tableau des
+  transitions pose lui-même la condition — « chaque arête suppose quelque chose
+  qui l'emprunte » —, et c'est le prix ferme qui l'emprunte.
+- **Un rappel clos fait avancer son dossier**, ce qu'il ne faisait pas. Sans
+  lever : le rappel EST clos, et refuser la requête ferait rappeler le client une
+  seconde fois.
+
+⚠️ **LA GARDE QUI COMPTE, ET QUI EST TESTÉE EN PREMIER.** Un tarif `A_VALIDER` —
+ceux de la maquette de la vitrine, que personne au cabinet n'a fixés — ne passe
+**pas** par ce chemin. Sans cette garde, on aurait encaissé un prix que nul
+n'avait décidé, ce que le catalogue s'interdit explicitement depuis qu'il porte
+`StatutTarif`. Le premier cas de la classe vérifie le refus **avant** que le
+second ne vérifie la vente.
+
+### Relu sur la pile, de bout en bout
+
+    ✓ 1. Une visiteuse demande une formation            HTTP 201
+    ✓ 2. Le dossier entre dans la file                  dos-… · DEPOSEE
+    ✓ 3. Un responsable est désigné                     HTTP 200
+    ✓ 4. Le responsable déclare avoir joint la cliente  état EN_CONVERSATION
+    ✓ 5. Le gérant arrête le prix                       HTTP 201
+    ✓ 6. Le chiffrage constate le prix arrêté           75000 · 75000 · 75000
+    ✓ 7. La proforma est émise                          PRO-2026-0037 · 75000 FCFA
+    ✓ 8. Elle est transmise à la cliente                état TRANSMISE
+
+`DOMICILIATION` passe de même, à 160 000 F.
+
+### Deux gardes vérifiées en direct, parce qu'elles protègent la création
+
+Ce correctif ouvre un chemin ; il fallait s'assurer qu'il n'en ouvrait pas
+d'autres. Le gérant peut-il fixer un prix sur un service **sur étude** et
+court-circuiter ainsi la qualification d'une création ?
+
+    fixer un prix sur CREATION   → HTTP 422
+    fixer un prix sur PONCTUEL   → HTTP 422
+    « se chiffre sur étude, dossier par dossier : un prix unique n'y a pas de sens »
+
+Non. Le domaine le refuse, et la porte est close des deux côtés : sans prix
+ferme, `_prix_ferme_du_service` rend `None` et l'on retombe sur la qualification.
+
+### Une garantie du domaine a changé d'étage, et le cas le dit
+
+`test_on_ne_chiffre_pas_avant_d_avoir_qualifie` est tombé, et il avait raison
+jusqu'ici. L'invariant « on ne chiffre pas avant d'avoir qualifié » était vrai
+tant que **tout** prix se calculait.
+
+⚠️ **La garde n'a pas disparu, elle a changé d'étage.** Le dossier ne connaît pas
+le catalogue, et il n'a pas à le connaître : savoir si un prix a une base est la
+question de celui qui tient les tarifs. Le cas a été réécrit pour dire ce qui est
+désormais garanti, et **où vit l'autre garde**. Une borne subsiste au domaine, et
+c'est la vraie : on ne chiffre pas un dossier `DÉPOSÉE` ou `AFFECTÉE` — émettre un
+prix sur un dossier que personne n'a ouvert, c'est envoyer une facture à
+quelqu'un qui a posé une question.
+
+### Une note de ma liste était fausse
+
+J'avais inscrit « une pièce du mobile arrive en `INDETERMINE` » parmi les
+frictions à corriger. Vérifié : le mobile envoie bien `canal: MOBILE`, et
+`INDETERMINE` est le **type** de pièce, dont le défaut est délibéré et
+documenté : « avant lecture, on ne sait pas ce qu'on a reçu, et exiger le montant
+d'une facture pour l'accepter ferait renoncer la moitié des adhérents ». Ce
+n'était pas un défaut. La note est retirée.
+
+### Ce qui reste invendable, et pourquoi c'est juste
+
+`PONCTUEL` demeure refusé. Son catalogue le dit : « une mission délimitée,
+chiffrée après examen ». Un prix unique au catalogue n'aurait aucun sens pour une
+mission qui varie à chaque dossier. Il lui faut **soit** un questionnaire au
+référentiel, **soit** un prix fixé dossier par dossier, qui n'existe pas encore.
+**C'est une décision du cabinet, pas la mienne.**
+
+**Non commité** — rien n'a été porté à l'index ni à l'historique.
+
+## 29 septembre 2026 (suite 2) — Le volet WhatsApp, tel qu'il est vraiment
+
+Demande du cabinet : lancer la pile en direct pour validation, et dire si le
+volet WhatsApp est complet. La pile est ouverte sur quatre onglets. Pour la
+seconde question, la réponse honnête est **non**, et j'ai trouvé pourquoi.
+
+### Ce qui marchait, et ce qui ne marchait plus après un rechargement
+
+Le bouton « Envoyer sur WhatsApp » de la proforma existait, avec sa garde de
+consentement et un message repris mot pour mot du modèle soumis à la
+plateforme. Mais le lien d'acceptation n'était rendu **qu'à l'émission**, et
+`EmissionProforma` le gardait dans l'état de son composant.
+
+Vérifié sur la pile, sur les **sept dossiers réels en `PROFORMA_EMISE`** :
+aucun n'affichait le bouton. L'écran disait même la chose en toutes lettres :
+
+    Le lien d'acceptation a été remis à l'émission et ne se réaffiche pas.
+
+Conséquence : le responsable qui rechargeait la page, fermait l'onglet ou
+revenait le lendemain n'avait plus d'autre voie que le courriel — y compris pour
+une cliente qui avait expressément autorisé la messagerie et n'avait donné que
+son numéro.
+
+⚠️ **Le serveur savait pourtant recomposer ce lien.** Il le faisait déjà pour le
+courriel, et `POST /transmission` le rendait depuis le 28 septembre. La console
+**jetait la réponse** : `await appeler(...)` sans rien en lire.
+
+### La correction, et pourquoi pas la plus courte
+
+Une route de lecture, `GET /acquisition/proformas/{numero}/lien`, sans aucun
+effet de bord.
+
+**Ce qui a été écarté, et pourquoi.**
+
+- *Mettre le lien sur la fiche du dossier.* Elle n'exige que `LIRE_PROSPECT`, et
+  son en-tête dit depuis le pas 78 : « jamais le lien d'acceptation ». Ce lien
+  est un **porteur** : qui l'a, peut accepter à la place du client. L'élargir à
+  tous les lecteurs de prospects aurait été une extension silencieuse de ce que
+  le sceau protège.
+- *Se servir de `POST /transmission`, qui rend déjà le lien.* Elle **date
+  l'envoi**, et c'est cette date qui arme la relance : la rappeler pour relire un
+  lien remettrait le compteur à zéro à chaque consultation, et le client ne
+  serait jamais relancé. Elle obligerait de plus à déclarer « j'ai envoyé le
+  lien » **avant** de l'avoir.
+
+Une lecture est une lecture. Elle ne note rien, et un cas le vérifie en la
+rappelant trois fois de suite.
+
+Relu à l'écran après reconstruction, sur les mêmes sept dossiers : quatre
+affichent « le client ne l'a pas autorisé à sa demande », un affiche le bouton.
+Son lien ouvre la vraie page : « Proposition PRO-2026-0027 · Création
+d'entreprise · 250 000 FCFA · Lien valable jusqu'au 13 octobre 2026 ».
+
+### Deux fonctions exportées et jamais éprouvées
+
+`messageWhatsapp` et `numeroWhatsapp` n'avaient aucun cas. Or `numeroWhatsapp`
+est exactement ce qui casse en silence : `wa.me` refuse le `+`, les espaces et le
+zéro initial, et un numéro mal formé **n'échoue pas** — il ouvre une conversation
+avec le mauvais correspondant, ou avec personne. Le responsable croit avoir
+envoyé, le client ne reçoit rien. Sept cas, dont le numéro étranger qu'on ne doit
+pas préfixer de 237.
+
+### L'état du volet WhatsApp, sans fard
+
+**Ce qui marche aujourd'hui, sans aucun compte à ouvrir** — tout passe par
+`wa.me`, c'est-à-dire par l'application du correspondant :
+
+- le visiteur écrit au cabinet depuis le pied de page, le bandeau d'appel, la
+  page de contact et sa proposition ;
+- les deux formulaires publics composent un message **et** déposent la demande en
+  base au même clic ;
+- l'estimateur envoie son devis ;
+- le cabinet renvoie une proforma, message identique au modèle, garde de
+  consentement, et désormais **après un rechargement** ;
+- une pièce reçue par WhatsApp s'enregistre au dossier, canal compris ;
+- le domaine tient le consentement, sa révocation, le repli de canal et
+  `joignable_sur_whatsapp`.
+
+**Ce qui ne marche pas, et ne peut pas venir de moi :**
+
+- **aucun envoi automatique.** `canaux.yaml` porte `WHATSAPP: actif: false`, avec
+  son motif écrit : « compte de la plateforme d'envoi non ouvert, aucun modèle
+  approuvé ». Il n'existe aucun adaptateur d'envoi, et c'est cohérent ;
+- les **sept modèles sont rédigés** et portent `statut: EN_ATTENTE` : ils
+  attendent leur soumission à Meta ;
+- `whatsapp_disponible` est **écrit en dur à faux** dans les réglages de rappel
+  de l'adhérent, avec le commentaire qui dit que c'est une donnée et non un
+  oubli ;
+- donc : aucune relance, aucune proforma, aucun rappel d'échéance **automatique**
+  par WhatsApp. Tout geste WhatsApp part d'un humain.
+
+Vérifié en direct, deux invariants qui tiennent :
+
+    demande avec consentement, canal préféré WHATSAPP → canal de rappel : APPEL
+    demande SANS consentement, canal préféré WHATSAPP → 422
+
+Le premier est le plus important : le produit **ne promet pas un canal qu'il ne
+peut pas tenir**. Le référentiel dit le canal inactif, le repli s'applique, et le
+visiteur lit ce qui se passera réellement.
+
+**Ce qui débloque le reste** : ouvrir le compte WhatsApp Business de la
+plateforme et faire approuver les sept modèles. Le jour où c'est fait, `actif:
+true` au référentiel — « et rien d'autre ne bouge dans le système », dit le
+fichier. Il reste à écrire l'adaptateur d'envoi, qui n'a pas de sens avant.
+
+**Non commité** — rien n'a été porté à l'index ni à l'historique.
+
+## 29 septembre 2026 (suite) — Vérification de fond en comble
+
+Demande du cabinet : « est-ce que tu peux déjà checker le système de fond en
+fond, c'est bon déjà ? ». Passe complète sur les cinq dépôts, la pile allumée et
+la chaîne d'intégration. Trois défauts trouvés, deux corrigés, un à décider.
+
+### 1. Le formulaire public disait « demarches.CREATION » au cabinet
+
+Trouvé par le parcours navigateur de la vitrine, qui refuse toute erreur de
+console sur une page publique :
+
+    MISSING_MESSAGE: vitrine.formulaire.demarches.CREATION (fr)
+
+**Défaut de mon unification du vocabulaire du 27 septembre.** Les codes du
+catalogue sont en majuscules, les clés de traduction en minuscules. Quatre
+endroits composaient la clé à la main ; trois minusculaient, **un l'avait
+oublié** — et les deux se trouvaient dans le même fichier, à quarante lignes
+d'écart.
+
+Ce que le visiteur en voyait : le message WhatsApp préparé pour le cabinet
+portait « Démarche : demarches.CREATION » au lieu du libellé. Un message que la
+cliente envoie, et que le cabinet reçoit.
+
+Corrigé là où on ne peut pas l'oublier : `cleDeLaDemarche(code)` dans la
+bibliothèque partagée, et les quatre appels y passent. Relu dans le navigateur
+après reconstruction :
+
+    Votre démarche : Création d'entreprise
+
+### 2. Ce qui a laissé passer ce défaut compte autant que le défaut
+
+Le parcours navigateur l'a trouvé en une seconde. **Mais les parcours navigateur
+ne tournent pas en intégration continue** : ils demandent une pile allumée, et la
+chaîne n'en monte pas. Elle vérifie les types, le lint, les tests unitaires et la
+construction, et elle était verte pendant les deux jours où la vitrine criait
+dans la console de chaque visiteur.
+
+⚠️ **Une chaîne verte ne prouve que ce qu'elle exécute.** C'est la même leçon que
+la veille sur la salutation vide, à un étage au-dessus : là c'était la suite qui
+ne mesurait pas ; ici c'est la chaîne qui ne lance pas la mesure.
+
+Fermé pour cette classe de défaut par un cas qui tourne, lui, à chaque
+intégration : il parcourt le catalogue des démarches et exige un libellé dans les
+deux langues, plus une contre-épreuve sur les libellés orphelins. Aucune pile
+nécessaire, seulement les fichiers de traduction. Éprouvé en retirant une clé :
+il tombe et nomme la démarche.
+
+**Il ne remplace pas le parcours navigateur.** Brancher les parcours réels sur la
+chaîne demande d'y monter la pile, ce qui engage des minutes d'intégration et un
+couplage entre dépôts. **C'est une décision du cabinet, pas la mienne** ; je la
+pose telle quelle.
+
+### 3. La chaîne mobile serait tombée sur le formateur
+
+`dart format --set-exit-if-changed` rendait **1** sur huit fichiers, dont quatre
+que j'avais touchés cette semaine. La chaîne mobile aurait refusé la livraison
+sans que rien d'autre ne le signale — `flutter analyze` et les 265 cas passaient.
+Formaté ; l'analyse et les tests repassent.
+
+### Ce qui a été éprouvé, et ce que ça donne
+
+| Couche | Contrôle | Résultat |
+|---|---|---|
+| Serveur | 3 912 cas, ruff, `alembic check` | vert, aucune dérive modèle/migrations |
+| Serveur | avancement, couverture et contrat des écrans | 100 %, 232/236 routes, 303/304 appels |
+| Console | tsc, lint, 398 cas, construction | vert |
+| Console | 14 parcours navigateur sur la pile | 14/14 |
+| Vitrine | tsc, lint, 90 cas, construction | vert |
+| Vitrine | 10 parcours navigateur sur la pile | 10/10 après correction |
+| Mobile | format, analyse, 265 cas | vert après correction |
+| Bout en bout | flux M→I, 35 étapes | complet |
+| Bout en bout | cahier de recette | 98/98 |
+
+**Le cloisonnement, éprouvé et non supposé.** Avec une session valide du cabinet
+et un en-tête `Host` pointant sur un locataire réel du répertoire, l'API rend
+**401** : la session ne franchit pas la frontière. Un sous-domaine inexistant rend
+**404**, le même code qu'un locataire suspendu, pour qu'énumérer les sous-domaines
+n'apprenne rien.
+
+### Ce qui reste, et que je ne décide pas
+
+- **Les parcours navigateur hors de la chaîne** (ci-dessus). Le plus important.
+- **Trois services du catalogue restent invendables par le tunnel** : `FORMATION`,
+  `DOMICILIATION`, `PONCTUEL` n'ont pas de questionnaire au référentiel. Le
+  formulaire les propose, et une demande ainsi déposée ne peut pas être chiffrée.
+- **La patente à J+1** : une société créée aujourd'hui sera en retard d'un jour
+  demain. Exact au sens du texte ; le cabinet voudra peut-être un délai
+  d'installation, qui se lira au référentiel le jour où il y sera écrit.
+- **`tenue-comptable → ADHESION`** reste mon interprétation, signalée au README du
+  référentiel pour relecture du cabinet.
+- **Le jeu de démonstration s'est chargé** : 17 locataires, 43 entreprises, 55
+  dossiers, accumulés par les rejeux. Le nettoyer demande votre accord.
+- **Quatre routes ne sont appelées par aucun écran**, dont deux légitimement : le
+  rappel du prestataire de paiement et la simulation de règlement. Les deux autres
+  sont `GET /collecte/pieces/{identifiant}` et `GET /comptabilite/plan-comptable`.
+
+**Non commité** — rien n'a été porté à l'index ni à l'historique.
+
+## 29 septembre 2026 — Le monitoring mentait dans les deux sens
+
+Deux corrections sur l'écran d'exploitation, qui se répondent : il déclarait sains
+trois services qu'il n'interrogeait pas, et il déclarait en difficulté une
+plateforme qui n'avait pas failli une seule fois.
+
+### 1. Trois services sur quatorze n'étaient pas sondés
+
+La Clôture, la Création d'entreprise et le Social se disaient `SANS_SONDE`. Le
+registre était honnête — il disait qu'il ne savait pas —, mais personne ne savait
+non plus.
+
+La décision de ne pas leur en donner était écrite, et son motif était bon :
+
+> « Leur inventer une sonde qui relit la ressource d'un autre créerait deux
+> vérités sur une même question. »
+
+**Elle est révisée, pour une raison précise : ces sondes ne posent pas la question
+du Référentiel.** La sienne demande « le fichier se charge-t-il, et porte-t-il
+quelque chose ». Les leurs demandent « porte-t-il les **valeurs nommées** sans
+lesquelles je ne produis plus rien ». Un référentiel de soixante paramètres auquel
+manque `CNPS_PLAFOND_MENSUEL` répond oui à la première et non à la seconde. Ce
+n'est pas deux vérités sur une question, c'est une vérité sur une question que
+personne ne posait.
+
+**Et c'est là que ça compte : les trois contextes se rabattent en silence.**
+
+- `_constater_le_capital` rend un constat **non bloquant** quand le capital
+  minimum manque au référentiel. Bon choix au guichet — une ligne absente d'un
+  YAML ne doit pas empêcher d'instruire tous les dossiers de SARL. Revers : le
+  capital n'est plus comparé au minimum légal, et le dossier part au greffe.
+- `_abattement_cga` rend `None` et une phrase jointe au dossier. L'explication vit
+  donc **dans le dossier**, lue une fois par la personne qui traite celui-là. Si le
+  taux manque, chaque adhérent paie l'impôt plein, chacun avec sa petite phrase.
+  **L'abattement est la seule chose que l'adhésion achète.**
+- Et un piège dans l'autre sens : un plafond d'abattement absent vaut `0`, et le
+  code ne plafonne que si le plafond est positif. Un plafond absent **supprime
+  donc le plafonnement**. Le référentiel ne distingue pas « la loi ne plafonne
+  pas » de « personne n'a écrit la ligne » ; la sonde le dit, en `SUSPECT`, parce
+  que l'explication innocente existe.
+
+⚠️ **Une sonde qui se tait toujours est verte sur une installation cassée.** Les
+trois sont donc éprouvées **deux fois** : sur le référentiel réel, où elles
+doivent se taire, et sur un référentiel amputé de la seule valeur qui les
+concerne, où elles doivent parler **et nommer ce qui manque**. Seize cas.
+
+Une contre-épreuve accompagne la Clôture : `SEUIL_SYSTEME_NORMAL` absent ne doit
+**pas** alarmer. Son absence rend le Système Normal, qui est le régime de droit
+commun ; alarmer pour un manque sans conséquence est le plus sûr moyen
+d'apprendre aux exploitants à ne plus lire ces alertes.
+
+Sur la pile, les quatorze répondent, et le registre coûte **5 ms**.
+
+### 2. Un panneau rouge en permanence, pour zéro panne
+
+Mesuré sur la pile de démonstration après une recette complète :
+
+    requêtes 454 · 2xx 322 · 4xx 132 · 5xx 0
+    taux d'erreur affiché : 29,1 %   (seuil d'alerte de la console : 2 %)
+
+**Zéro panne, et un panneau rouge.** Or ce produit refuse par métier : 403 pour un
+comptable écarté de l'acquisition, 409 pour un dépôt aux pièces incomplètes, 422
+pour un prix hors intervalle sans motif. Ce sont des succès du produit, comptés
+comme ses échecs — et nos propres cas de recette les exigent.
+
+Là encore une décision écrite : « un 404 isolé est normal, un pic de 404 est un
+symptôme ; les séparer perdrait le second pour épargner le premier ».
+
+⚠️ **Elle était optimiste sur un point : un taux global ne détecte pas un PIC, il
+détecte un NIVEAU.** Fusionner les deux ne donnait donc pas le signal qu'on croyait
+acheter ; cela rendait seulement le seuil inutilisable.
+
+Deux taux désormais, et `par_statut` reste à côté :
+
+- **erreurs (5xx)** — ce que la plateforme a raté. Seuil d'alerte à 2 %, qui veut
+  enfin dire quelque chose.
+- **refus (4xx)** — ce qu'elle a refusé, **sans ton d'alerte et délibérément** : il
+  n'existe pas de taux de refus « normal », il dépend entièrement de ce que les
+  appelants demandent. Lui donner un seuil reviendrait à réinventer le panneau
+  rouge permanent qu'on vient de retirer.
+
+Relu à l'écran, après cinq refus délibérés :
+
+    0.0 % erreurs (5xx)   ·   83.3 % refus (4xx)   ·   panneau au vert
+
+### 3. Un cas de recette qui mangeait son propre terrain
+
+Trouvé en régénérant le cahier : 97/98, alors que le registre venait de rendre
+98/98 une minute plus tôt. UC-69, « envoyer la preuve qu'il a déjà payé », rendait
+« aucune échéance à régler ».
+
+Ce n'était pas le produit. Le cas n'acceptait que les échéances `EN_RETARD` ou
+`A_VENIR`, et il en **règle une à chaque exécution**. Au bout de quatorze passages
+sur la même pile, il ne restait plus rien : 14 cartes en `PREUVE_ENVOYEE`, 4 en
+`DEPOSEE`, et un cas rouge pour un produit qui n'avait rien fait de mal.
+
+⚠️ **Le filtre était aussi plus étroit que le produit.** Vérifié sur la pile avant
+de toucher au cas : une quittance **neuve** sur une échéance déjà prouvée rend
+**201**. C'est juste — l'adhérente qui a envoyé la mauvaise quittance doit pouvoir
+envoyer la bonne. Le 409 documenté porte sur **la même pièce** rejouée, pas sur
+l'échéance.
+
+Le cas écarte désormais `DEPOSEE`, et rien d'autre ; il préfère une échéance non
+réglée quand il en reste une, et son constat dit lequel des deux scénarios il a
+joué. Trois exécutions d'affilée, trois fois vert.
+
+**Un cas de recette qui consomme un stock fini est un faux négatif à retardement**,
+et il se déclenche le jour où l'on a le plus besoin de croire le cahier.
+
+### Ce que cette passe apprend
+
+Deux décisions anciennes ont été révisées, et aucune n'était sotte : l'une évitait
+une duplication, l'autre voulait garder un signal. Toutes deux avaient été prises
+avant que le produit n'ait quatorze contextes et ne refuse par métier un appel sur
+trois. **Une décision juste se démode ; ce qui la rend fausse, c'est le temps, pas
+la bêtise de qui l'a prise.** Les deux motifs d'origine sont recopiés dans le code
+à côté de leur révision, pour que le prochain qui passe sache ce qui a changé.
+
+**Livré :** trois sondes, seize cas qui les éprouvent par amputation, deux taux
+distincts, console à jour, un cas de recette qui ne s'épuise plus, 98/98 au
+cahier, 3 912 cas au vert.
+
+**Non commité** — rien n'a été porté à l'index ni à l'historique.
+
+## 28 septembre 2026 (suite 4) — Trois messages faux, et la suite qui les laissait passer
+
+Passe de corrections demandée en bloc, après la recette du parcours de création.
+Trois défauts, tous **visibles par la cliente**, tous invisibles à une suite de
+3 882 cas restée verte.
+
+### 1. La patente réclamée à une société qui n'existait pas
+
+Le dernier écran de la recette, le sien, affichait :
+
+    Contribution des patentes — En retard de 212 jours
+
+Sa société avait été immatriculée le jour même. L'échéance d'une obligation
+annuelle civile se calculait sur la seule année de fin de période : la patente
+se règle fin février, donc fin février, quelle que soit la date de naissance de
+l'entreprise.
+
+**Ce produit s'interdit de tranquilliser à tort. Alarmer à tort est la même
+faute retournée** — et celle-ci accueille la cliente à sa première connexion, le
+seul moment où elle décide si cet espace lui dit vrai.
+
+**Ce qui a été écarté :** fabriquer un délai. Le référentiel ne dit pas combien
+de temps une société créée en cours d'année a pour s'acquitter de sa patente, et
+écrire « deux mois » ou « trente jours » serait ranger une règle fiscale dans du
+code, sans texte derrière.
+
+**Ce qui a été retenu :** une échéance ne précède jamais le début de la période
+qu'elle couvre. Elle est ramenée au premier jour où l'obligation peut exister.
+Elle est **due**, elle n'est pas **en retard**. Une société installée depuis 2020
+garde sa date statutaire au 28 février, au jour près — un cas le vérifie.
+
+Relu sur la pile de démonstration, sur le dossier réel :
+
+    "echeance": "2026-09-28", "en_retard": false, "jours_restants": 0
+
+**Reste à instruire :** à J+1, elle sera en retard d'un jour. C'est exact au
+sens du texte — la patente est un droit d'exercer, payé d'avance — mais le
+cabinet voudra peut-être un délai d'installation. Il se lira au référentiel le
+jour où il y sera écrit, pas avant.
+
+### 2. L'accusé de dépôt, qui n'existait pas
+
+Compté depuis la boîte de la cliente, le parcours entier lui envoyait **deux**
+messages : sa proposition commerciale, puis son accès. Le premier arrive après
+l'échange avec l'expert, des jours après son dépôt.
+
+Entre les deux, rien. Elle quittait la page sur « un responsable vous
+recontacte » et n'avait plus aucune trace de son geste : ni référence, ni
+confirmation, rien à relire. C'est le silence le plus long du parcours, et celui
+où elle doute le plus — au point de redéposer, ce que l'anti-doublon rattrape, ou
+de renoncer, ce que rien ne rattrape.
+
+Un second abonné se branche donc sur `DemandeDéposée`, à côté de l'affectation.
+Les deux ne se commandent pas : **l'accusé ne nomme personne**, précisément pour
+partir même quand l'annuaire n'a trouvé aucun responsable. C'est la veille qui
+remonte l'absence, pas le silence fait à la cliente.
+
+Il est idempotent — `accuse_de_depot_le` le porte — et il **ne lève pas** : une
+demande sans adresse n'est pas une panne, c'est une cliente qu'on rappellera, ce
+qu'elle a demandé.
+
+**Le piège, et il est gros.** Il y a un objet `Consentement` sur la demande, il
+porte `vaut_maintenant`, et le brancher ici ferait sérieux. Ce serait faux : ce
+consentement est celui de **WhatsApp** — champ `consentement_whatsapp`, version
+`consentement-whatsapp-v1` — et il est décoché par défaut. S'y adosser aurait
+privé d'accusé la grande majorité des clientes, celles qui ont pourtant écrit
+leur adresse dans le formulaire. Ce qui autorise ce message, c'est qu'elle a
+donné cette adresse, à l'instant, dans ce formulaire-là. Un cas le dit, et dit
+pourquoi.
+
+**Aucun délai n'est annoncé.** Le référentiel porte les délais de veille — ce
+qu'on se donne avant de s'alarmer — et non un engagement pris au client. Écrire
+« sous 24 heures » aurait fabriqué une promesse que personne n'a signée, et la
+première demande déposée un vendredi soir l'aurait démentie.
+
+Relu dans la boîte, sur la pile :
+
+    Objet : Nous avons bien reçu votre demande — dos-c793bff8c8fc4db1
+    Bonjour Sylvie NGONO
+    Votre demande concernant Création d'entreprise nous est bien parvenue.
+
+Huit tours de relais plus tard : toujours un seul message.
+
+### 3. « Bonjour  », suivi d'une demande d'argent
+
+C'est en relisant cette boîte qu'un autre message s'est montré — un rappel
+d'échéance réel, parti vers une adhérente :
+
+    Bonjour
+
+    Votre échéance Patente est à régler avant le 28/09/2026.
+
+Rien après « Bonjour », et une espace en trop.
+
+**C'est une conséquence de ma propre correction de la veille.** `Compte.prenom` a
+été relâché à `""` pour laisser entrer une fondatrice dont le formulaire public ne
+porte qu'un champ de nom. La correction était juste. J'avais même écrit, dans le
+modèle : « ce qui AFFICHE ce champ doit donc composer proprement ». Je ne l'avais
+appliqué qu'aux deux messages écrits le même jour. **Douze autres** composaient
+leur salutation sur `compte.prenom` brut.
+
+**La suite est restée verte tout du long.** Elle ne mesurait pas la salutation.
+
+Corrigé là où on ne peut pas l'oublier : `Compte.appellation` — « ce qu'on écrit
+après Bonjour, jamais vide » — et les douze appelants y passent. Un treizième
+site fabriquait un prénom en coupant le nom au premier espace ; il porte
+désormais l'appellation, parce que l'étiquette du formulaire public dit « Nom et
+prénom », **dans cet ordre**, et que la coupe rendait donc le nom de famille.
+
+Deux gardes plutôt qu'une : l'une sur le modèle, l'autre qui **lit le code
+source** et refuse tout contexte de courriel remplissant `prenom` autrement que
+par `appellation` — y compris `compte.prenom or compte.nom`, qui rend pourtant le
+bon résultat mais qu'il faut penser à écrire. La garde a été éprouvée en
+réintroduisant le défaut : elle tombe, et nomme le fichier et la ligne.
+
+Relu sur la pile, sur le compte même qui produisait « Bonjour  » :
+
+    Bonjour Sylvie MBIDA
+
+### Ce que cette passe apprend
+
+Les trois défauts sont du même genre : **le produit parlait, et disait faux**.
+Une dette réclamée avant la naissance, un silence là où il fallait un accusé,
+une salutation vide devant une demande d'argent. Aucun n'aurait fait tomber un
+test ; tous les trois se voient en dix secondes dans une boîte aux lettres.
+
+Une suite verte ne prouve que ce qu'elle mesure. Les trois cas ajoutés mesurent
+désormais ce que la cliente lit, et non ce que le code renvoie.
+
+### Ce qui a été mis sous surveillance
+
+Le cahier de recette passe de 90 à **94 cas** (UC-91 à UC-94), et le flux M→I de
+33 à **35 étapes** : l'accusé y est lu dans la boîte de la cliente, avec sa
+référence, et son échéancier est refusé s'il porte une seule ligne antérieure à
+la naissance de sa société.
+
+    ✓  4. Elle reçoit l'accusé de sa demande
+           « Nous avons bien reçu votre demande — dos-a8adac4cff4943c6 »
+    ✓ 32. Aucune échéance n'est antérieure à sa société
+           aucune dette d'avant sa naissance
+
+Au passage, une entrée de ce journal — « 27 septembre (suite 12) » — s'était
+glissée au-dessus de celles du 28. Remise à sa place.
+
+**Livré :** 3 894 cas au vert (3 882 au départ), 94/94 au cahier de recette,
+flux M→I complet en 35 étapes, API reconstruite et rejouée sur la pile de
+démonstration, les trois corrections relues dans la boîte réelle.
+
+**Non commité** — rien n'a été porté à l'index ni à l'historique.
+
+## 28 septembre 2026 (suite 3) — Elle entre dans son espace
+
+Le parcours va désormais **du formulaire du site à son espace adhérent**, et je
+l'ai suivi dans un vrai navigateur jusqu'au bout.
+
+```
+2. après soumission : /connexion?defini=1
+3. après connexion  : /mon-espace
+   écran            : SM | Sylvie MBIDA B346 | Espace adhérent
+```
+
+Elle y voit **son** entreprise : SYLVIE COUTURE SARL, NIU MB3465F0011Q, régime
+réel, CDI, assujettie à la TVA, « adhésion au centre agréé : en cours ». Ses
+échéances, le dépôt d'un justificatif, ses envois.
+
+**Flux M→I : 33 étapes, complet.**
+
+### Trois défauts trouvés en y arrivant
+
+**1. Un prénom exigé que le produit ne connaît pas.** `Compte.prenom` imposait au
+moins un caractère. Or le formulaire public ne porte qu'UN champ de nom, la
+demande de contact le conserve entier, et le dossier de formalité fait de même —
+`Fondateur.prenom` tolère le vide depuis toujours.
+
+L'ouverture de l'accès tombait donc **en quarantaine après dix tentatives**, sur
+« String should have at least 1 character ». Sa société était immatriculée, au
+portefeuille, et elle n'avait aucun chemin vers son espace — l'échec vivant dans
+une colonne de la boîte d'envoi, que personne ne lit.
+
+Les deux remèdes possibles étaient pires : couper le nom au premier espace pour
+en tirer un prénom — l'étiquette du formulaire dit « Nom et prénom », dans cet
+ordre —, ou recopier le nom dans ce champ, c'est-à-dire ranger un faux en base.
+**Le produit préfère ne pas savoir.** Le champ accepte le vide, et une propriété
+unique, `nom_affiche`, compose le nom sans laisser d'espace en tête — trois
+f-strings la remplacent, qui auraient rendu «  MBIDA » en première ligne de toute
+liste triée.
+
+**2. Un message faux.** Le courriel réemployait `compte.activation`, qui ouvre sur
+« Votre souscription **X** est encaissée ». Une fondatrice n'a pas souscrit :
+elle a fait immatriculer sa société, et son accès s'ouvre des semaines après son
+paiement. La référence n'existant pas, la phrase sortait en outre avec une double
+espace.
+
+Un gabarit à part, `compte.activation_creation` : « Votre société SYLVIE COUTURE
+SARL est immatriculée ». **Ce n'est pas la duplication que le catalogue
+interdit** — celle-ci vise le même message écrit deux fois ; ici ce sont deux
+événements différents. Le banc l'a d'ailleurs exigé : il refuse un gabarit sans
+contexte de référence recopié de son site d'appel.
+
+**3. Mon propre flux se trompait de titre.** Il cherchait « accès » dans l'objet
+du courriel. L'objet a changé, et le flux s'est mis à dire qu'aucun courriel
+n'arrivait alors qu'il était là, sous un autre nom. Il le reconnaît maintenant à
+son **lien d'activation** — ce qui ne changera pas.
+
+### Et une chose qui l'alarmerait à tort
+
+Sur son écran, première ligne de ses échéances :
+
+> **Contribution des patentes — En retard de 212 jours**
+
+Sa société a été immatriculée **aujourd'hui**. 212 jours avant le 28 septembre
+ramènent à fin février : l'échéancier calcule la patente sur l'année civile, sans
+tenir compte de la date de création. Or la patente est un droit d'exercer payé
+d'avance, et une entreprise qui n'existait pas en février ne devait rien.
+
+Le produit s'interdit de tranquilliser à tort ; alarmer à tort est la même faute
+retournée. À instruire — `generer_echeancier` reçoit bien l'entreprise, donc sa
+date de création.
+
+---
+
+## 28 septembre 2026 (suite 2) — La proforma par WhatsApp, et une adresse en double
+
+Demande du cabinet : que la proforma parte aussi par WhatsApp, à côté du
+courriel.
+
+**Elle partait déjà.** La console porte un bouton « Envoyer sur WhatsApp » avec
+un message pré-rempli, conditionné au **consentement** de la cliente — « le
+client ne l'a pas autorisé à sa demande » quand il manque. Vérifié dans un vrai
+navigateur, en émettant depuis l'écran :
+
+```
+Bonjour Voie WhatsApp 57ED, votre proforma n° PRO-2026-0029 est prête,
+pour un montant de 250 000 FCFA.
+Vous pouvez la consulter ici : http://localhost:3101/fr/proforma/PRO-2026-0029?v=1&e=…&s=…
+Répondez à ce message si vous souhaitez en discuter avant de valider.
+```
+
+Destinataire `237675153025`, et le courriel était parti en parallèle.
+
+### Mais l'adresse existait en deux exemplaires
+
+La console **recomposait** l'adresse à partir du sceau, de la version et de
+l'expiration. Le commentaire l'avouait : « même adresse que celle que le serveur
+met dans le courriel ». Deux recettes pour une seule adresse.
+
+Elles avaient **déjà divergé une fois** : le lien partait sur le domaine de
+production au lieu de la vitrine, et la cliente recevait un lien vers un site où
+sa proforma n'existe pas. Le courriel, lui, continuait de marcher — rien ne le
+signalait. Le correctif d'alors avait réparé la copie, pas la duplication.
+
+- Le serveur rend désormais **`lien_client`**, l'adresse complète, composée là où
+  il compose celle du courriel. Et `telephone`, pour savoir à qui écrire.
+- La console la prend telle quelle. Un paramètre renommé les change toutes les
+  deux, ou aucune.
+- `lien_acceptation` garde son nom trompeur — il porte le sceau — parce que deux
+  routes le rendent et la vitrine le lit. Les deux champs se côtoient, et leurs
+  commentaires disent lequel est lequel.
+
+Trois cas ajoutés côté serveur, dont celui qui compte : **l'adresse rendue ouvre
+vraiment la proforma**, sans session, par une consultation réelle. Et un cas de
+la console a changé de sens : il gardait la recomposition, il garde maintenant
+son absence.
+
+⚠️ Au passage, le panneau dit deux choses justes que je n'avais pas relevées :
+« Chiffrée et engagée par le même compte : aucune validation par un second
+collaborateur », et « Transmission notée : la relance est armée ». L'écran ne
+cache ni l'un ni l'autre.
+
+---
+
+## 28 septembre 2026 (suite) — L'accès vient avec l'entreprise, et avec le suivi
+
+Le cabinet a précisé la règle, et elle est plus juste que ce que j'avais câblé.
+
+### Pendant la création, elle n'a besoin d'aucun compte
+
+Ses pièces — carte d'identité, casier judiciaire, statuts — arrivent **par
+WhatsApp**, et un collaborateur les coche au dossier de formalité. C'est déjà
+ainsi que la checklist fonctionne, et c'est le bon choix : un formulaire à
+identifiants pour envoyer la photo d'une carte d'identité ferait abandonner la
+moitié des dossiers, sur un canal que tout le monde emploie ici de toute façon.
+
+### L'accès demande DEUX conditions, pas une
+
+1. **Son entreprise existe** — avant l'immatriculation, il n'y a rien à lui
+   montrer, et la portée d'une adhérente est un NIU.
+2. **Elle a pris le suivi.**
+
+La seconde vaut la première. Le cabinet peut immatriculer une société sans en
+tenir la comptabilité : la cliente repart avec son RCCM et son NIU, et la
+prestation est complète. Lui ouvrir un espace de suivi qu'elle n'a pas acheté lui
+ferait attendre un service qui ne viendra pas — et le cabinet le découvrirait à
+la première échéance non traitée, c'est-à-dire trop tard.
+
+**Le drapeau existait déjà** : `DemandeConversion.adherent`, qui pose l'adhésion
+sur l'entreprise. Il entre maintenant dans `EntrepriseCréée`, et l'abonné en fait
+sa condition.
+
+⚠️ **Absent vaut vrai**, ici aussi : avant cette clé, la conversion valait
+adhésion, et il en dort dans la boîte d'envoi. Les ignorer laisserait une
+adhérente payante sans accès, sans que personne sache pourquoi.
+
+Trois cas ajoutés : sans suivi rien ne s'ouvre et le journal dit que c'est ce qui
+a été vendu ; avec le suivi l'accès s'ouvre ; un événement d'avant la distinction
+ouvre toujours. Dix cas au total sur cet abonné.
+
+---
+
+## 28 septembre 2026 — Une vente n'ouvre pas toujours un locataire
+
+Le cabinet a tranché : **une cliente qui achète une prestation est une adhérente
+du cabinet**, pas un locataire de la plateforme. Son compte doit vivre là où vit
+son dossier.
+
+### Ce que l'ancien comportement produisait
+
+Toute proforma payée ouvrait un locataire, `tnt-{slug}`, quel que soit le service
+vendu. Une entrepreneuse qui achetait la création de sa SARL recevait donc **son
+propre espace de plateforme**, isolé, pendant que son entreprise entrait au
+portefeuille **du cabinet**. Deux locataires pour une seule cliente — et même en
+activant son compte, elle serait entrée dans un espace vide.
+
+Relevé en base, sur quatre exécutions du flux :
+
+| | Locataire |
+|---|---|
+| Son compte | `tnt-couture-a2af8c` |
+| Son entreprise, son dossier, ses échéances | `CGA-BRCG` |
+
+### Ce qui a été livré
+
+- `SERVICES_OUVRANT_UN_LOCATAIRE` dans l'application de la souscription. Une
+  seule entrée : **`PLATEFORME`**, l'offre « un autre centre de gestion achète la
+  plateforme ».
+- L'événement `PaiementEncaissé` porte `ouvre_un_locataire`, **dit explicitement
+  et non déduit d'un slug absent** : un champ manquant est un défaut, une
+  consigne s'écrit.
+- L'abonné du contexte Tenants s'arrête sans rien faire quand la clé dit non —
+  et **ne lève pas** : ce n'est ni un échec ni un rejeu, il n'y avait rien à
+  ouvrir. `ResultatOuverture` porte `sans_objet`.
+- **Absent vaut vrai** : un événement déposé avant cette distinction n'en porte
+  pas la clé et ouvre toujours son locataire. Il en dort dans la boîte d'envoi ;
+  les ignorer laisserait un cabinet payé sans espace.
+
+⚠️ `PLATEFORME` **n'est pas au catalogue** : aucun prospect ne peut l'acheter. Le
+code est écrit pour que le mécanisme d'ouverture garde ses cas — un mécanisme
+câblé que plus aucun cas ne traverse pourrit en silence et se découvre cassé le
+jour où l'on en a besoin. Le jour où le cabinet vend la plateforme, le service
+s'ajoute au catalogue **sous ce code exact**. C'est la leçon de la veille : trois
+vocabulaires pour une même prestation avaient rendu le tunnel sans issue.
+
+### Et une conséquence que je n'avais pas vue
+
+J'avais répondu au cabinet : « elle a accès à son interface **après le
+paiement** ». C'est faux, et le mécanisme d'accès adhérent le dit lui-même.
+
+`ouvrir_acces_adherent` exige un **NIU** : la portée d'une adhérente est le
+dossier de **son** entreprise, et rien d'autre — « une souscription ne peut pas
+fabriquer un réviseur ». Or au moment où elle paie sa création, **son entreprise
+n'existe pas**. Son NIU n'arrive qu'à l'immatriculation, au bout du tunnel des
+formalités.
+
+Son accès ne peut donc s'ouvrir qu'à la **conversion**, quand le dossier de
+formalité devient une entreprise du portefeuille. Ce qui se tient : avant cela,
+il n'y a rien à lui montrer.
+
+⚠️ La promesse du produit change donc, et il faut que le site le dise : on
+n'achète pas un accès, on achète une société. L'accès vient avec elle.
+
+**Reste à faire** : la conversion ne publie aucun événement. Il lui en faut un,
+porteur du NIU et des coordonnées de la fondatrice, sur lequel brancher
+l'ouverture de l'accès adhérent — le mécanisme, lui, existe et fonctionne depuis
+le parcours d'adhésion.
+
+---
+
+## 27 septembre 2026 (bilan) — Le parcours de création est livrable
+
+Fin de la journée sur la souscription de création d'entreprise. Toutes les
+suites repassées **sur les images reconstruites**, rien d'injecté nulle part.
+
+| Ce qui est éprouvé | Compte |
+|---|---|
+| Serveur | **3 860** cas, aucun sauté |
+| Console | 398 cas · contrat des écrans 303/304 |
+| Vitrine | 86 cas |
+| Mobile | 265 cas · analyse propre |
+| Parcours navigateur | 14 |
+| Flux M→I, de bout en bout | **26/26** |
+| **Cahier de recette** | **88/88**, huit pages, HTML et PDF |
+
+Le cahier compte 88 cas contre 75 ce matin : le mobile y est entré (7), et le
+parcours de création souscrite aussi (6). Répartition : accès et exploitation 21,
+collecte des pièces 11, **souscription 10**, **création d'entreprise 8**,
+comptabilité 8, pilotage 7, social 6, clôture 6, obligations 5, conformité 5.
+
+### Ce que la journée a établi sur ce parcours
+
+Le site vend « votre SARL immatriculée ». Ce matin, **aucune demande déposée
+depuis le site ne pouvait être qualifiée** — trois vocabulaires pour une même
+prestation —, une création payée n'ouvrait **qu'un accès à l'ERP**, et quatre
+écrans tombaient en 500 sur des cas ordinaires.
+
+Ce soir, le chemin est continu et vérifié : un visiteur dépose sa demande, le
+cabinet la qualifie et la chiffre, le client lit sa proforma par un lien signé,
+l'accepte, la règle — et **l'encaissement ouvre à la fois son espace et son
+dossier de formalité**, celui-ci portant les faits qu'il a donnés au téléphone.
+Le tunnel mène ensuite au RCCM, au NIU, au portefeuille, et à un échéancier
+fiscal de dix obligations calculé sans qu'on l'ait demandé.
+
+### Ce qui reste à décider, et qui n'est pas du code
+
+- **`tenue-comptable` → `ADHESION`** est une interprétation de ma part, signalée
+  dans le README du référentiel. Le catalogue ne porte pas de service « tenue
+  comptable » distinct.
+- **`lien_acceptation` porte mal son nom** : il contient le sceau. Le renommer
+  touche un contrat rendu par deux routes et lu par la vitrine.
+- **Les services sans questionnaire** — `FORMATION`, `DOMICILIATION`,
+  `PONCTUEL` — ne peuvent être ni qualifiés ni chiffrés. Les écrans le disent
+  désormais au lieu de tomber, mais ces trois prestations restent invendables par
+  le tunnel. Il leur faut un fichier au référentiel, ou une décision de les
+  traiter hors parcours.
+
+---
+
+## 27 septembre 2026 (suite 12) — L'envoi automatique, et les choix de l'expert
+
+Question du cabinet, et elle était juste : **le flux avait-il joué la proforma
+envoyée automatiquement après l'échange, avec les choix de l'expert ?**
+
+**Non.** Le flux émettait la proforma puis appelait `POST /transmission` — le
+chemin **manuel**, celui où un responsable recopie un lien dans un courriel et
+coche « j'ai envoyé ». L'envoi automatique existait, avec cinq cas unitaires, et
+n'avait **jamais été vu partir**. Les choix de l'expert, eux, n'étaient pas
+touchés du tout : je passais le prix de référence, zéro débours, aucun motif.
+
+### L'envoi automatique, éprouvé jusqu'à la boîte du client
+
+Le flux émet désormais avec `envoyer_par_courriel`, et vérifie quatre choses que
+la réponse seule ne prouve pas :
+
+- le serveur répond `ENVOYE`, vers une adresse **masquée** — `s***@exemple.cm` ;
+- **un courriel parti vaut transmission** : la proforma est `TRANSMISE` sans
+  second geste, et c'est cette date qui arme la relance. Sans elle, le client
+  aurait sa proposition et personne ne le relancerait ;
+- le message est **réellement dans la boîte** — relu dans le collecteur, sujet
+  compris : « Votre proposition PRO-2026-0023 : 199 999 FCFA » ;
+- **le lien du message ouvre sa proposition**, sur la vraie page de la vitrine,
+  et le montant y figure.
+
+⚠️ Le dernier point est le seul qui compte vraiment. Entre « le service de
+notification n'a pas levé » et « la cliente peut cliquer », il y a un serveur
+SMTP, un gabarit, un encodage et une adresse de site : quatre façons de n'avoir
+rien envoyé tout en ayant l'air d'avoir envoyé. Le flux ouvre donc **le lien du
+courriel**, et non le sceau rendu par la réponse.
+
+### Les choix de l'expert, maintenant exercés
+
+- **Les débours** : 41 500 de greffe et 15 000 de publication légale, avancés
+  pour le compte de la cliente. Ils ressortent du chiffrage à part — 56 500 —
+  parce que les fondre dans le prix ferait passer une avance pour une marge.
+- **Un prix hors intervalle sans motif est refusé** : 199 999 contre un plancher
+  à 200 000, et le serveur nomme l'intervalle. Un rabais sans motif est un rabais
+  que personne ne relit.
+- **Le même prix avec motif passe**, et le motif est conservé avec la proforma.
+
+### Et un contrôle qui ne peut pas fonctionner
+
+`separation_respectee` vaut `chiffre_par != valide_par`. Or les deux sont
+renseignés **au même instant, par le même compte** : celui qui émet. Le geste de
+chiffrage ne persiste rien — c'est une simulation qui rend un intervalle.
+
+Ce n'est pas un oubli, et le code le déclare en toutes lettres : « aucun geste
+distinct de validation n'existe encore ; le contrôle interne le verra, au lieu de
+lire une validation déclarée. » Le produit préfère afficher « non respectée »
+plutôt que de simuler un contrôle que personne n'a fait — et ce choix est le bon.
+
+⚠️ **Mais la conséquence est concrète, et elle vient d'être mise en scène** : un
+prix **sous le plancher** a été accordé, avec un motif écrit par celui-là même
+qui l'accordait, et rien dans le produit ne peut exiger un second regard. Pour un
+geste commercial, c'est une décision du cabinet ; pour un contrôle interne, c'est
+un trou. Le cas de recette le **constate** et ne le reproche pas ; il deviendra un
+vrai contrôle le jour où la validation aura sa propre route.
+
+### Un défaut de mon propre flux, et il était du genre le plus vicieux
+
+Un garde hérité lisait `code` après le chiffrage pour s'arrêter si celui-ci
+n'aboutissait pas. Depuis qu'une étape **refusée à dessein** le précède — le prix
+hors intervalle —, ce même `code` valait 422 : le flux s'arrêtait à l'étape 9 en
+se déclarant **COMPLET**. Vert, et muet sur dix-neuf étapes jamais jouées.
+
+C'est la deuxième fois de la journée qu'un outil de recette manque de mentir en
+vert, après le sélecteur Playwright qui se sautait lui-même. Un banc d'essai qui
+se trompe ne fait pas d'erreur bruyante : il se tait.
+
+**Flux M→I : 31 étapes, toutes vertes.**
+
+---
+
+## 27 septembre 2026 (suite 11) — Trois écrans qui tombaient, et un dossier introuvable
+
+Les images sont reconstruites — le réseau est revenu, le code et le référentiel
+ne sont plus injectés dans les conteneurs. Le flux M→I rejoué sur ces images :
+**26/26**.
+
+En voulant écrire le parcours navigateur de ce tunnel, trois défauts sont sortis,
+qu'aucune suite ne pouvait voir.
+
+### 1. Un dossier payé n'apparaissait nulle part
+
+`GET /acquisition/dossiers` rend la file « en cours », et `ouverts()` en écarte
+les états terminaux. C'est juste : un dossier payé n'attend plus rien de
+personne, et l'y laisser le ferait traiter deux fois.
+
+Mais `?etat=PAYEE` passait par **le même chemin** et rendait donc toujours une
+liste vide. Un filtre qui ne peut jamais rien rendre ne dit pas « il n'y en a
+pas » : il ment, et l'on cherche le défaut ailleurs. J'y ai perdu une demi-heure.
+
+Demander un état terminal n'est pas parcourir la file : c'est chercher quelque
+chose de précis. La route le rend désormais.
+
+**Et c'était grave, pas seulement gênant.** Une création payée dont le dossier de
+formalité ne s'ouvre pas — un fait manquant à la qualification — était
+**invisible partout** : hors de la file, et sans écran qui la liste. Le client
+avait payé, le travail n'avait pas commencé, et rien ne le disait. C'est la faute
+que ce produit s'interdit, déplacée d'un cran par la fonctionnalité du matin.
+
+Un panneau « Créations payées » la rend visible en deux clics. Il ne dit pas
+lui-même si le dossier est ouvert : la fiche le fait, en une requête par dossier.
+Le faire dans la liste coûterait un aller-retour par ligne sur un réseau qu'on
+sait mauvais.
+
+### 2. La fiche tombait en 500 pour qui ne suit pas les formalités
+
+Mon panneau appelait `/creations/{ref}`, qui exige `SUIVRE_FORMALITE`. Je ne
+reprenais que le 404. Résultat : **la direction ne pouvait plus ouvrir la fiche
+d'un dossier payé**. Un défaut que j'avais créé une heure plus tôt.
+
+La fiche a maintenant **trois réponses, et non deux** : ouvert, avec le lien ;
+pas encore, parce qu'il part sur un événement ; ou « vous ne suivez pas les
+formalités ». Rendre `null` dans les deux derniers cas ferait dire « pas encore
+ouvert » à quelqu'un qui n'a simplement pas l'habilitation — et l'on attend
+devant un écran, puis on appelle.
+
+### 3. La fiche tombait en 500 pour tout service sans questionnaire
+
+Celui-là ne venait pas de moi. Il restait **un quatrième appel** à `prendre()`
+sans reprise, dans `GET /acquisition/dossiers/{ref}/qualification`. La fiche d'un
+dossier `FORMATION`, `DOMICILIATION`, `PONCTUEL` — ou déposé sous un ancien code
+— **ne s'ouvrait pas du tout**. Le collaborateur voyait une page d'erreur à la
+place du dossier de son client, et n'apprenait rien.
+
+Traduit en 404, comme les trois autres. Côté console, le panneau de qualification
+dit pourquoi il est vide, celui du chiffrage se tait — un geste qui ne peut pas
+aboutir ne s'offre pas — et **le reste de la fiche s'affiche** : la demande, les
+proformas, le règlement.
+
+### Ce que cela dit du banc d'essai
+
+Trois écrans cassés, dont deux depuis longtemps, et **aucune suite ne les
+voyait**. Les cas du serveur éprouvent des routes ; ceux de la console éprouvent
+des composants. Personne n'ouvrait la fiche d'un dossier dont le service n'a pas
+de questionnaire.
+
+Le parcours navigateur ajouté emprunte le chemin du collaborateur : panneau des
+créations payées → fiche → lien → dossier de formalité. **14 parcours verts.**
+
+⚠️ Il a lui-même failli mentir : mon premier sélecteur prenait `section,div`
+filtré par le texte, donc **tous les ancêtres** du panneau — c'est-à-dire la page
+entière, avec les liens de la file « en cours ». Le parcours passait sur des
+dossiers non payés et **se sautait lui-même**, en vert. Un parcours qui se saute
+ne prouve rien, et ne se remarque pas.
+
+---
+
+## 27 septembre 2026 (suite 10) — Vingt-six étapes, du visiteur à l'immatriculation
+
+Le flux va désormais jusqu'au bout : **du visiteur anonyme sur le site à
+l'entreprise immatriculée au portefeuille, avec son échéancier fiscal**.
+
+```
+catalogue → demande sans compte → file du cabinet → refus du comptable
+→ affectation → questionnaire → qualification → chiffrage → proforma
+→ transmission → lecture par lien signé → acceptation → règlement
+→ encaissement → espace utilisable → dossier de formalité ouvert seul
+→ faits repris → dépôt refusé (pièces nommées) → dossier déposable
+→ CFCE → suivi → livraison refusée sans NIU → livraison
+→ conversion → portefeuille → échéancier de 10 obligations
+→ seconde conversion refusée
+```
+
+**Pourquoi prolonger, alors que `flux_creation.py` couvre déjà ce tunnel.**
+Parce qu'il l'éprouve depuis un dossier ouvert **à la main**, avec des faits
+écrits dans le script. Ici le dossier est né d'un **paiement**, sur les faits que
+la cliente a donnés au téléphone. Le tunnel n'a pas à savoir d'où vient son
+dossier ; la seule façon de s'en assurer est de le lui faire parcourir depuis
+l'autre bout. Il le fait.
+
+**Ce que cela établit, et qui n'était établi nulle part :** l'argent encaissé
+produit une société immatriculée. Pas un accès, pas un dossier vide — une
+entreprise au portefeuille, qui sait ce qu'elle doit et quand.
+
+### Le sceau perdu à la seconde transmission, corrigé
+
+Le lien d'acceptation n'était rendu qu'à **l'émission**. La transmission — la
+route qu'un collaborateur emploie quand il envoie le document — ne le rendait
+pas, et rien ne permettait de le retrouver ensuite.
+
+Un client qui perd son courriel n'avait donc plus de chemin vers sa proforma. Le
+seul recours du cabinet était d'émettre une **v2** d'un document que personne
+n'avait contesté : nouveau numéro, ancien lien invalidé, suivi commercial
+brouillé — pour un courriel égaré.
+
+Le lien n'est pas persisté, et c'est un choix qui se tient : il ne contient rien
+que la proforma ne porte déjà — numéro, version, et une expiration qui vaut
+`emise_le + N jours`. Il est donc **recalculé**, en un seul endroit, et les deux
+routes s'en servent. La transmission le rend désormais, à l'identique.
+
+Trois cas le tiennent, dont celui qui compte : **le lien renvoyé est le MÊME**,
+et pas un lien neuf. En émettre un autre invaliderait celui que le client
+retrouvera peut-être demain, sans que personne le sache. Éprouvés en retirant le
+correctif : les trois tombent.
+
+⚠️ Le champ reste nommé `lien_acceptation` alors qu'il contient le **sceau**. Le
+renommer touche un contrat rendu par deux routes et lu par la vitrine ; c'est une
+correction à faire, mais pas en passant.
+
+### Et le chemin manquait dans la console
+
+Le dossier de formalité s'ouvrant désormais tout seul, la fiche commerciale
+payée annonçait l'ouverture de l'espace… et rien de la société. Le collaborateur
+n'avait **aucun chemin** vers le dossier qui venait de naître : un manque créé
+par la fonctionnalité du jour même.
+
+Le panneau du règlement le dit maintenant, en **trois états** et sans lien posé à
+l'aveugle : ouvert, avec un lien vers l'immatriculation ; pas encore, parce qu'il
+part sur un événement et arrive quelques secondes plus tard ; ou absent parce
+qu'un fait manquait — et la phrase dit alors où le journal le nomme et qu'il est
+à ouvrir à la main.
+
+⚠️ Un 404 est **attendu** ici et ne remonte pas : laisser l'erreur passer ferait
+tomber la fiche commerciale entière pour une course de quelques secondes.
+
+⚠️ La fiche n'interroge le dossier de formalité que pour une **création payée**.
+Une adhésion n'en ouvre aucun, et un aller-retour sur chaque fiche ouverte se
+paierait sur un réseau qu'on sait mauvais.
+
+---
+
+## 27 septembre 2026 (suite 9) — Le parcours de création, de bout en bout
+
+Le cabinet a tranché les deux questions ouvertes par la simulation :
+
+1. **Le catalogue fait foi.** Un seul vocabulaire, celui que publie
+   `GET /souscription/services`.
+2. **Le dossier de formalité s'ouvre tout seul** à l'encaissement.
+
+### Ce que l'unification a touché
+
+- `Docs/referentiel/qualification/` : `creation-sarl.yaml` → `CREATION.yaml`,
+  `tenue-comptable.yaml` → `ADHESION.yaml`, clé `service:` comprise.
+- `Docs/referentiel/tarification/baremes.yaml` : mêmes clés.
+- La vitrine : `DEMARCHES` passe aux codes du catalogue. **Deux listes existaient**
+  — celle de `app/lib/acquisition.ts` et une copie locale dans
+  `FormulaireDemarche.tsx` — et elles avaient divergé. Une seule demeure.
+- La page publique de proforma : les libellés suivent les nouveaux codes.
+- Vingt-huit fichiers de cas du serveur.
+- Le README du référentiel énonce désormais l'histoire, pas seulement la règle.
+
+⚠️ `tenue-comptable` → `ADHESION` est une **interprétation** : le catalogue ne
+porte pas de service « tenue comptable » distinct, et l'adhésion y est décrite
+comme « suivi comptable et fiscal ». Elle est signalée comme telle dans le
+README, à relire par le cabinet.
+
+**Un second écart de vocabulaire, trouvé en chemin.** Le questionnaire proposait
+`SARL_UNIPERSONNELLE` et `ETABLISSEMENT` là où `FormeJuridique`, l'énumération du
+portefeuille, dit `SARLU` et `ETS`. Ce champ traverse trois contextes — il chiffre
+la prestation, il ouvre le dossier de formalité, il devient la forme de
+l'entreprise au portefeuille. Un seul endroit l'employait ; aligné.
+
+### L'ouverture automatique du dossier de formalité
+
+**Par un événement, et non par un appel direct.** Le graphe autorise
+`creation_entreprise → {conformite, portefeuille}` et `souscription →
+{portefeuille}` : ni l'un ni l'autre ne peut lire son voisin, et c'est voulu —
+une création d'entreprise n'a pas à savoir comment on vend. `PaiementEncaissé`
+est le mécanisme prévu pour franchir cette frontière.
+
+- `abonne_de_souscription.py` dans le contexte de la création : il n'agit que si
+  le service vendu est `CREATION`, et n'a besoin que de l'événement.
+- **Rejouable** : la référence du dossier de formalité est *dérivée* de celle du
+  dossier commercial — `CRE-dos-abc123`. Le même encaissement remis deux fois
+  désigne le même dossier, et le second passage constate qu'il existe. Une
+  référence tirée au hasard ouvrirait deux dossiers pour un seul client payé.
+  Elle est lisible par surcroît : on sait d'où vient le dossier sans requête.
+- **Ce qui manque n'est pas inventé.** Un fait fondateur absent n'ouvre rien :
+  l'abonné le dit dans le journal d'exploitation et laisse le dossier à ouvrir à
+  la main. Un dossier au nom de « Société à nommer » circulerait jusqu'au greffe.
+
+**L'événement a grandi, et chaque ajout a dû se justifier** devant le cas qui
+garde sa minimalité :
+
+- `service` — sans lui, l'abonné ne sait pas s'il doit agir.
+- `faits_fondateurs` — **cinq** faits sur la douzaine recueillie. Les tranches de
+  chiffre d'affaires et le nombre de salariés ont servi à *chiffrer* : ils
+  restent sur la proforma, qui les conserve, et ne circulent pas.
+- `telephone_titulaire` — il était écarté avec ce motif : « il ne sert pas à créer
+  un compte ». C'était juste tant que l'encaissement n'ouvrait qu'un espace. Le
+  fondateur d'un dossier de formalité porte un téléphone : c'est par là que le
+  greffe le joint. **Le motif d'hier ne tient plus ; la règle, elle, n'a pas
+  bougé** — rien qui ne serve.
+
+**Le questionnaire passe en version 2** : `denomination_souhaitee` et `siege`
+s'ajoutent, parce qu'un dossier de formalité ne s'ouvre pas sans eux, et que la
+qualification est le seul moment où quelqu'un parle au client.
+
+⚠️ La forme juridique **reste la première question**. J'avais mis la dénomination
+en tête ; un cas de recette gardait l'ordre, avec son motif — « demander le
+capital avant la forme fait interrompre le responsable par le client ». Une
+décision motivée ne se renverse pas pour une préférence : la dénomination est
+passée en deuxième.
+
+### Le flux, et ce qu'il a coûté à écrire
+
+`flux_creation_souscrite.py`, **dix-sept étapes, toutes vertes** : catalogue → demande
+déposée sans compte → file du cabinet → refus du comptable → affectation →
+questionnaire → qualification → chiffrage → proforma → transmission → lecture
+par lien signé → acceptation → règlement → encaissement → espace ouvert →
+**dossier de formalité ouvert tout seul** → faits de la qualification repris.
+
+Six erreurs de MA part, chacune corrigée par ce que le serveur répondait :
+
+- chercher le dossier par son nom, quand c'est le téléphone qui identifie un
+  prospect — deux demandes d'un même numéro ne font qu'un dossier ;
+- un numéro à dix chiffres, refusé avec le format en toutes lettres ;
+- le mauvais compte pour l'affectation : quatre permissions distinctes courent
+  sur ce parcours, et trois mains ;
+- des réponses de qualification mal typées, refusées en 422 ;
+- **le sceau cherché sur la transmission, alors qu'il vient de l'émission** ;
+- l'impatience : le dossier s'ouvre par un événement, que le relais publie à sa
+  cadence.
+
+**Deux pièges relevés, à signaler.**
+
+- `lien_acceptation` **ne contient pas un lien**, mais le sceau seul. Le nom
+  trompe : on croit tenir une adresse à ouvrir, on tient une signature à
+  recomposer.
+- Une **seconde** transmission d'une proforma rend `lien_acceptation: null` et
+  `expire_le: null`. Un collaborateur qui renvoie le lien à un client qui l'a
+  perdu ne le récupère donc pas.
+
+**Une septième erreur de ma part, et la plus instructive.** J'ai d'abord écrit
+que la saga d'ouverture du tenant ne se déclenchait pas : `ouverture` rendait
+`demarree: false` après encaissement, alors que le dossier de formalité, lui,
+s'ouvrait. J'en ai conclu que des deux abonnés du même événement, un seul
+réagissait.
+
+C'était faux, deux fois. D'abord j'interrogeais l'ouverture **immédiatement**
+après l'encaissement, sans laisser au relais le temps de passer — je mesurais mon
+impatience. Ensuite je relisais le mauvais dossier : celui d'une exécution
+antérieure, arrêtée avant l'encaissement.
+
+La vérification en base a tranché : quatre sagas `ouverture-de-tenant`, toutes
+**TERMINEE**, sans une seule tentative en échec ; la boîte d'envoi sans
+quarantaine ; et l'ouverture des trois dossiers payés rend `utilisable: true`
+avec **zéro étape substituée**. Les trois ports posés le 26 septembre font donc
+leur travail en conditions réelles.
+
+Le flux attend désormais le relais à cette étape aussi, et compte les étapes
+substituées : un espace ouvert par substitution n'est pas un espace ouvert.
+
+⚠️ La leçon vaut d'être gardée : **une réaction à un événement ne se vérifie pas
+dans la seconde qui suit la requête**. Deux de mes sept erreurs sur ce parcours
+viennent de là.
+
+⚠️ L'image du serveur n'a pas pu être reconstruite (registre Docker injoignable) :
+le code et le référentiel ont été **injectés dans le conteneur** pour la
+vérification en direct.
+
+---
+
+## 27 septembre 2026 (suite 8) — Le tunnel commercial est sans issue depuis le site
+
+Demande du cabinet : reprendre la simulation, cadrée sur **la souscription de
+création d'entreprise** — l'offre de première page, « votre SARL immatriculée
+pour 275 000 FCFA ».
+
+**Il n'existait aucun flux pour ce parcours.** `flux_souscription.py` part d'un
+prospect qui souscrit une ADHÉSION ; `flux_creation.py` part d'un dossier de
+création **déjà ouvert par un collaborateur**. Entre les deux manquait le seul
+cas que le site vend en vitrine : quelqu'un qui n'a pas encore d'entreprise et
+qui veut l'acheter. `flux_creation_souscrite.py` le joue désormais.
+
+**Ce qui marche, et qui mérite d'être dit.**
+
+- La création est déclarée SUR ÉTUDE au catalogue, et le serveur le TIENT : un
+  devis de création sort sans montant, quel que soit le montant proposé dans la
+  requête. J'ai essayé de lui imposer 275 000 : il a rendu `montant: null`,
+  `chiffrée: false`, avec la mention « chiffré après examen du dossier ».
+- L'engagement d'un tel devis est refusé en 409, avec une phrase courtoise :
+  « le devis comporte des prestations non chiffrées, qui supposent un examen du
+  dossier. Le cabinet vous confirme le devis définitif sans frais. » **Aucun
+  espace ne s'ouvre gratuitement.**
+- Deux demandes portant le même téléphone sont **rattachées au même dossier**
+  commercial, avec le motif d'affectation consigné. C'est le même prospect qui
+  relance, pas un second client.
+- Un numéro mal formé est refusé avec le format attendu, en toutes lettres.
+- Le cloisonnement tient : un comptable est refusé sur le chiffrage. Le parcours
+  passe par **quatre permissions** et trois mains — `LIRE_PROSPECT`,
+  `AFFECTER_DOSSIER`, `QUALIFIER_PROSPECT`, `GERER_COMPTES`.
+
+**Ce qui ne marche pas, et c'est un point bloquant de livraison.**
+
+Trois vocabulaires pour une même prestation :
+
+| Où | Code employé |
+|---|---|
+| Le formulaire de la vitrine | `creation` |
+| Le catalogue public `/souscription/services` | `CREATION` |
+| Le référentiel de qualification | `creation-sarl` |
+
+Le README du référentiel énonce pourtant la règle : « **le nom du fichier est la
+clé du service au catalogue** ». Les données l'ont perdue de vue.
+
+Conséquence, vérifiée avec la valeur exacte que transmet le formulaire : un
+dossier né du **vrai site** ne peut être ni qualifié, ni chiffré, ni transformé
+en proforma. Et ce n'est pas propre à la création — **aucune** des six valeurs
+que le formulaire peut envoyer (`creation`, `adhesion`, `ponctuel`,
+`domiciliation`, `formation`, `autre`) ne correspond à un questionnaire. Le
+tunnel commercial est **mort à l'arrivée pour tout le trafic public**.
+
+**Pourquoi personne ne l'avait vu.** Le jeu de démonstration et les cas du
+serveur déposent directement `creation-sarl`, la clé du référentiel. Le pipeline
+est donc éprouvé avec le vocabulaire interne, jamais avec ce que le site envoie.
+La frontière n'était traversée par aucun test.
+
+**Un second défaut, corrigé aujourd'hui.** Le chiffrage laissait
+`QuestionnaireIntrouvable` s'échapper : le cabinet recevait **HTTP 500**,
+« Internal Server Error », sur la seule route qui pouvait lui apprendre quoi
+corriger. Les routes du questionnaire et de la qualification faisaient déjà la
+reprise en 404 — l'écart n'en était que plus difficile à voir. Le message levé
+est excellent : il nomme le service demandé ET les services qualifiables ; le
+500 le jetait. Traduit en 404, comme `BaremeIntrouvable` quinze lignes plus bas.
+Les deux appelants en bénéficient : le chiffrage et l'émission de la proforma.
+
+Cas de non-régression ajouté à `test_prix_du_dossier.py`, éprouvé en retirant le
+correctif : il tombe. `tests/test_acquisition.py` et `test_prix_du_dossier.py`
+verts.
+
+**L'écart de vocabulaire, lui, n'est pas corrigé** : trancher lequel fait foi
+touche à l'offre commerciale, et appartient au cabinet. Le flux le **nomme**
+plutôt que de s'arrêter sur un code HTTP.
+
+⚠️ L'image du serveur n'a pas pu être reconstruite — le registre Docker est
+injoignable depuis ce poste. Le fichier corrigé a été **injecté dans le
+conteneur** pour la vérification en direct ; l'image sera refaite au retour du
+réseau.
+
+---
+
+## 27 septembre 2026 (suite 7) — Un contrôleur refabriqué, et la suite du serveur
+
+**Une faute que j'ai commise le matin même, et corrigée avant qu'elle ne sorte.**
+Le champ de recherche livré une heure plus tôt fabriquait son
+`TextEditingController` dans `build`. Cela paraît marcher, et les cinq cas
+passaient : le texte s'affiche, le filtre s'applique.
+
+Mais la liste se reconstruit à **chaque frappe**. Le champ recevait donc un
+contrôleur neuf à chaque lettre, et la **région de composition** partait avec
+l'ancien. Cette région porte le mot en cours : la saisie prédictive, la
+correction automatique, et **les accents composés** — le « é » obtenu en
+maintenant le « e » sur un clavier Android.
+
+C'est-à-dire exactement ce dont se sert quelqu'un qui tape « février ». Un champ
+écrit pour chercher en français, qui casse sur les accents : l'ironie aurait
+coûté cher, et aucun cas ne l'aurait vue, parce que `enterText` pose le texte
+d'un bloc et ne compose rien.
+
+Le contrôleur vit maintenant dans l'état, et la valeur de l'écran n'y est
+recopiée que lorsqu'elle **diffère** du texte saisi — sinon, remettre le même
+texte replacerait le curseur à chaque lettre. Un cas frappe désormais lettre par
+lettre (« f », « fe », « fev », « fevr ») et vérifie que le texte s'accumule,
+que le curseur reste au bout, et que le filtre suit.
+
+Suite mobile : **265 cas verts**.
+
+**La suite du serveur, passée en entier.** Elle ne l'avait pas été de la
+session : **3 844 cas, tous verts, aucun sauté**, en 13 minutes 58, contre la
+base d'essai réelle. Aucune régression du côté serveur, ce qui était attendu —
+rien ne l'a touché aujourd'hui — mais qui devait être établi avant de parler de
+livraison plutôt que supposé.
+
+---
+
+## 27 septembre 2026 (suite 6) — Le cahier de recette, réengendré à 82 cas
+
+Le cahier livrable datait de 75 cas. Il en compte 82, mobile compris.
+
+**Un second silence, trouvé en le régénérant.** `COMPTE_DU_CAS` est la seule
+partie du cahier écrite à la main : elle dit au testeur humain quel compte
+employer pour rejouer chaque cas. Le rendu la lit avec `.get(..., "")`. Elle
+s'arrêtait à **UC-64** — dix-huit cas s'imprimaient donc avec une case vide,
+sans que rien ne le signale. Un testeur devant UC-70 n'avait aucun moyen de
+savoir sous quelle identité se connecter, et le cahier avait l'air complet.
+
+Même famille que les deux défauts du matin : ce qui manque ne se voit pas, tant
+que rien n'est chargé de le dire.
+
+- Les dix-huit entrées manquantes sont écrites, dont les sept cas mobiles, avec
+  leur mode opératoire réel : l'application installée sur un téléphone Android,
+  branchée sur la pile de démonstration par `adb reverse`, et un compte
+  **adhérent** — celui d'un collaborateur n'ouvre pas l'espace adhérent.
+- `_cas_sans_compte()` liste à voix haute, à chaque engendrement, les cas sans
+  indication. **Il n'arrête pas le cahier** : celui-ci reste juste sur les
+  autres, et un manque d'aide au testeur n'est pas un échec du produit. Garde
+  éprouvé en retirant une entrée : il la désigne.
+
+**Cahier engendré : 82/82, sept pages**, HTML et PDF. Les sept cas mobiles y
+figurent, chacun avec le compte et le geste à reproduire.
+
+Répartition par contexte : Accès et exploitation 21, **Collecte des pièces 11**
+(elle en avait 4 ce matin), Comptabilité 8, Création d'entreprise 7, Pilotage 7,
+Social 6, Clôture 6, Conformité 5, Obligations 5, Souscription 5, Base 1.
+
+---
+
+## 27 septembre 2026 (suite 5) — Chercher, quand la liste dépasse l'écran
+
+Troisième friction relevée en usage réel, et la seule des trois qui ne demandait
+aucune décision du cabinet : **on ne pouvait rien chercher**. Soixante-cinq
+accusés de dépôt et cinquante et une pièces remises, en liste plate. Retrouver
+l'accusé de février 2024 sur le dossier de démonstration demandait quatorze
+glissements. L'information était là, l'accès manquait.
+
+**Ce qui a été livré.**
+
+- `domaine/recherche.dart` : la comparaison employée par les deux écrans.
+- `composants/champ_de_recherche.dart` : le champ, et le message de liste vide.
+- La recherche sur **Mes documents** — numéro, déclaration, période, guichet.
+- La recherche sur **Pièces remises** — émetteur, référence, et **mois**.
+
+**Quatre décisions, et leur pourquoi.**
+
+*Sans accents, dans les deux sens.* On tape « fevrier » sur un clavier de
+téléphone : la touche des accents est en second niveau, et personne ne l'ouvre
+pour filtrer une liste. Une comparaison brute n'aurait rien rendu, et l'adhérent
+en aurait conclu que le document n'existe pas. Le sens inverse compte autant :
+taper « février » doit trouver une ligne écrite « Fevrier » par un opérateur
+pressé. Une table de douze caractères, et non un paquet tiré pour cela — Dart ne
+porte pas la décomposition Unicode, et le français tient en une ligne.
+
+*Les mots cherchés séparément.* « tva fevrier » trouve une ligne « TVA du mois ·
+février 2024 », où les deux mots vivent dans deux champs différents et dans
+l'autre ordre. Exiger la chaîne entière obligerait à deviner la mise en forme de
+la ligne.
+
+*Le mois ajouté à la main pour les pièces.* Il n'est porté par aucun champ du
+serveur : il est **calculé à l'affichage**. Sans l'ajouter explicitement à la
+recherche, « septembre » n'aurait rien rendu — alors que l'écran l'écrit en
+titre de section, juste au-dessus. Le genre d'écart qu'on ne voit qu'en
+essayant.
+
+*Le champ n'apparaît qu'au-delà de huit lignes.* En deçà, on lit plus vite qu'on
+ne tape, et un champ de recherche en tête de page n'est que du bruit.
+
+**Et la règle qui ne souffre aucune exception :** une recherche qui ne rend rien
+dit « Rien ne correspond à « … » — vos autres documents sont toujours là », et
+**jamais** « aucun accusé de dépôt ». C'est la même règle que pour le réseau
+absent : dire à un adhérent que le cabinet n'a rien pour lui, alors que c'est sa
+recherche qui ne rend rien, est exactement le message qui fait appeler en
+urgence. Deux cas le tiennent, un par écran.
+
+Dix-huit cas ajoutés. Suite mobile : **264 cas verts**, analyse propre.
+
+**Cahier de recette : UC-80, UC-81, UC-82**, sur le banc Flutter ouvert plus
+tôt. Sept cas mobiles y figurent désormais, tous verts.
+
+---
+
+## 27 septembre 2026 (suite 4) — La porte que la barre cachait
+
+Demande du cabinet : améliorer le rendu de la barre du bas, et donner accès à
+l'historique des documents envoyés — pièce jointe comprise.
+
+**La découverte, en cherchant où poser cette porte.** L'historique existait
+déjà. Complet : les pièces remises groupées par mois, le bilan en tête,
+l'avancement de chacune en mots ET en segments, l'émetteur qui remplace la date
+dès que le cabinet a ouvert la photo, et le document consultable d'un appui sur
+la ligne entière. Cinq cent cinquante lignes, écrites et testées.
+
+**Et son seul point d'entrée était la tuile « Mes pièces », tout en bas de
+l'accueil.** C'est-à-dire précisément la section que la barre du bas recouvrait
+jusqu'à ce matin. Le défaut de mise en page ne cachait pas trois tuiles
+décoratives : **il cachait la porte d'un écran entier**, et personne ne pouvait
+le savoir — ni le cabinet, qui ne l'avait jamais vu, ni les cas de rendu, qui
+n'ont pas d'encart système.
+
+Deux défauts qui se masquaient l'un l'autre. Le second ne s'est vu qu'une fois
+le premier corrigé.
+
+**Ce qui a été livré.**
+
+*L'accès à l'historique.* Une carte « Tout ce que j'ai envoyé » sur l'écran des
+justificatifs — l'onglet du dépôt, c'est-à-dire l'onglet de ce que j'envoie. Une
+carte dans la page, et **non une troisième icône dans la barre du haut** : c'est
+la règle posée à l'ouverture de la coquille, six icônes dans une barre de titre
+de téléphone ne se distinguent plus. Elle est volontairement discrète : le
+verdict au-dessus répond à la question du jour, l'historique à une question
+d'après. Le sous-titre annonce le document de chaque pièce, parce que c'est ce
+que l'adhérent vient chercher — pas une ligne de journal, la facture elle-même.
+
+*Et la même porte dans « Documents ».* Cet écran ne montrait qu'une moitié des
+documents de l'adhérent : les accusés déposés PAR le cabinet. Les pièces remises
+AU cabinet vivaient sur un écran auquel rien ne menait depuis là. Or
+« Documents » est l'onglet où l'on cherche un document, quel qu'en soit le sens ;
+y taire la moitié revenait à la cacher. La carte est donc sortie dans
+`composants/porte_de_l_historique.dart` et posée aux deux endroits — sous le
+verdict du dépôt, et sous le chapeau des accusés.
+
+*Un compteur sur le bouton de dépôt.* Une pastille dans l'anneau, avec le nombre
+de pièces qui attendent encore. C'est **la seule information que l'application
+détient et que le serveur ignore** : hors réseau, une pièce photographiée
+n'existe que sur ce téléphone. Rien ne la signalait tant qu'on n'ouvrait pas
+l'onglet du dépôt — on consultait ses échéances sans savoir qu'une facture
+attendait à deux écrans de là. Elle reste DANS l'anneau et ne déborde pas
+au-dessus de la barre : ce qui déborde d'un parent ne reçoit pas les appuis, la
+leçon du 23 septembre sur ce même bouton. Fond clair, chiffre sombre, pour se
+détacher du magenta. Au-delà de neuf, « 9+ » : trois chiffres dans dix-neuf
+points ne se lisent pas, et le nombre exact n'apprend plus rien à ce stade.
+
+*Un fondu au ras de la barre.* Au milieu d'un défilement, une carte passait sous
+la barre et se coupait net sur son bord : on croyait la liste finie, et la carte
+tronquée. Vingt-quatre points de dégradé de la couleur du fond rendent la
+coupure progressive — l'œil comprend qu'il passe DERRIÈRE quelque chose. Un
+dégradé, **et non un flou** : un `BackdropFilter` coûte une passe de rendu par
+image sur un appareil d'entrée de gamme, qui est la cible de ce produit. Le
+voile ne remplace pas le coussin : celui-ci garantit que la dernière ligne est
+lisible, le voile ne sert qu'au trajet.
+
+*Un retour au doigt.* `selectionClick` au changement d'onglet, `mediumImpact` au
+déclenchement de l'appareil photo. Sur une dalle bon marché, l'affichage met
+parfois deux dixièmes de seconde à basculer ; sans retour, on croit avoir raté
+sa cible et l'on appuie une seconde fois.
+
+**Une source unique pour le compteur.** La coquille tient un `ValueNotifier`,
+que l'écran du dépôt met à jour là où il relit la file. Si la barre relisait la
+file pour son compte, deux lectures du même état pourraient se contredire à
+l'écran — « tout est parti » d'un côté, « 2 » de l'autre.
+
+Six cas ajoutés : le compteur muet à zéro, le compteur lu depuis un autre
+onglet, le plafond à « 9+ », la porte présente et fonctionnelle, la porte
+absente tant que le dossier n'est pas connu, et la porte des documents qui mène
+bien à l'historique. Suite mobile : **246 cas verts**, analyse propre.
+
+---
+
+## 27 septembre 2026 (suite 3) — Le cahier de recette ignorait un livrable entier
+
+En cherchant à rattacher le défaut de la file à un cas d'usage, constat net :
+le registre comptait **75 cas, et pas un seul pour l'application mobile**. Le
+serveur, la console, la vitrine — oui. Le mobile, rien. C'est pourtant par là
+que l'adhérent remet ses pièces, et c'est précisément là qu'un défaut vient
+d'échapper à tout le monde pendant des semaines.
+
+Un cahier qui ignore un livrable ne dit pas « il reste à couvrir » : il ne dit
+rien du tout, et son total rassure à tort. C'est la même faute que celle du pas
+119, à une échelle plus grande.
+
+**Ce qui a été livré.**
+
+- Le registre sait maintenant rejouer un cas sur **deux bancs** : `pytest` sur le
+  serveur, `flutter` sur le mobile. Un champ `banc` sur `CasUsage`, une fonction
+  de dépouillement propre à `flutter test` — qui ne rend pas un résumé comme
+  pytest mais une ligne d'avancement `+n -n ~n` réécrite en place, dont il faut
+  lire la dernière.
+- Le dépôt du mobile se trouve par `CGA_RACINE_MOBILE`, ou en voisin. **Son
+  absence n'arrête pas le registre, mais ne valide rien** : les cas concernés
+  rendent « dépôt du mobile introuvable », donc en échec. Quelqu'un qui n'a
+  cloné que le serveur garde un registre utilisable, sans jamais croire que le
+  mobile a été vérifié.
+- Quatre cas d'usage ajoutés, contexte C — Collecte des pièces : UC-76 (une
+  pièce photographiée part sans aucun geste), UC-77 (la file repart au retour
+  dans l'application, après un essai sans réseau), UC-78 (l'écran ne promet que
+  ce que l'application tient), UC-79 (la dernière section reste lisible sous la
+  barre).
+
+**Le garde-fou, éprouvé sur ses trois façons de mentir.** Un filtre qui ne
+correspond à rien, un fichier qui n'existe pas, un dépôt absent : les trois
+rendent **échec**, aucun ne rend « validé ». C'est la règle de ce registre depuis
+le pas 119, et elle valait d'être revérifiée sur un banc neuf.
+
+**Registre complet : 79/79.** Il a d'abord rendu 78/79 : UC-31 échouait parce que
+ses tests se **sautaient** faute de base d'essai — le registre a refusé de le
+valider, ce qui est exactement son travail. L'instance locale du projet
+(`outils/postgres-local.sh start`) l'a réglé.
+
+---
+
+## 27 septembre 2026 (suite 2) — La pièce qui ne partait jamais
+
+Suite du contrôle en direct : le geste central du produit, jamais éprouvé sur un
+vrai téléphone. Photographier une facture et la remettre au cabinet.
+
+**Ce qui marche.** L'appareil photo du système s'ouvre depuis le bouton central
+— qui change de rôle sur son propre onglet, ce qui n'est pas évident mais est
+documenté et cohérent. La pièce se range dans la file, avec sa vignette, son
+dossier et son heure. L'envoi manuel fonctionne de bout en bout : la pièce
+arrive en base avec le canal `MOBILE`, le bon dossier, l'état `RECUE` et le bon
+locataire.
+
+**Ce qui ne marchait pas, et que personne ne pouvait voir.** L'écran de la file
+annonçait :
+
+> Elles partiront dès que le réseau le permet. **Vous pouvez fermer.**
+
+C'était faux. Le seul déclencheur d'envoi était le nuage de la barre du haut.
+Rien dans `initState`, rien au retour de l'application, aucune reprise. Vérifié
+sur l'appareil : au bout d'une minute, la pièce était toujours sur le téléphone,
+et la base n'avait pas bougé.
+
+**Pourquoi c'est grave, et pas seulement gênant.** L'adhérent fait exactement ce
+qu'on lui dit : il ferme. Il croit sa facture remise. Le cabinet ne la reçoit
+jamais, et personne ne s'en aperçoit avant la déclaration. C'est la faute que ce
+projet s'interdit depuis le début — **tranquilliser à tort** — et elle était
+écrite noir sur blanc dans l'interface.
+
+**Pourquoi aucun test ne l'avait vue.** Les cas couvraient l'appui sur le bouton,
+l'absence de réseau, la session expirée, le compte des pièces. Aucun ne couvrait
+l'**absence de geste**. On teste ce qu'on fait faire à l'écran ; ici il fallait
+tester ce qu'il fait tout seul.
+
+**Ce qui a été livré.**
+
+- `_envoyerDiscretement()` dans `accueil.dart` : vide la file **sans rien dire**.
+  Pas de réseau est l'état normal de ce produit, pas une anomalie — un message
+  d'échec à chaque tentative serait du bruit. Le bouton, lui, parle encore :
+  on y a appuyé exprès. Le seul cas qui rompt le silence est la session
+  expirée, parce que plus rien ne partira tant que l'adhérent n'est pas revenu.
+- Quatre moments de déclenchement : à l'ouverture de l'écran, **juste après une
+  prise de vue**, au **retour de l'application**, et toutes les 30 secondes.
+  Le retour est le plus utile : on photographie dans une boutique sans réseau,
+  on range le téléphone, on ressort dans la rue où la 3G revient.
+- La phrase est ramenée à ce que le produit tient vraiment : « Elles repartent
+  toutes seules dès que le réseau revient, **tant que cette application est
+  ouverte**. » Un envoi en arrière-plan, application fermée, demanderait une
+  dépendance de plus (`workmanager`) et des réveils programmés : c'est une
+  décision du cabinet, pas un correctif de passage. Tant qu'elle n'est pas
+  prise, l'écran ne promet pas ce qu'il ne fait pas.
+- Trois cas ajoutés ou refaits dans `ecran_accueil_test.dart` : la file part
+  seule sans qu'on appuie sur rien ; elle repart au retour dans l'application
+  après un premier essai sans réseau ; et la phrase affichée ne contient plus
+  « vous pouvez fermer ». Le cas du bouton a été refait sur le scénario réel qui
+  lui reste : le premier envoi automatique n'a pas eu de réseau, l'adhérent en
+  retrouve un, et appuie.
+
+Suite mobile : **240 cas verts**. `flutter analyze --fatal-infos` propre.
+
+**Preuve sur l'appareil.** Photographie prise, puis **plus aucun geste** : la
+pièce était en base dix secondes plus tard, et l'écran affichait « Tout est
+parti », le nuage grisé. Une seconde pièce de démonstration s'ajoute donc au jeu
+d'essai du dossier M071122334455J, canal `MOBILE`.
+
+**Un cas non testable sur ce banc.** Le départ juste après la prise de vue passe
+par de vraies écritures disque, que `testWidgets` ne déroule pas sans
+`runAsync` ; le cas a été remplacé par celui du retour d'application, qui tient
+la même garantie et se teste vraiment. Le départ après prise de vue reste prouvé
+sur l'appareil, ci-dessus.
+
+---
+
+## 27 septembre 2026 (suite) — Le correctif que l'écran a démenti
+
+Reprise en main directe du TECNO KM5 branché, avec l'APK de production et une
+session réelle. En descendant l'accueil d'un adhérent jusqu'au bout, la dernière
+section — les raccourcis « Mes pièces », « Mon entreprise », « Écrire » —
+restait **coupée par la barre du bas**. Deux captures identiques à la suite ont
+confirmé que c'était bien la fin de la liste.
+
+**Le premier diagnostic, et pourquoi il était faux.** Les écrans réservaient
+`Marque.espaceSousLaBarre`, une constante à 104 : la barre mesure 86 et laisse
+12 sous elle. J'ai conclu qu'il manquait l'encart du système — la bande de
+gestes — et ajouté `MediaQuery.viewPaddingOf(context).bottom`. Cinq cas de test
+verts, suite complète verte, APK reconstruit, réinstallé.
+
+**L'écran n'a pas bougé d'un pixel.** C'est là que le contrôle en direct paie :
+une suite verte ne prouve que ce qu'elle mesure, et elle mesurait ma propre
+hypothèse. J'ai donc posé une mesure dans l'écran et relu le journal de
+l'appareil :
+
+```
+hauteur=800.0   viewPadding=0.0   padding=114.0   viewInsets=0.0   reserve=104.0
+```
+
+Deux choses d'un coup. `viewPadding` vaut **zéro**, et non l'encart : la coquille
+pose la barre dans une `SafeArea`, et `MediaQuery.removePadding` retranche de
+`viewPadding` ce qu'elle vient de consommer. Mon ajout ajoutait zéro. Et le cadre
+annonçait déjà la bonne valeur ailleurs : `padding.bottom = 114`, soit la barre
+(86), sa marge (12) et l'encart (16) réunis — parce que la coquille monte la
+barre en `bottomNavigationBar` d'un `Scaffold` en `extendBody`, et que Flutter
+annonce alors au contenu ce que la barre lui prend. La constante écrite à la main
+en réservait 104. Il manquait dix pixels, et c'est ce qui était coupé.
+
+**Ce qui a été livré.**
+
+- `Marque.espaceSousLaBarreDe(context)` ne bricole plus : elle prend
+  `MediaQuery.paddingOf(context).bottom` et y ajoute `espace3` d'air. La
+  constante reste comme plancher, pour un écran monté hors de la coquille.
+- **Effet de bord gagné** : la hauteur de la barre grandit avec la taille de
+  texte du système. Une constante ne pouvait pas suivre ; la valeur annoncée,
+  si. Le défaut aurait reparu chez toute personne qui grossit les caractères.
+- Les cinq écrans concernés y passent : `accueil`, `documents`, `echeances`,
+  `mon_entreprise`, `tableau_de_bord`.
+- `test/espace_sous_la_barre_test.dart`, cinq cas, réécrits sur le mécanisme
+  réel : ils posent le `padding` annoncé — dont 114, la valeur relevée, et 136,
+  la barre à 200 % de taille de texte. Le cinquième **relit le code des écrans**
+  et échoue si l'un réemploie la constante nue. Garde-fou éprouvé en le faisant
+  échouer pour de bon.
+
+Suite mobile : **238 cas verts**. `flutter analyze --fatal-infos` propre.
+Vérifié à l'écran sur les quatre écrans défilants de l'espace adhérent :
+accueil, échéances, documents, entreprise. Tous se terminent au-dessus de la
+barre, avec de l'air.
+
+**Deux leçons à garder.**
+
+1. Un correctif de mise en page n'est pas acquis parce que les tests passent : il
+   est acquis quand l'écran a changé. Ici les tests validaient l'hypothèse, pas
+   le produit.
+2. Avant d'ajouter un terme au calcul, demander à l'appareil ce qu'il annonce.
+   La mesure a coûté quatre minutes et a remplacé deux hypothèses fausses.
+
+**Un piège de construction, au passage.** `flutter build apk --release` sans
+`--dart-define` repart sur l'adresse d'émulateur par défaut : l'application
+affichait « Pas de réseau » sur un téléphone pourtant relié par `adb reverse`.
+Les deux adresses sont réglées à la compilation, par choix — pour qu'une version
+de démonstration ne puisse pas se retrouver branchée sur la production par un
+fichier oublié. Il faut donc les repasser à **chaque** construction :
+
+```
+flutter build apk --release \
+  --dart-define=CGA_API=http://localhost:8100 \
+  --dart-define=CGA_VITRINE=http://localhost:3101
+```
+
+**Ce qui reste.** Le collecteur de courrier de démonstration a dû être déporté
+sur le port 8026 : le 8025 est pris par un autre projet de la machine. Rien à
+décider, mais à savoir au déploiement.
+
+## 27 septembre 2026 — La politique de contenu, avec un nonce plutôt qu'un alibi
+
+Dernier point de sécurité que je pouvais traiter seul : il n'y avait **aucune
+`Content-Security-Policy`**, et l'absence était assumée par un commentaire de
+`next.config.ts` — « une politique écrite à la légère se contente d'un
+`'unsafe-inline'` partout et ne protège de rien ». C'était vrai. L'absence ne
+protégeait de rien non plus.
+
+### Mesurer avant d'écrire
+
+Ce qu'une politique doit autoriser ne se devine pas. Relevé sur la pile :
+
+| Ce qui a été compté | Résultat |
+| --- | --- |
+| Styles en attribut | **1 496** dans la console, 185 dans la vitrine |
+| Balises `<style>` en ligne | 0 |
+| Scripts externes | 0 |
+| Origines externes dans la page servie | **aucune** — `next/font` héberge les polices localement |
+| Scripts **en ligne** servis | **3** : le thème (le nôtre) et deux de Next |
+
+Ce sont les trois scripts en ligne qui décidaient de tout.
+
+### Un nonce, et non `'unsafe-inline'`
+
+Avec `'unsafe-inline'`, un script injecté s'exécute exactement comme les nôtres :
+la politique devient décorative. Avec un nonce par requête, seuls les scripts que
+**nous** marquons s'exécutent — et le nonce change à chaque requête, ce qu'un cas
+vérifie.
+
+Ce que les autres directives empêchent, et qui compte autant :
+
+- **`connect-src 'self'`** — le gain le plus concret. Le navigateur ne parle
+  jamais au backend directement : tout passe par une seule origine. Un script
+  injecté ne peut donc envoyer la session, un montant ou un NIU **nulle part** ;
+- **`object-src 'none'`** — un justificatif déposé par un adhérent est du contenu
+  venu du dehors : il ne s'exécute pas dans la page ;
+- **`base-uri 'self'`** — sans elle, une balise `<base>` injectée détourne toutes
+  les adresses relatives, formulaires compris ;
+- **`form-action 'self'`** — ce qui empêche un mot de passe de partir chez un
+  tiers.
+
+⚠️ **`style-src` garde `'unsafe-inline'`, et c'est assumé.** Dix-sept cents styles
+en attribut sont la façon d'écrire de ce produit, et `style-src-attr` ne connaît
+pas les nonces. Un style injecté peut défigurer une page ; il ne peut ni exécuter
+de code, ni faire sortir une donnée.
+
+⚠️ **Et elle ne répare pas une injection** : elle en limite les effets. Ce qui
+empêche l'injection reste l'échappement de React et le refus du serveur.
+
+### Deux refus du build, tous deux instructifs
+
+- J'ai écrit un `middleware.ts`. Le build l'a refusé : « Both middleware file
+  "./middleware.ts" and proxy file "./proxy.ts" are detected. » **Depuis Next 16,
+  l'intergiciel s'appelle `proxy.ts`**, et le projet en avait déjà un — celui qui
+  négocie la langue. Mon `ls middleware.ts` ne l'avait pas trouvé parce qu'il
+  cherchait l'ancien nom. La politique s'ajoute donc **dans** `proxy.ts`, et la
+  négociation de langue passe **d'abord** : c'est sa réponse qu'il faut coiffer.
+- La politique ne peut pas vivre dans `next.config.ts` : ses en-têtes sont
+  statiques, calculés une fois à la compilation, et un nonce constant est un
+  nonce inutile. Le commentaire qui annonçait l'absence a été corrigé — laissé
+  tel quel, il aurait menti au prochain lecteur.
+
+### Vérifié
+
+| Contrôle | Résultat |
+| --- | --- |
+| Politique servie | mesurée sur la réponse réelle du conteneur |
+| Nonce | **différent à chaque requête**, vérifié sur deux appels |
+| Parcours navigateur | **13 sur la console, 8 sur la vitrine** — dont « aucune erreur de console » sur dix écrans et le test d'hydratation : la preuve que les scripts s'exécutent toujours |
+| Cas de garde neufs | 4 — dont un qui **tombe si quelqu'un ajoute `'unsafe-inline'`** aux scripts pour « faire marcher » quelque chose |
+| Types, lint, unitaires, compilation | 398 et 86 cas, au vert |
+
+### Une fausse alerte, de mon fait
+
+Neuf parcours en échec sur `waitForURL`, tous ceux qui se connectent. C'était la
+**limitation de débit que j'avais épuisée** — trente connexions par cinq minutes,
+et j'avais enchaîné quatre exécutions du cahier de recette et trois séries de
+parcours. Après la fenêtre : 13 sur 13. Les quatre qui passaient malgré tout
+étaient ceux qui ne se connectent pas.
+
+C'est la troisième fois cette semaine qu'un « échec » venait de mon propre rythme
+d'essais. Le limiteur, lui, fait exactement son travail.
+
+---
+
+## 26 septembre 2026 (fin) — Le cahier de recette repasse à 75/75, et il est rejouable
+
+Demande du cabinet : laisser iOS de côté et **valider l'ensemble des cas d'usage
+conformément au cahier des charges**. L'instrument existe — `Docs/recette/`, un
+registre de **75 cas d'usage** qui porte chacun sa preuve : exécutée à l'instant
+contre la pile, ou déléguée à un test nommé de la suite.
+
+### Il était impointable sur la pile de démonstration
+
+Les deux adresses étaient **codées en dur** sur les ports du développement — 3011
+et 8010 — dans `cas_usage.py` **et** dans `verifier_profils.py`. Le registre ne
+pouvait donc pas viser la pile de démonstration, qui écoute 3100 et 8100, sans
+éditer l'instrument de recette pour pouvoir l'exécuter.
+
+Réglables désormais par `CGA_FRONT_RECETTE` et `CGA_API_RECETTE`, avec les ports
+du développement pour défauts — c'est la convention que le projet applique déjà
+partout ailleurs (`CGA_RACINE_*`, `CGA_API` du téléphone). Une seule variable pour
+les deux fichiers, pour qu'ils ne puissent pas viser deux piles différentes.
+
+### Le verdict, et les quatre cas qui tombaient
+
+Premier passage : **54/54 en direct**, puis **72/75** au complet. Second passage :
+**71/75** — deux exécutions, deux résultats. C'est le symptôme : **le registre
+modifiait les données qu'il éprouvait.**
+
+Aucun des quatre échecs n'était un défaut du produit :
+
+| Cas | Ce que le registre disait | Ce qui se passait vraiment |
+| --- | --- | --- |
+| UC-68 | « une carte par obligation : False » | **L'assertion était fausse.** Une TVA mensuelle a une carte par PÉRIODE. Relevé : `IRPP_ACOMPTE` en août et en juillet, `CNPS` en juillet et en septembre. Et les états `PREUVE_ENVOYEE` venaient d'UC-69, qui tourne juste avant |
+| UC-66 | « demande toujours OUVERTE : False » | La demande **était** ouverte. Au second passage, la réponse existait déjà : le premier envoi rend 409, et le corps du 409 ne porte pas le statut |
+| UC-72 | « lien None envoyé » | **Un garde-fou du produit qui tient** : « 2 lien(s) déjà renvoyé(s) aujourd'hui à ce compte. Au-delà, chaque lien valide de plus est un risque. » Mes exécutions avaient consommé le quota du jour |
+| UC-74 | « écart refusé : HTTP 409 » | L'écart existait. Ma relecture interrogeait `/conformite/pieces/{ref}/ecarts`, **qui n'existe qu'en POST** — 405, donc « introuvable » sur un écart pourtant posé. Le journal des dérogations est la seule lecture qui les liste |
+
+### Ce qui a été corrigé, et pourquoi c'est l'instrument et non le produit
+
+Les quatre cas sont désormais **rejouables** : un 409 sur un geste déjà fait est
+reconnu comme la preuve que le domaine refuse le doublon, et non comme un échec.
+UC-72 traite explicitement le 409 de la borne quotidienne comme une **réussite** :
+exiger 201 faisait accuser le produit alors qu'il protégeait l'adhérent.
+
+⚠️ **Un cahier de recette qui ne passe qu'une fois ne vaut presque rien**, et c'est
+précisément ce qu'on découvre la veille d'une livraison : on le relance pour
+montrer au client, et il tombe.
+
+### Le verdict final
+
+**75/75 cas d'usage validés**, sur une base **déjà modifiée par trois exécutions
+précédentes** — c'est la preuve de la rejouabilité, pas une base vierge de
+complaisance.
+
+### Ce qui reste
+
+- Les quatre corrections portent sur l'instrument. **Aucun défaut du produit n'a
+  été trouvé par cette passe** — ce qui est le résultat qu'on espère, et qui ne
+  valait d'être affirmé qu'après l'avoir mesuré quatre fois.
+- Le cahier PDF (`cahier_de_recette.py`) n'a pas été régénéré : il ouvre une
+  session par compte et la borne de trente connexions par cinq minutes est déjà
+  bien sollicitée par ces quatre exécutions.
+
+---
+
+## 26 septembre 2026 (suite) — Le point bloquant de la livraison est levé
+
+Le constat de la passe précédente : `ProvisionneurLocal` prend trois ports en
+option et **substitue** l'étape quand le port manque. Il était câblé **sans aucun
+des trois**. Toute ouverture de tenant se terminait donc avec le schéma, le
+stockage et le compte administrateur sans effet — un client payé sans identifiant
+ni lien d'activation.
+
+C'était honnête, la substitution étant déclarée et l'écran la montrant depuis le
+pas 93. Ce n'était pas livrable : **un second cabinet n'aurait pas pu ouvrir son
+espace.**
+
+### Ce qui était déjà là, et qu'il suffisait de relier
+
+Rien à inventer. Les deux capacités existaient :
+
+- `MagasinLocal` range les fichiers en `racine/<locataire>/xx/yy/clé`. Ouvrir le
+  préfixe, c'est créer ce répertoire — et vérifier qu'on peut y écrire.
+- `inviter_collaborateur` crée un compte et son jeton à usage unique.
+
+### Trois refus du code, et ce qu'ils ont appris
+
+⚠️ **Le garde-fou d'architecture.** J'avais posé les ports dans le contexte
+Tenants. `test_architecture.py` a refusé : le graphe **interdit** aux Tenants de
+connaître le Transverse. Le refus était juste — un port qui relie deux contextes
+appartient à celui qui a le droit de voir les deux, pas au plus profond. Déplacé
+dans `transverse/adaptateurs/sortant/ports_d_ouverture.py`.
+
+⚠️ **Le garde-fou de cloisonnement.** Ma première version écrivait le compte du
+client dans les dépôts **du cabinet** — la saga tourne dans l'unité de travail de
+celui qui a confirmé l'encaissement. Le socle a refusé net : *« une écriture
+croisée est un défaut, pas un cas limite »*. Le port ouvre désormais **sa propre
+unité de travail sur le tenant du client**.
+
+⚠️ **La recette du parcours.** J'avais écrit un port pour `SCHEMA_CREE` qui
+vérifiait les politiques de cloisonnement. Quatre cas de bout en bout sont tombés :
+les cas d'essai montent leur schéma par `create_all`, qui crée les tables mais
+**pas** les politiques — seul Alembic les pose. Le port refusait donc d'ouvrir
+dans tout environnement d'essai. Retiré : c'était une propriété **globale** de la
+plateforme, que `/sante` rend déjà, et la vérifier à l'ouverture de chaque client
+couplait son sort à l'état général de l'installation.
+
+### Une décision, et son motif
+
+L'étape `SCHEMA_CREE` est le vestige de la **décision D3, révisée** : le schéma
+par tenant a été abandonné au profit d'une colonne `locataire` et des politiques
+de lignes. Elle est donc substituée **sur toutes les installations**.
+
+La compter comme un manque rendrait `utilisable` faux pour l'éternité : l'écran
+dirait « l'espace n'est pas utilisable » à un client qui a son compte, son lien et
+son stockage. `ETAPES_SANS_OBJET` l'exclut donc du calcul, et `manques_reels`
+remplace la liste brute dans la route — citer une étape sans objet ferait croire
+à un défaut au chargé de clientèle.
+
+⚠️ **L'étape n'est pas retirée de `EtapeOuverture`** : les contextes de saga déjà
+écrits en base portent `SCHEMA_CREE` dans `franchies`, et l'ôter demanderait une
+reprise de données. C'est une décision à prendre avec le cabinet.
+
+### Deux cas se substituent plutôt que de lever
+
+La règle est écrite dans le provisionneur lui-même : *« le silence mentirait,
+l'échec bloquerait, la substitution déclarée informe. »*
+
+- **Adresse du titulaire absente** — il existe des événements déposés avant que la
+  charge ne la transporte. Lever les ferait tourner jusqu'à la quarantaine.
+- **Aucun courrier configuré** — vérifié **avant** de créer le compte. L'inverse
+  laisserait un compte sans lien : un état à moitié fait, le pire des trois.
+
+En revanche, un envoi **refusé** lève : le compte existe, et c'est le seul cas qui
+mérite une saga en échec — elle se reprendra sans le recréer.
+
+### Un détail qui n'en est pas un : le nom du titulaire
+
+Une demande commerciale porte **un seul** champ de nom : « Jean-Paul NKOA », ou
+« NKOA Jean-Paul ». Le découper supposerait un ordre, et au Cameroun le nom de
+famille précède souvent le prénom. Se tromper misnomme un client dès son premier
+courriel, et le compte garde l'erreur.
+
+`Compte` exige les deux champs. On y met donc le nom tel qu'il a été donné, dans
+les deux, et le titulaire corrigera à l'activation — il est le seul à savoir. Le
+nom rendu deux fois est visible, donc corrigible ; un découpage faux passe
+inaperçu.
+
+### Vérifié
+
+| Contrôle | Résultat |
+| --- | --- |
+| `test_un_visiteur_devient_un_tenant` | **passe avec les ports réels** : le visiteur obtient un tenant ACTIF, un préfixe de stockage et un compte administrateur avec son lien |
+| 13 cas neufs sur les ports | dont le rejeu, qui n'envoie pas un second lien |
+| Suite serveur | relancée |
+| `ruff` | propre |
+| L'API en service | démarre avec les deux ports branchés |
+| La route d'ouverture, en direct | ne rapporte plus que les **manques réels** |
+
+### Ce qui reste
+
+- **Le tenant ouvert le 23 septembre reste inutilisable** : il a été ouvert avant
+  le branchement, et ses deux étapes ont été réellement substituées. Rien ne le
+  reprend automatiquement — c'est voulu, une reprise de saga sur un tenant actif
+  est une décision.
+- **Le courriel d'activation part sur `adresse_publique`**, pas sur le
+  sous-domaine du cabinet. Le jour où la passerelle le résout, c'est une ligne à
+  changer, et le commentaire le dit d'avance.
+- **Le premier administrateur porte son nom deux fois** jusqu'à ce qu'il le
+  corrige.
+
+---
+
+## 26 septembre 2026 — Un écran pour ce que la machine endure, et un fichier que j'ai écrasé
+
+Demande du cabinet, à l'approche de la livraison : l'inventaire de ce qui est
+opérationnel et éprouvé, **et une interface de surveillance des services et de
+la charge**.
+
+### Ce qui existait, et ce qui manquait
+
+L'écran d'exploitation montrait ce qui **fonctionne** : services inscrits, boîte
+d'envoi, quarantaine, travaux de fond. Il ne montrait rien de ce que la machine
+**endure** : mémoire, processeur, connexions de base, latences, taux d'erreur.
+
+Or c'est exactement ce qu'on regarde en premier quand « c'est lent », et la
+seule chose dont on ne disposait pas.
+
+### Livré : `GET /transverse/charge` et son panneau
+
+| Bloc | Ce qu'il donne | Pourquoi d'abord celui-là |
+| --- | --- | --- |
+| **Requêtes servies** | médiane, 95e centile, débit, taux d'erreur, réponses par famille, cinq routes les plus lentes | « Est-ce lent pour tout le monde, ou sur une route ? » se tranche là |
+| **Base de données** | aller-retour, connexions employées sur maximum, **bassin employé**, taille | Le bassin sature en premier : chaque requête y prend une connexion pour la durée de sa transaction, et un bassin plein fait attendre **sans qu'aucune erreur ne soit rendue** |
+| **Cette instance** | mémoire résidente, fils, temps processeur, durée de service, charge moyenne | En dernier, parce qu'on y arrive rarement |
+
+L'ordre des blocs suit l'ordre du **diagnostic**, pas celui des couches
+techniques.
+
+### Quatre décisions, et leur raison
+
+- **Aucune dépendance nouvelle.** `psutil` ferait ce travail en trois lignes ; il
+  n'est pas déclaré, donc pas dans l'image. L'ajouter pour un écran de
+  surveillance mettrait une bibliothèque de plus dans la chaîne
+  d'approvisionnement d'un produit qui manipule la comptabilité d'un tiers.
+  `/proc` est toujours là, et c'est de là que `psutil` lit lui-même.
+- **L'anneau est borné à mille passages.** Une liste qui grandirait à chaque
+  requête est une fuite de mémoire déguisée en mesure : sur un serveur qui tourne
+  trois mois, elle finit par peser plus que l'application.
+- **La sonde de santé n'est pas mesurée.** Docker et Kubernetes l'appellent
+  toutes les cinq secondes : comptée, elle représenterait la moitié de l'anneau
+  et écraserait les latences réelles du travail du cabinet.
+- **La portée est écrite dans la réponse ET à l'écran.** Par instance, depuis son
+  démarrage, sans historique. Un exploitant qui croirait lire l'ensemble du parc
+  — deux répliques derrière un répartiteur — verrait la moitié du trafic et
+  doublerait ses estimations.
+
+⚠️ **Ce n'est pas un système de métriques**, et le dire fait partie de la
+livraison. Pas d'historique, pas d'agrégation, pas d'alerte. Ce que cela donne
+et qui n'existait pas : « à cet instant, sur cette instance, la médiane est à
+40 ms et 2 % des requêtes échouent », sans aucune infrastructure à installer.
+
+### ⚠️ Une faute de ma part : j'ai écrasé vingt-cinq cas
+
+J'ai créé `tests/test_charge.py` **sans vérifier qu'il existait déjà**. Il
+existait : vingt-cinq cas sur l'**évaluation de charge d'un dossier** — le poids
+de travail qu'un adhérent représente pour le cabinet, contexte Portefeuille.
+
+« Charge » a deux sens dans ce produit, et je n'ai vu que le mien.
+
+Ce qui est grave n'est pas l'écrasement : c'est que **la suite est restée
+verte**. 3 820 cas avant, 3 800 après — aucun échec, aucun saut, et un total qui
+baisse de vingt pendant que j'en ajoutais douze. Je ne l'ai vu qu'en comparant
+deux exécutions à la main.
+
+Restauré depuis git ; mon fichier s'appelle désormais
+`test_charge_de_la_plateforme.py`, et son en-tête explique les deux sens du mot.
+Un balayage des autres fichiers créés cette semaine n'en a trouvé aucun dans le
+même cas.
+
+**Ce que j'en retiens** : un fichier de cas créé sans vérifier son existence est
+une suppression silencieuse. Le nombre total de cas d'une suite mérite d'être
+suivi d'une exécution à l'autre, au même titre que les échecs.
+
+### Vérifié
+
+| Contrôle | Résultat |
+| --- | --- |
+| `avancement_des_ecrans` | **100 %**, 233 gestes sur 233, zéro route orpheline |
+| `contrat_des_ecrans` | 302 appels justes sur 303 |
+| Console | 398 cas unitaires, types, lint, compilation |
+| Parcours navigateur | 11 sur la console (dont 2 sur le monitoring), 8 sur la vitrine |
+| L'écran, en direct | médiane, centiles, bassin et mémoire réels, zéro erreur de console |
+
+---
+
+## 25 septembre 2026 (fin de nuit) — Je me trompais depuis cinq passes, et le produit savait
+
+⚠️ **Cette entrée corrige ce que j'ai rapporté au cabinet à cinq reprises.**
+
+Je signalais, depuis plusieurs jours, « un client qui paie par la voie
+commerciale obtient un locataire mais ni compte ni lien d'accès », et je
+présentais cela comme une **décision de conception en attente**. C'était faux.
+
+### Ce que le produit fait réellement
+
+La saga d'ouverture franchit **sept étapes**, dont `ADMINISTRATEUR_CREE` : « le
+compte administrateur existe, avec son jeton d'activation à usage unique ». Le
+parcours est complet, et depuis longtemps.
+
+Quand l'infrastructure manque — ce qui est le cas de la pile de démonstration —
+une étape est **substituée** : traversée sans rien faire, et le domaine
+l'inscrit. Relevé en base le 25 septembre sur le seul dossier payé :
+
+    franchies : SLUG_RESERVE, LIGNE_CREEE, SCHEMA_CREE, METIER_AMORCE,
+                STOCKAGE_OUVERT, ADMINISTRATEUR_CREE, PRET
+    etapes_substituees : SCHEMA_CREE, STOCKAGE_OUVERT, ADMINISTRATEUR_CREE
+
+Il n'y avait donc aucune décision à prendre : le geste existe, il est écrit, et
+il marche là où l'infrastructure existe.
+
+### Le vrai défaut, bien plus étroit
+
+Le domaine écrit lui-même, dans `substitution.py` :
+
+    « Le tenant existe, son sous-domaine répond, et il n'a ni schéma, ni
+    stockage, ni compte administrateur. **Annoncer au client un espace ouvert
+    dans ce cas serait un mensonge que sa première connexion découvrirait.** »
+
+Cette information était **calculée, stockée, et exposée nulle part**. Aucune
+route HTTP ne la rendait. Et la console annonçait, dans tous les cas :
+
+    Payé le 23/09/2026 · espace « essai-paiement-0062 ».
+
+Le chargé de clientèle raccrochait en disant au client que son espace était
+ouvert. Le client le découvrait à sa première connexion.
+
+### Livré
+
+- **`GET /acquisition/dossiers/{reference}/ouverture`** — rend `demarree`,
+  `terminee`, **`utilisable`**, `etapes_substituees`, `slug`, `dernier_echec`.
+  ⚠️ `terminee` n'est pas `utilisable` : une saga terminée avec trois étapes
+  substituées est terminée, et l'espace n'est pas utilisable. La route emploie
+  `ouverture_reellement_complete` du **domaine** plutôt que de recopier la
+  règle, qui divergerait.
+- ⚠️ **Aucune erreur quand la saga n'a pas encore tourné.** Le relais publie
+  toutes les cinq secondes ; entre la confirmation et le premier tour, la saga
+  n'existe pas. Rendre 404 afficherait une erreur au collaborateur qui vient de
+  réussir son geste : on rend `demarree: false`, que l'écran sait dire.
+- **Le panneau « Règlement » de la fiche commerciale** dit maintenant l'état
+  réel, en quatre cas : pas encore démarrée, en cours, ouverte et utilisable, ou
+  — le cas qu'il fallait rendre visible — « l'espace existe, mais il n'est pas
+  utilisable ; le client n'a ni identifiant ni lien d'activation : ne lui
+  annoncez pas que son espace est ouvert ».
+- **6 cas serveur**, dont trois paramétrés qui figent `terminee` ≠ `utilisable`,
+  le troisième reproduisant exactement l'état relevé en démonstration.
+
+Vérifié en direct, dans un vrai navigateur, sur le dossier réellement payé.
+
+### Un défaut que J'AVAIS introduit, relevé par l'outil du projet
+
+`contrat_des_ecrans` parcourt **tous** les fichiers TypeScript, cas d'essai
+compris, et confronte chaque appel aux routes du serveur. Mes 398 cas de console
+employaient des adresses inventées pour l'exemple — `/comptabilite/ecritures`,
+`/portefeuille/dossiers`, `/referentiel/regles` — qui n'existent pas.
+
+**Mon banc d'essai cassait l'outil de vérification du projet.** Sept adresses
+corrigées, et écrites sous forme **paramétrée** (`${DOSSIER}`) parce que l'outil
+lit la forme de l'adresse, pas sa valeur. L'outil repasse à **301 appels justes
+sur 302**, le seul restant étant le chemin dynamique connu.
+
+### Et un garde-fou qui a fait son travail
+
+`test_les_routes_du_parcours_sont_montees` porte une liste **close** des routes
+sous `/acquisition`. Ma route neuve l'a fait tomber — c'est exactement ce qu'il
+est là pour faire : obliger à décider si une route est publique comme le dépôt
+de demande, ou protégée comme les autres. Décision inscrite : **protégée**,
+`LIRE_PROSPECT`, parce qu'elle parle d'un client identifié.
+
+### Vérifié
+
+| Contrôle | Résultat |
+| --- | --- |
+| Suite serveur | 3 825 cas |
+| Console | 398 cas, types, lint, compilation |
+| `avancement_des_ecrans` | **100 %**, 232 gestes sur 232, zéro route orpheline |
+| `contrat_des_ecrans` | 301 sur 302 |
+| `ruff` | propre |
+| L'écran, en direct | dit la vérité sur le dossier payé |
+
+### Ce que j'en retiens, et qui dépasse ce défaut
+
+J'ai rapporté cinq fois une conclusion tirée d'une **observation de la
+démonstration**, sans lire le code qui la produisait. Le produit portait la
+réponse, écrite en toutes lettres dans un docstring, et j'ai demandé au cabinet
+de trancher une question qui n'existait pas.
+
+---
+
+## 25 septembre 2026 (nuit, très tard) — Le dernier trou : un vrai navigateur
+
+Le seul trou de **nature** différente restait : aucun parcours réel. Tout le
+banc — 4 531 cas — est du même tissu : de la logique éprouvée hors navigateur.
+
+### Ce que ce harnais attrape, et que rien d'autre ne peut voir
+
+**Console, 9 parcours. Vitrine, 8.** En moins d'une minute à eux deux.
+
+| Ce qui est attrapé | Pourquoi les cas unitaires ne le voient pas |
+| --- | --- |
+| L'hydratation du formulaire de saisie | Un composant peut rendre juste en DOM simulé et ne **jamais s'hydrater** en vrai : la page reste figée, le pied des totaux n'affiche rien, et la compilation est parfaite |
+| Le témoin de session réellement posé | `HttpOnly`, `SameSite`, `Secure` vérifiés sur le témoin que **Chrome a reçu**, pas sur l'objet qu'une doublure a rendu |
+| Une page qui répond 200 et n'affiche rien | C'est exactement ce que rend un composant serveur qui lève |
+| Les erreurs de console sur dix écrans | **Aucune**, mesuré. Une seule signifierait de l'hydratation cassée |
+| Les en-têtes de sécurité **servis** | Mesurés sur la réponse du conteneur, et non sur la configuration : la seule façon de voir qu'un en-tête déclaré n'est pas servi |
+| Le 404 sur un dossier hors périmètre | Un 403 confirmerait son existence |
+| L'hydratation de l'estimateur | `estimer()` a 20 cas, mais un estimateur figé rend les mêmes chiffres quoi qu'on change et **paraît fonctionner** |
+| Le champ « capital » qu'on peut effacer | Le défaut du 11 août ne se voit que dans un navigateur |
+| Les images réellement **chargées** | Les cas unitaires vérifient que le fichier existe ; celui-ci vérifie que le navigateur le charge, y compris en bas de page |
+
+### Trois décisions, et leur raison
+
+- **Séparé de `npm test`.** Il exige la pile en service ; un banc unitaire qui
+  exigerait Docker ne tournerait ni sur le poste d'un nouveau venu, ni dans la
+  chaîne. Il se lance par `npm run essai-reel`.
+- **Le Chrome du poste**, pas celui que l'outil télécharge. 170 Mo en moins à
+  chaque montée de version, et surtout : c'est le navigateur que le cabinet
+  emploie. Un parcours qui passe sur un Chromium d'outil et casse sur le Chrome
+  du poste ne sert à rien.
+- **Il n'écrit rien.** Les données d'essai s'accumulent déjà dans la base de
+  démonstration et personne ne les nettoie. La vitrine, elle, dépose de VRAIES
+  demandes commerciales : un parcours qui les enverrait créerait un prospect à
+  chaque exécution, et le chargé de clientèle rappellerait un fantôme. Ce qu'on
+  perd en couverture, on le gagne en pouvoir tourner cent fois sans trace.
+
+### Deux fausses alertes, toutes deux de mon fait
+
+- **« Le tableau de bord n'a pas de titre. »** Faux : mon script lisait le titre
+  avant que le document ne soit remplacé après la redirection. Les treize pages
+  en ont un.
+- **« Une requête d'image ne finit jamais. »** Faux aussi : les images sous la
+  ligne de flottaison sont en chargement **paresseux**, et le navigateur retient
+  leur requête tant qu'on ne descend pas. `networkidle` n'est donc jamais
+  atteint, et l'attente expire sur une page saine — l'optimiseur rend ces images
+  en **4 ms**, mesuré. Le parcours descend maintenant la page, ce qui déclenche
+  le chargement paresseux et le vérifie du même coup.
+
+Les deux se sont vues en mesurant, pas en supposant. C'est la deuxième fois
+cette semaine qu'un « défaut » trouvé au navigateur était un défaut de
+l'instrument.
+
+### L'état du banc, au complet
+
+| | Cas |
+| --- | --- |
+| Serveur | 3 814 |
+| Console, unitaires | 398 |
+| Téléphone | 233 |
+| Vitrine, unitaires | 86 |
+| **Parcours navigateur** | **17** |
+| **Total** | **4 548** |
+
+### Ce qui reste
+
+- **Le parcours n'écrit pas.** Un parcours complet — saisir, valider, clôturer —
+  demanderait un jeu de données jetable, donc une base de démonstration qu'on
+  remonte à chaque exécution. C'est le pas suivant si le cabinet le veut.
+- **Soixante-douze composants sur soixante-quinze** non couverts en unitaire.
+- **Dix fichiers d'actions**, petits et sans calcul métier.
+
+---
+
+## 25 septembre 2026 (nuit, fin) — Les composants, là où les tests de logique ne voient rien
+
+Basculé des actions vers les **composants**, comme proposé : les dix fichiers
+d'actions restants sont de petits passe-plats, et le rendement de les couvrir
+était devenu faible. Les défauts d'affichage, eux, ne se voient nulle part
+ailleurs.
+
+### Trois composants, choisis pour leur portée
+
+| Composant | Cas | Le défaut que ces cas empêchent |
+| --- | --- | --- |
+| `FormulaireEcriture.tsx` | 18 | **Un total qui afficherait « équilibrée » sur une écriture qui ne l'est pas.** Le pied calcule l'écart à chaque frappe : c'est ce qui remplace la bande de calculatrice. Un total qui ignorerait « 1 500,75 » — espaces et virgule — rassurerait à tort, et c'est le pire défaut possible ici |
+| `ListeConstats.tsx` | 17 | Un constat **sans sa référence légale**. C'est la contrainte forte de la fiche : devant un adhérent qui demande « de quel droit refusez-vous ma facture ? », le comptable lit l'article. Sans lui, le refus est indéfendable et le cabinet cède |
+| `Tableau.tsx` | 16 | **Une grille différente entre l'en-tête et les lignes** : un montant se retrouve sous le libellé « Date », et le comptable lit de travers sans s'en apercevoir. Ce fichier est employé par presque tous les écrans — un défaut n'y touche pas un écran, il en touche trente |
+
+**51 cas neufs.** Console : **398**, tous verts.
+
+### Ce que l'écriture de ces cas a appris
+
+- **`aria-live="polite"` sur le pied des totaux** : un comptable aveugle entend
+  « écart 10 000 au débit » au moment où il l'introduit, et non dix lignes plus
+  loin. Le cas le fige, parce que c'est le genre d'attribut qu'on retire en
+  refondant un pied de page.
+- **La bibliothèque de rendu NORMALISE les blancs.** L'espace insécable étroite
+  — celle qui empêche un montant de se couper en fin de ligne — y devient une
+  espace ordinaire. Trois cas écrits avec `getByText` ne voyaient donc pas ce
+  qu'ils croyaient vérifier ; ils lisent maintenant le texte brut du document.
+  Au passage : `toLocaleString("fr-FR")` emploie la même espace fine que
+  `ESPACE_FINE`, donc les totaux du pied sont cohérents avec les montants
+  formatés ailleurs.
+- **Le compilateur a refusé mes données d'essai**, et il avait raison : j'avais
+  écrit `libelle` là où le type dit `intitule`. Un `as Journal[]` de complaisance
+  aurait compilé, serait passé, et aurait masqué le jour où le contrat du
+  backend change. Les données d'essai sont désormais typées sans aucun `as`.
+
+### Ce qui reste
+
+- **Soixante-douze composants sur soixante-quinze** restent non couverts, mais
+  les trois pris sont les plus employés et les plus porteurs de règles.
+- **Dix fichiers d'actions**, tous petits et sans calcul métier.
+- **Aucun parcours de bout en bout dans un navigateur** — c'est désormais le
+  seul trou de nature différente.
+
+---
+
+## 25 septembre 2026 (nuit, suite) — Les actions d'écriture sous filet à 85 %
+
+Suite de la descente. Trois fichiers ce tour-ci, aucun défaut de production
+trouvé — ce qui est le résultat qu'on espère quand on descend une liste par
+risque décroissant.
+
+### Ce qui a été couvert
+
+| Fichier | Cas | Le défaut que ces cas empêchent |
+| --- | --- | --- |
+| `actions-creations.ts` | 18 | Un identifiant de guichet porté **sans sa date**. La date mesure le délai du guichet : c'est elle qui permet de dire au fondateur suivant « le RCCM prend trois semaines ». Et l'accord des clés — `patente_obtenue_le` au féminin, `rccm_obtenu_le` au masculin — dont l'erreur ferait ignorer une date en silence |
+| `actions-social.ts` | 15 | **Une embauche à moitié faite.** Le salarié est créé, puis son contrat ; si le second échoue, le salarié existe déjà. Sans le message qui le dit, le gestionnaire recommence toute la saisie et se heurte à « matricule déjà pris », qui ressemble à un bogue du produit |
+| `actions-souscription.ts` | 11 | Un prix fixé à **zéro**, qui rendrait la prestation gratuite sans que personne ne l'ait décidé — et que le backend encaisserait comme un paiement abouti |
+
+**44 cas neufs.** Console : **347**, tous verts, types, lint et compilation
+compris.
+
+### Où en est la couverture des actions
+
+**Seize fichiers sur vingt-six, mais 3 723 lignes sur 4 364 — 85 %.** Les dix
+qui restent totalisent 641 lignes : exploitation, conformité-revue, échange,
+règles-du-cabinet, pilotage, lettrage, règles, pilotage-charge, notifications,
+rapport-mensuel. Aucun ne dépasse 118 lignes, et aucun ne porte de calcul
+métier — ce sont des passe-plats vers le backend.
+
+### Un défaut de mes propres cas
+
+Une doublure de `fetch` à qui j'ai passé un corps brut là où elle attend
+`{ corps }` : l'appel rendait un objet vide, et le cas échouait sur une lecture
+de champ absent. Corrigé en une ligne, mais il vaut d'être noté : une doublure
+mal formée fait échouer un cas pour une raison étrangère à ce qu'il mesure, et
+c'est le genre d'échec qu'on met dix minutes à lire.
+
+### Ce qui reste
+
+- **Dix fichiers d'actions**, tous petits et sans calcul métier.
+- **Un seul composant couvert sur soixante-quinze.**
+- **Aucun parcours de bout en bout dans un navigateur.**
+
+---
+
+## 25 septembre 2026 (nuit) — Un mois « 2026-00 » ouvrait une revue qui finissait avant de commencer
+
+Suite de la descente des actions serveur. Trois fichiers ce tour-ci, et un vrai
+défaut trouvé **en écrivant le cas**, pas en relisant le code.
+
+### Le défaut : un motif de mois trop permissif
+
+`actions-revue.ts` et `actions-rapport-mensuel.ts` validaient le mois avec
+`/^\d{4}-\d{2}$/` — quatre chiffres, un tiret, deux chiffres. Ce motif accepte
+`2026-00`, `2026-13`, `2026-99`. Le mois sert ensuite à **borner une période** :
+
+| Mois saisi | Période calculée |
+| --- | --- |
+| `2026-13` | du 2026-13-01 au 2027-01-31 |
+| `2026-00` | du 2026-00-01 au **2025-12-31** — la période finit avant de commencer |
+| `2026-99` | du 2026-99-01 au 2034-03-31 — **huit ans de revue** |
+
+Le backend aurait refusé « 2026-99-01 » comme date invalide. Mais l'écran aurait
+envoyé du charabia au lieu de refuser, et le collaborateur aurait lu un message
+de schéma là où il attend « choisissez le mois ».
+
+⚠️ **Trois pages du même dépôt employaient déjà le motif strict.** Deux actions
+employaient le lâche. C'est l'écart qui ne se voit qu'en mettant les deux côte à
+côte — et un test qui essaie « 2026-13 » les met côte à côte.
+
+Le motif vit désormais à un seul endroit, `MOIS_VALIDE` dans `saisie.ts`, avec
+le tableau ci-dessus écrit à côté.
+
+### Ce qui a été couvert
+
+| Fichier | Cas | Le défaut que ces cas empêchent |
+| --- | --- | --- |
+| `actions-referentiel.ts` | 14 | Un taux envoyé en **texte** au lieu d'un nombre : « 9 » serait alors supérieur à « 19,25 ». Et l'inverse — une expression régulière convertie en nombre, qui ferait accepter n'importe quel NIU. C'est le principe n° 1 du projet qui se joue là : aucune valeur légale codée en dur, donc toutes passent par cet écran |
+| `actions-revue.ts` | 13 | Le mois ci-dessus, et la borne de fin : 28, 29, 30 ou 31 selon le mois **et** l'année. Une borne fausse d'un jour laisse l'écriture du 31 hors de la revue — précisément celle qu'on passe en fin de mois |
+| `actions-rapprochement.ts` | 11 | Un solde **négatif** refusé, ce qui rendrait l'écran inutilisable sur tout compte en découvert. Et un relevé décodé en texte : les libellés en cp1252 d'une banque camerounaise deviendraient illisibles, et le comptable ne le verrait qu'au rapprochement |
+
+**38 cas neufs.** Console : **303**, tous verts, types, lint et compilation
+compris.
+
+### Où en est la couverture
+
+Treize fichiers d'actions sur vingt-six, mais **3 214 lignes sur 4 364** — près
+des trois quarts, et les treize plus risqués. Les treize qui restent font
+1 150 lignes, aucun ne dépassant 204.
+
+### Ce qui reste sur ce volet
+
+- **Treize fichiers d'actions** sans filet : souscription (console), créations,
+  social, exploitation, conformité-revue, règles, lettrage, échange, pilotage,
+  notifications, règles-du-cabinet, pilotage-charge, rapport-mensuel.
+- **Un seul composant couvert sur soixante-quinze.**
+- **Aucun parcours de bout en bout dans un navigateur.**
+
+---
+
+## 25 septembre 2026 (fin) — Six écrans d'écriture mis sous filet
+
+Demande : continuer les tests pas à pas. J'ai poursuivi l'inventaire des actions
+serveur, en descendant la liste par risque et par taille.
+
+### Ce qui est couvert, et pourquoi dans cet ordre
+
+Les six fichiers pris ce tour-ci sont ceux qui **écrivent** et dont l'erreur ne
+se voit pas tout de suite :
+
+| Fichier | Cas | Le défaut que ces cas empêchent |
+| --- | --- | --- |
+| `actions-administration.ts` | 22 | Une portée envoyée `[]` en croyant dire « tout le cabinet ». `null` = tout le portefeuille, une liste — **même vide** — restreint. C'est la même distinction qu'`acces.ts`, la plus coûteuse du produit |
+| `actions-collecte.ts` | 21 | Une photo de plus de 20 Mo refusée par « erreur 413 » au lieu de « photographiez en qualité normale ». Et le message de rejeu : la file hors ligne rejoue par construction, l'adhérent doit lire « c'était déjà arrivé » et non croire qu'il a envoyé deux fois |
+| `actions-acquisition.ts` | 21 | Un lien de proforma construit sur le domaine de production : le client reçoit une adresse où sa proforma n'existe pas. Et l'origine, qui vient de la page, bornée à quarante caractères |
+| `actions-obligations.ts` | 16 | **L'heure d'un accusé de dépôt.** Un dépôt fait le 15 à 00 h 30 à Douala vaut le 14 à 23 h 30 en UTC. Une conversion oubliée, et un dépôt dans les temps est consigné hors délai — ou l'inverse, ce qui est pire : le cabinet croit son client en règle |
+| `actions-portefeuille.ts` | 16 | Une admission au Centre sans source de chiffre nommée : devant un contrôle, l'attestation ne vaut rien, et c'est le Centre qui engage sa responsabilité |
+| `actions-ecarts.ts` | 13 | Un « écart enregistré » sec, qui laisse croire l'anomalie levée alors que le constat **compte encore** faute de second regard. Le réviseur passe à la suite avec une anomalie active |
+
+**109 cas neufs.** Console : **265**, tous verts, types, lint et compilation
+compris.
+
+### Où en est la couverture des actions
+
+Dix fichiers sur vingt-six — mais ce sont les dix plus gros et les plus
+risqués : **2 762 lignes couvertes sur 4 364**, soit près des deux tiers. Les
+seize qui restent totalisent 1 602 lignes, aucun ne dépassant 204.
+
+### Deux défauts de mes propres cas, corrigés
+
+- Un canal de réception écrit « GUICHET » au lieu de « DEPOT_CABINET ». J'avais
+  deviné la valeur au lieu de lire le vocabulaire. Le cas qui en est sorti est
+  meilleur que celui que j'écrivais : il vérifie désormais **qu'aucun canal
+  inventé ne passe**, ce qui est l'invariant qui compte.
+- Un accès à `.motif` sur une union discriminée, que `vitest` acceptait et que
+  `tsc` a refusé. La lecture passe maintenant par une fonction qui restreint le
+  type et **lève** si le résultat n'est pas un refus : un cas d'essai laxiste
+  masque le jour où la forme change.
+
+### Ce qui reste sur ce volet
+
+- **Seize fichiers d'actions** encore sans filet, tous de taille moyenne.
+- **Un seul composant couvert sur soixante-quinze.**
+- **Aucun parcours de bout en bout dans un navigateur.**
+
+---
+
+## 25 septembre 2026 (suite) — « Aujourd'hui » valait la veille, cinq fois recopié
+
+Demande : continuer les tests pour se rassurer que tout est complet. J'ai visé
+ce qui écrit dans l'ERP sans filet, et le premier fichier ouvert a rendu un
+défaut plus large que celui de la veille.
+
+### Le même fuseau, mais cette fois sur ce qui part au backend
+
+L'entrée précédente corrigeait l'**affichage**. Celle-ci corrige le **calcul** :
+
+- **`aujourdhui()`** rendait `new Date().toISOString().slice(0, 10)`, c'est-à-dire
+  le jour **UTC**. Ces pages sont des composants serveur : elles tournent dans le
+  conteneur. Entre minuit et une heure du matin à Douala, « aujourd'hui » valait
+  donc la veille — et cette date part au backend comme `a_la_date`, le paramètre
+  qui décide de ce qui est échu, de ce qui est en retard, de quel exercice est
+  courant. Une heure par jour, la console lit le portefeuille à la mauvaise date.
+- **`moisPrecedent()`** était **recopié dans cinq endroits**, tous calculant en
+  UTC. Le premier du mois entre minuit et une heure, « le mois écoulé »
+  désignait **l'avant-dernier mois** — le jour précis où le cabinet ouvre la
+  période déclarative. La clôture, la relance des pièces, le rapport mensuel et
+  le rapprochement proposaient tous le mois d'avant.
+- **La date par défaut d'une écriture comptable** venait de la même source. Une
+  écriture saisie après minuit était datée de la veille, et tombait dans le
+  mauvais mois le premier du mois.
+- **Le constat de dépôt de TVA** envoyait `a_la_date` en UTC : la date de dépôt
+  est précisément ce qui prouve qu'on a respecté l'échéance.
+
+Deux fonctions partagées — `jourADouala` et `moisPrecedentADouala`, avec
+**l'instant injectable**, sans quoi on ne peut éprouver la bascule de minuit
+qu'en changeant l'horloge de la machine. Les cinq copies supprimées.
+
+### Ce qui a été couvert, et pourquoi ces fichiers-là
+
+| Fichier | Le défaut que ces cas empêchent |
+| --- | --- |
+| `actions-comptabilite.ts` | Un « 1 500,75 » envoyé tel quel, refusé par un message de schéma — alors que le comptable a saisi ce qu'on lui a appris à saisir. Et `lignes_offertes`, qui vient du formulaire donc du client, borné à cent : une requête fabriquée annonçant un million de lignes ferait boucler le serveur |
+| `actions-cloture.ts` | Un premier envoi qui appliquerait au lieu de contrôler. **Une clôture ne se rouvre pas** : seul « oui » applique, et rien d'approchant |
+| `actions-second-facteur.ts` | Une réinitialisation sans motif écrit ni confirmation. C'est le geste qu'un attaquant obtient par téléphone : « j'ai perdu mon téléphone » |
+| `actions-souscription.ts` (vitrine) | Un NIU envoyé avec ses espaces devant un prospect qui vient de remplir huit champs. Et des champs d'identité fournis par la page, qui permettraient de déposer une demande **au nom d'un tiers** sous la référence de son devis |
+| `obligations.ts`, `fiche-dossier.ts`, `rapprochement.ts` | Un dernier jour de mois écrit à la main — on oublie février bissextile. Et un signe de mouvement inversé, qui fait « équilibrer » un rapprochement avec un écart du double du montant |
+
+**Console 156 cas, vitrine 86.** Types, lint et compilation au vert sur les deux.
+
+### Une précision sur le point en attente de décision
+
+En écrivant les cas de la vitrine, j'ai trouvé `activerUneSouscription` : le
+geste ouvre l'accès après vérification d'identité écrite, coche de confirmation,
+et nomme la personne à qui l'accès vient d'être ouvert. **Il existe déjà, et il
+marche** — mais sur la voie **souscription** (libre-service), pas sur la voie
+**acquisition** (proforma commerciale).
+
+Le constat signalé depuis plusieurs passes tient donc, mais il change de nature :
+ce n'est plus une question de conception, c'est une transposition. Le patron est
+écrit, éprouvé, et se lit dans `erp-cga-vitrine/app/lib/actions-souscription.ts`.
+
+### Ce qui reste sur ce volet
+
+- **Un seul composant couvert sur soixante-quinze.** Les cas portent sur la
+  logique, pas sur le rendu.
+- **Vingt-trois fichiers `actions-*.ts` restent sans filet** côté console.
+- **Aucun parcours de bout en bout dans un navigateur.**
+
+---
+
+## 25 septembre 2026 — L'ordonnanceur avait l'air mort, et c'était l'écran qui mentait
+
+Volet jamais éprouvé : **la mécanique asynchrone** — boîte d'envoi, relais,
+ordonnanceur. Tout le reste en dépend : l'ouverture d'un locataire payé, les
+relances, les rappels d'échéance.
+
+### L'état, qui est bon
+
+| Contrôle | Résultat |
+| --- | --- |
+| Boîte d'envoi | 17 événements, **tous publiés**, 0 en attente, 0 tentative, 0 échec |
+| Quarantaine | vide |
+| Six travaux inscrits | tous dans leur cadence |
+| Relais (cadence 5 s) | a avancé de 20 s exactement pendant un relevé de 20 s |
+
+Le socle tourne, et il tournait tout seul : un `DossierRepris` daté de 04 h 39
+ce matin, sans que personne ne lance rien.
+
+### Mais j'ai d'abord cru qu'il était arrêté depuis une heure
+
+L'écran d'exploitation — et la route qui l'alimente — rendent `termine_le` en
+**UTC, sans marqueur de fuseau**. `horodatageCourt` découpait la chaîne ISO sans
+rien convertir. À 11 h 07 heure de Douala, le tableau affichait « 10:06 » pour un
+relais passé deux secondes plus tôt.
+
+La première réaction devant cela est la mauvaise : **on relance un service qui
+tourne**. J'y suis tombé, et c'est bien l'exploitant du cabinet qui y tombera.
+
+Le contrat était pourtant écrit, côté serveur, dans `app/partage/horloge.py` :
+« tout est horodaté en UTC, et **la conversion à l'affichage est l'affaire de
+l'interface** ». Les interfaces ne la faisaient pas.
+
+### Trois endroits, trois gravités
+
+- **Le journal d'audit** affichait l'UTC brut **avec l'heure**, sans dire lequel.
+  C'est le registre qui fait foi : « 20:09:43 » pour une action faite à 21:09:43.
+  Une heure sans fuseau n'est pas opposable. Converti, et la colonne s'intitule
+  désormais « Horodatage (Douala) » — le fuseau dans l'intitulé n'est pas
+  cosmétique.
+- **Les trois formats de date** (`dateLongue`, `dateCourte`, `periode`) lisaient
+  le jour d'un instant UTC. Entre 23 h et minuit UTC — donc entre minuit et une
+  heure du matin à Douala — tout s'affichait **daté de la veille**. Sur un accusé
+  de dépôt, un jour faux est la preuve qu'on a déposé à temps.
+- **Le téléphone**, même défaut : `DateTime.parse` sans `Z` interprète la chaîne
+  dans le fuseau de l'appareil. Une pièce déposée à 00 h 30 apparaissait la
+  veille dans l'historique, et basculait dans le **mois précédent** le premier du
+  mois.
+
+⚠️ **La distinction qui commande la correction : une date n'est pas un instant.**
+`2026-08-15` est une échéance — elle ne se convertit pas, le 15 août est le 15
+août partout. `2026-08-15T23:30:00` est un instant UTC, et c'est déjà le 16 à
+Douala. Les formats regardent donc si la valeur porte une heure.
+
+### Un défaut préexistant trouvé en écrivant le cas
+
+Une date illisible rendait « NaN/NaN/NaN ». Même famille que le montant absent
+affiché « 0 » de l'entrée précédente : les trois formats rendent maintenant un
+tiret, qui se lit « on ne sait pas ».
+
+### Livré
+
+- `depuisUtc` dans `heure-douala.ts` (console), miroir Dart
+  `lib/domaine/heure_douala.dart` (téléphone) ;
+- les trois formats de date corrigés dans **les deux** dépôts web, qui les
+  partagent ;
+- le journal d'audit converti et son intitulé rendu explicite ;
+- **31 cas neufs** : 22 sur les formats de chaque interface, 12 sur l'heure côté
+  console, 9 côté téléphone. Les cas mobiles sont le miroir des cas web — si une
+  interface décale et l'autre non, l'adhérent voit son dépôt daté du 15 sur son
+  téléphone et du 16 sur le site, et doute de tout le reste.
+
+### Ce qui reste sur ce volet
+
+- **Le fuseau n'est écrit que dans un intitulé de colonne**, celui de l'audit.
+  Ailleurs, l'heure est juste mais muette sur son fuseau. Acceptable tant que le
+  cabinet est à Douala ; à revoir le jour d'une antenne ailleurs.
+- **Le serveur rend toujours des horodatages sans marqueur.** Poser un `Z` au
+  contrat le rendrait auto-descriptif et empêcherait ce défaut de revenir dans
+  une interface neuve. C'est un changement de contrat, donc une décision.
+
+---
+
+## 24 septembre 2026 (nuit, suite) — Le cabinet au travail en même temps
+
+Volet suivant : **le comportement sous concurrence**. Seules des latences
+ponctuelles avaient été mesurées, une requête à la fois, ce qui ne dit rien de
+ce qui se passe quand cinq collaborateurs travaillent ensemble.
+
+### Ce qui a été mesuré, et comment
+
+Cinq comptes réels, chacun sur **son propre travail** — la direction sur le
+pilotage, l'administrateur sur les comptes et l'audit, le réviseur sur la
+conformité et les doublons, les deux comptables sur le plan comptable et les
+pièces. Mesurer des refus aurait embelli la moyenne : un 403 est rendu avant
+toute lecture en base, donc très vite.
+
+| De front | Requêtes | Durée | Médiane | p95 | Max | Statuts |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 10 | 0,29 s | 10,5 ms | 27 ms | 170 ms | 200 partout |
+| 5 | 50 | 0,95 s | 67 ms | 187 ms | 363 ms | 200 partout |
+| 10 | 100 | 1,74 s | 148 ms | 270 ms | 406 ms | 200 partout |
+| 20 | 200 | 3,22 s | 293 ms | 429 ms | 508 ms | 200 partout |
+| 40 | 400 | 6,80 s | 637 ms | 786 ms | 967 ms | 200 partout |
+
+**750 requêtes, aucune erreur, aucun dépassement de délai.** Le débit plafonne
+vers 60 requêtes par seconde et la latence croît linéairement : c'est la machine
+qui sature, pas l'API qui se dégrade. ⚠️ Poste de travail partagé avec la base,
+les deux interfaces et le relais de courrier — ces chiffres ne valent pas pour
+un serveur de production.
+
+### Le contrôle qui justifiait l'exercice
+
+Quarante requêtes concurrentes partagent un pool de connexions. **Si le
+locataire était posé sur la connexion et non sur la transaction**, une requête
+pourrait hériter de l'identité de la précédente : le tableau de bord d'un
+comptable affiché à un autre, ou pire, les dossiers d'un autre cabinet. C'est le
+défaut le plus grave qu'un essai de concurrence puisse révéler dans un produit
+multi-locataire, et **il est invisible hors concurrence**.
+
+Résultat : **400 requêtes concurrentes, 40 de front, zéro identité mélangée**,
+un seul locataire rendu. Le socle multi-locataire tient sous charge.
+
+### Deux fausses alertes, toutes deux de mon fait
+
+- « 400 identités mélangées sur 400 » à la première passe. Mon contrôle comparait
+  le champ `compte` — un identifiant interne, « C-001 » — à l'adresse
+  électronique du compte. Il ne pouvait qu'échouer. L'identité se relève
+  maintenant **au calme** avant la passe concurrente, puis se compare à
+  elle-même.
+- « 429 » à la relance suivante : la limitation de débit compte 30 connexions par
+  tranche de cinq minutes et par adresse, et mes essais répétés l'avaient
+  épuisée. La règle fonctionnait ; c'est l'outil qui devait attendre. Écrit en
+  tête de `outils/concurrence_reelle.py`, parce que le prochain à le relancer
+  trois fois croira à une régression.
+
+Les deux se sont vues en lançant, pas en relisant.
+
+### Livré
+
+`erp-cga-backend/outils/concurrence_reelle.py` — le profil de travail par rôle,
+les paliers, et le contrôle de cloisonnement sous concurrence.
+
+### Ce qui reste sur ce volet
+
+- **Aucune mesure d'endurance.** Sept secondes de charge ne disent rien d'une
+  fuite de connexions ou de mémoire sur huit heures.
+- **Aucune mesure sur du matériel de production**, ni derrière un mandataire.
+- **Les écritures ne sont pas mesurées** — uniquement des lectures. Un essai
+  concurrent en écriture demanderait un jeu de données jetable, et la base de
+  démonstration n'en est pas un.
+
+---
+
+## 24 septembre 2026 (nuit) — Une sauvegarde qui paraît complète et ne contient rien
+
+Suite des vérifications. Le volet suivant sur la liste des trous : **la
+sauvegarde et la restauration, documentées mais jamais exercées**.
+
+### L'état de départ
+
+Aucune procédure. Une seule phrase, dans le fichier de composition : « une base
+infogérée dont quelqu'un vérifie les sauvegardes ». « Quelqu'un » n'est pas une
+procédure, et pour un produit qui détient la comptabilité de tiers, c'est le
+genre d'absence qui ne se paie qu'une fois.
+
+### Le piège, mesuré et non supposé
+
+La base porte 35 politiques de cloisonnement. Une sauvegarde prise sous le rôle
+applicatif `cga_app`, qui ne les contourne pas, **échoue bruyamment** — c'est le
+bon comportement de PostgreSQL :
+
+```
+pg_dump: error: query would be affected by row-level security policy
+```
+
+Le réflexe, devant cette erreur, est d'ajouter l'option qui la fait taire :
+`--enable-row-security`. Elle la fait taire. Mesuré sur la pile en service :
+
+| Sauvegarde | Taille | Lignes réellement présentes |
+| --- | --- | --- |
+| sous le rôle propriétaire | 193 035 octets | **1 173** |
+| avec `--enable-row-security` | 10 171 octets | **8** |
+
+Le fichier déclare ses 38 tables, donc il **paraît** complet. Zéro compte, zéro
+accusé de réception, zéro écriture comptable. Et la commande rend zéro : aucune
+alerte, aucune trace, et on le découvre le jour du sinistre.
+
+### Et ce que `pg_dump` n'emporte pas
+
+`cga_app` et `cga_migration` vivent dans la **grappe**, pas dans la base.
+Restaurée sur un serveur neuf, la base seule retrouve ses 35 politiques et ses
+152 privilèges — qui désignent des rôles inexistants. `pg_dumpall --roles-only`
+les emporte ; les deux scripts le font toujours.
+
+### Le cycle complet, exercé
+
+| Contrôle | Résultat |
+| --- | --- |
+| 38 tables, ligne par ligne, avant et après | identiques |
+| 35 politiques, 35 tables protégées | conservées |
+| 152 privilèges de `cga_app` | conservés |
+| Cloisonnement exercé sous `cga_app` sur la base restaurée | 0 ligne sans locataire, 12 comptes avec le bon, **0 avec un locataire étranger** |
+
+C'est le dernier contrôle qui compte : le cloisonnement multi-locataire survit à
+une restauration. Les 35 politiques auraient pu revenir sur des tables dont
+`ROW LEVEL SECURITY` aurait été désactivé — présentes, et sans effet.
+
+### Un défaut dans mon propre script, trouvé en l'exerçant
+
+`restauration.sh` annonçait « la base d'origine est absente » sur une base
+parfaitement présente. Le test était
+`psql -lqt | cut -d'|' -f1 | grep -qw "$BASE"` : `grep -q` sort dès la première
+correspondance, `cut` encore en train d'écrire reçoit un SIGPIPE et meurt, et
+avec `set -o pipefail` la mort d'un maillon rend tout le tuyau en échec. Le test
+lisait donc « échec », c'est-à-dire « absente », **précisément quand la base est
+là**.
+
+Conséquence réelle : le garde-fou « ne jamais restaurer par-dessus une base
+existante » ne se déclenchait jamais. Remplacé par une interrogation de
+`pg_database` dont le résultat passe par une variable. Les deux garde-fous ont
+ensuite été éprouvés **en échec**, ce qui est le seul essai qui vaille pour un
+garde-fou.
+
+Ce défaut ne se voyait pas en relecture. Il s'est vu en lançant le script.
+
+### Livré
+
+- `outils/sauvegarde.sh` — rôles et base, avec un contrôle qui refuse une
+  archive manifestement vide ;
+- `outils/restauration.sh` — dans une base **neuve**, jamais par-dessus, avec
+  comparaison table par table et contrôle du cloisonnement ;
+- la section « Sauvegarder » du README, avec le tableau des mesures.
+
+Les trois bases d'essai créées pour cet exercice ont été supprimées ; la pile est
+rendue à son état initial.
+
+### Ce qui reste sur ce volet
+
+- **Aucune sauvegarde n'est planifiée.** Les scripts existent, rien ne les
+  appelle. C'est une décision d'hébergement : fréquence, rétention, chiffrement
+  et lieu de dépôt appartiennent au cabinet.
+- **La restauration n'a jamais été exercée sur une grappe VIERGE** — seulement
+  sur celle-ci, où les rôles existaient déjà. C'est là que l'oubli des rôles
+  ferait mal, et c'est l'essai qu'il faudra faire avant la mise en production.
+
+---
+
+## 24 septembre 2026 (fin) — Les deux interfaces avaient zéro test, et une faille critique dormait dans Next
+
+Demande : « on continue, il faudrait laisser le volet iOS d'abord ». Le trou
+structurel signalé à la passe précédente était le bon endroit où aller.
+
+### L'état de départ, sans détour
+
+Le serveur a 3 814 cas. Le téléphone en a 224. **La console et la vitrine en
+avaient zéro.** Leur `package.json` ne connaissait que `dev`, `build`, `start`,
+`lint`. Trente écrans éprouvés à la main, en direct, une fois — et rien qui les
+garde. Une compilation réussie dit « le code tient debout » : elle ne lit pas un
+montant, ne pose pas un témoin, ne vérifie pas qu'une image existe.
+
+### Une faille critique trouvée en chemin
+
+L'installation du banc a fait parler `npm audit` : **`next@16.3.0` porte deux
+exécutions de code à distance sans authentification**, et c'est une dépendance
+de PRODUCTION. La première ne vise que les serveurs Windows — hors sujet ici. La
+seconde vise **l'optimisation d'images**, que dix-huit fichiers emploient à
+travers `next/image`. Les deux interfaces sont montées en `16.3.6`, correctif
+sans rupture ; `npm audit --omit=dev` rend désormais zéro sur les deux.
+
+C'est le genre de trouvaille qu'aucun test n'apporte et qu'aucune relecture ne
+fait : elle vient d'une commande qu'on lance en installant autre chose.
+
+### Un défaut comptable trouvé en écrivant un cas
+
+`Number("")` vaut **zéro** en JavaScript. Un montant absent rendu par le backend
+sous forme de chaîne vide s'affichait donc « 0 » — c'est-à-dire « rien à payer »
+pour qui lit la colonne, alors que la vérité est « on ne sait pas ». Et
+`montant("inconnu")` rendait bien « — » : les deux absences ne se comportaient
+pas pareil, et **seule la plus dangereuse passait**. Corrigé dans les deux
+dépôts, avec `montantFcfa("")` qui rend « — » et non « — FCFA ».
+
+Le cas qui l'a trouvé avait été écrit en supposant que le comportement existait
+déjà. C'est exactement ce à quoi sert d'écrire des tests sur du code qu'on croit
+connaître.
+
+### Ce que le banc garde, et pourquoi ces fichiers-là
+
+| Dépôt | Ce qui est gardé | Le défaut que ça empêche |
+| --- | --- | --- |
+| Console | `api.ts` | Un refus rendu « 422 Unprocessable Entity » au lieu de « le montant doit être positif ». Tout passe par là : un défaut n'y casse pas un écran, il en casse trente |
+| Console | `actions-session.ts` | Un témoin `Secure` posé sur une connexion en clair : la connexion réussit, puis la page suivante renvoie à l'écran de connexion, sans erreur ni trace. Et le message de refus reformulé, qui rouvrirait l'oracle d'énumération |
+| Console | `acces.ts` | `dossiers: null` (tout le cabinet) confondu avec `[]` (aucun dossier) |
+| Console | `Gravite.tsx` | Une pastille de couleur seule, illisible pour un comptable daltonien et en impression noir et blanc |
+| Vitrine | `bareme-creation.ts` | Une majoration de capital comptée deux fois — l'écart ne se voit que sur les gros capitaux |
+| Vitrine | `blog.ts` | Un `slug` en double qui rend un article inaccessible, **une image citée qui n'existe pas sur le disque** |
+| Les deux | `formats.ts` | Le défaut « absent affiché zéro » ci-dessus |
+
+**147 cas au total** — 83 console, 64 vitrine — en moins de deux secondes chacun.
+
+### Deux dépendances écartées, et pourquoi c'est noté
+
+Le greffon React et le résolveur de chemins de Vite font le travail en une ligne
+chacun. Ils tirent chacun une version de Vite **différente** de celle qu'emploie
+vitest, et les deux jeux de types deviennent incompatibles : `npx tsc --noEmit`
+échouait sur le fichier de configuration alors que tous les cas passaient. On
+peut arbitrer à coups de versions épinglées ; ça se défait à la première mise à
+jour. Les deux lignes qu'ils apportaient sont écrites à la main — un alias et un
+réglage de JSX. Deux chaînes d'approvisionnement de moins à surveiller.
+
+### Branché sur la chaîne
+
+`npm test` entre dans les deux `verification.yml`, **avant** la compilation : les
+cas tournent en secondes, la compilation en minutes, et échouer d'abord sur ce
+qui est rapide et précis épargne l'attente. Le nom du travail, qui annonçait
+« types, lint et compilation », le dit maintenant.
+
+### Ce qui reste sur ce volet
+
+- **Aucun parcours de bout en bout dans un vrai navigateur** n'est automatisé.
+  Un écran peut être juste au banc et illisible à l'écran.
+- **Les composants ne sont couverts qu'à un exemplaire** (`Gravite.tsx`). Les
+  soixante-quatorze autres de la console attendent.
+- **Les actions serveur sont couvertes sur la session seule.** Les vingt-sept
+  autres fichiers `actions-*.ts` écrivent dans l'ERP sans filet.
+- **iOS reste de côté**, à la demande du cabinet.
+
+---
+
+## 24 septembre 2026 (suite) — Le paquet livré ne joignait rien, et personne ne pouvait le voir
+
+Poursuite des vérifications, sur le dernier volet jamais éprouvé : ce que
+contient réellement l'application **livrée**, par opposition à celle qu'on lance
+depuis le poste.
+
+### Trois défauts que le développement ne peut pas révéler
+
+Ils ont en commun de ne vivre dans aucun fichier de code. Ils vivent dans les
+déclarations de paquet, que le gabarit de Flutter livre incomplètes.
+
+- **L'APK de production ne portait aucune permission réseau.** Constaté sur le
+  manifeste fusionné du 22 septembre : `android.permission.INTERNET` n'était
+  déclarée que dans les profils `debug` et `profile`, où l'outil la pose pour le
+  rechargement à chaud. Une version livrée fusionne `main` seul. L'application
+  aurait démarré, affiché sa page de connexion, et **chaque appel aurait échoué**
+  — sans message qui l'explique. Aucun essai en développement ne pouvait le
+  dire : le profil de développement donne la permission.
+- **Le trafic en clair était refusé par le système.** `targetSdk` vaut 36 ;
+  depuis Android 9, tout `http://` est bloqué avant même de sortir du téléphone.
+  La version de démonstration branchée sur `http://localhost:8100` ne se serait
+  jamais connectée. Une politique de réseau écrite dans
+  `res/xml/reseau.xml` autorise le clair **adresse par adresse** — `localhost`,
+  `127.0.0.1`, `10.0.2.2`, les trois qui ne quittent jamais le poste. La racine
+  reste à `false` : ouvrir le clair en général ferait traverser le mot de passe
+  d'un adhérent en lisible sur le wifi d'un cybercafé.
+- **iOS aurait arrêté l'application au premier appui sur « Déposer ».** Sans
+  `NSCameraUsageDescription`, le système ne refuse pas l'appareil photo : il tue
+  le processus. Les deux descriptions sont écrites, et dans les termes que
+  l'adhérent lira — ce que le cabinet fait de la photo, pas « cette application a
+  besoin de l'appareil photo ».
+
+### La signature, qui n'est pas un détail de publication
+
+Le gabarit laissait la version livrée signée avec la **clé de débogage**, une clé
+générée par l'outil et différente sur chaque poste. Android refuse d'installer
+une mise à jour signée autrement que la version en place : publiée telle quelle,
+la première mise à jour aurait obligé chaque adhérent à désinstaller puis
+réinstaller, en perdant sa session.
+
+La clé se pose maintenant dans `android/key.properties`, ignoré par git. Absent,
+la construction retombe sur la clé de débogage **en l'écrivant dans le journal de
+construction** : essayer reste possible, publier sans s'en apercevoir ne l'est
+plus.
+
+### Ce qui garde ces trois portes fermées
+
+Six cas neufs, `test/paquet_livre_test.dart`, qui lisent les fichiers de
+déclaration plutôt que le code. Ils ne remplacent pas un essai sur appareil ; ils
+garantissent que les trois déclarations dont l'absence est **invisible** en
+développement sont toujours là. Le quatrième vérifie qu'on n'a pas rouvert le
+clair à la racine pour « faire marcher la démonstration ».
+
+### Vérifié, et comment
+
+| Ce qui est vérifié | Comment |
+| --- | --- |
+| La permission est dans le paquet livré | `aapt2 dump permissions` sur l'APK lui-même, pas sur un intermédiaire |
+| La politique de clair y est aussi | La ressource `xml/reseau` est résolue dans l'APK |
+| Le serveur, en entier | 3 814 cas au vert, 14 min 45 |
+| Le téléphone | `flutter analyze --fatal-infos` sans remarque, 224 cas au vert |
+| Les traductions | Parité exacte fr/en : 518 clés sur la vitrine, 326 sur la console |
+| L'indexation de la vitrine | `robots.txt` interdit proforma, devis et suivi ; plan du site à 30 adresses, en deux langues |
+
+### La grille d'écrans avait trois gestes de retard
+
+Les trois outils de la chaîne ont été relancés. `avancement_des_ecrans` signalait
+**trois routes qu'aucun geste ne cite** : le rappel demandé depuis un devis, et
+les deux gestes de tarifs. Les trois sont bel et bien appelées par le code — ce
+que l'outil dit, c'est que la grille ne les DÉCLARAIT pas, et c'est précisément
+son travail : une route qui existe sans écran déclaré est une route que personne
+ne saura retrouver dans six mois.
+
+Les deux gestes de tarifs étaient en plus rattachés au mauvais écran : ils
+vivent sur `/tarifs`, un écran de console distinct de la souscription qui
+consomme le prix. Ils ont désormais leur entrée, `HORS-TARIFS`.
+
+La mesure repasse à **100 % — 231 gestes branchés sur 231, zéro route orpheline**.
+
+### Ce qui reste, et qui n'est pas de mon ressort
+
+- **L'APK de production n'a été installé sur aucun appareil.** Le téléphone était
+  débranché au moment de la vérification ; la preuve est le manifeste embarqué,
+  ce qui est solide mais n'est pas un essai.
+- **iOS n'a jamais rien exécuté.** Ni appareil, ni poste pour construire.
+- **Livrer en `appbundle`, pas en `apk`.** Un APK unique porte les trois
+  architectures : 52 Mo là où chaque téléphone n'en téléchargerait que dix-huit.
+  Sur un forfait camerounais, ce n'est pas un détail de confort.
+- **Le client qui paie par la voie commerciale n'a toujours ni compte ni lien**
+  (voir l'entrée précédente). La décision appartient au cabinet : geste de
+  console après vérification d'identité, ou ouverture automatique à
+  l'encaissement.
+
+---
+
+## 24 septembre 2026 — La surface de sécurité, et un client payé que personne ne prévient
+
+Suite des vérifications, sur les volets jamais éprouvés.
+
+**Migrations.** Montée complète depuis une base vide, redescente d'un cran, remontée :
+sans erreur. 38 tables, 35 politiques de cloisonnement. Les trois tables sans politique
+ne portent aucune donnée de client — version de migration, registre des espaces,
+journal des travaux périodiques — et c'est ce qu'il faut.
+
+**Cloisonnement, éprouvé en direct** (10 cas) : un dossier hors périmètre répond 404 et
+non 403 — introuvable, pas interdit ; une permission absente répond 403 ; sans session,
+401. L'inspecteur voit son dossier et ignore les autres.
+
+**Temps de réponse** : dix routes des écrans les plus employés, toutes sous 70 ms de
+médiane, la plus lente étant le tableau de bord de la direction à 63 ms.
+
+**Pages** : 30 écrans de console sur 30, toute la vitrine, ses 4 fiches de service et
+ses 14 articles, sans erreur.
+
+⚠️ **TROIS MANQUES DE SÉCURITÉ TROUVÉS, ET CORRIGÉS.**
+
+- **Le témoin de session portait `secure=False` écrit en dur**, avec un commentaire
+  disant de le passer à `True` en production. Un commentaire n'est pas un mécanisme :
+  le jour de la mise en ligne, le témoin serait parti en clair. Il suit désormais
+  l'adresse publique de l'API (`Configuration.temoin_securise`), et la production
+  refuse de démarrer si cette adresse est en `http`.
+- **Aucune réponse ne portait d'en-tête de sécurité**, et les manifestes de
+  déploiement n'en ajoutaient pas : ni `nosniff`, ni politique de référent, ni refus
+  d'encadrement, ni HSTS. Un intergiciel les pose désormais sur TOUTE réponse, y
+  compris les refus. HSTS seulement quand l'API est servie en HTTPS — posé en
+  développement, il interdirait `http://localhost` au navigateur pendant six mois,
+  pour tous les projets du poste.
+- **Les portes publiques du parcours commercial n'étaient pas bornées** — dépôt d'une
+  demande, rappel sur un devis, acceptation d'une proforma — alors que la connexion et
+  le devis l'étaient. Le trou s'est aggravé le jour où l'affectation est devenue
+  automatique : un automate qui martèle le formulaire occupe désormais des gens, pas
+  seulement une table. Les règles acceptent maintenant un chemin à étoile finale, sans
+  quoi une référence dans l'adresse (`/acquisition/devis/DV-…/rappel`) ne serait jamais
+  attrapée. Mesuré sur la pile : le 31ᵉ dépôt d'une même adresse reçoit 429.
+
+⚠️ **UN DÉFAUT DE FOND, NON CORRIGÉ, QUI DEMANDE UNE DÉCISION.**
+
+Le parcours de paiement a été suivi jusqu'au bout pour la première fois : demande,
+qualification, chiffrage, proforma envoyée, acceptation par lien signé, règlement,
+encaissement — et **l'espace client s'ouvre tout seul** (`tnt-essai-paiement-…`, actif
+et prêt). Mais **personne ne crée de compte au client et ne lui envoie de lien
+d'accès** : le seul chemin qui le fait est la souscription en ligne, par sa route
+d'activation. La fiche du dossier payé, côté console, n'affiche qu'« Payé le … ·
+espace « … » », sans aucun geste pour ouvrir l'accès. Pour une création d'entreprise
+c'est normal — il n'y a pas encore de société —, mais pour une adhésion, le client a
+payé et n'a aucun moyen d'entrer.
+
+Serveur : 3 813 tests (sept nouveaux sur la surface de sécurité), 0 échec.
+
+## 23 septembre 2026 (nuit) — La barre du bas flotte, et les champs cessent d'être des cases
+
+Le cabinet a trouvé la barre et les formulaires « trop classiques ». Deux reprises.
+
+**La barre du bas flotte.** Collée au bord, pleine largeur, elle avait l'allure d'une
+barre système : correcte, sans caractère. Détachée — seize points sur les côtés, coins
+de vingt-six, ombre remontante —, elle devient un objet posé sur la page. L'onglet
+actif porte une PASTILLE, et non une simple teinte de texte : sur une dalle bon marché
+au soleil, un magenta et un gris se ressemblent, une forme non. La coquille laisse le
+contenu passer dessous (`extendBody`), et chaque écran réserve `espaceSousLaBarre`.
+
+⚠️ **Un défaut trouvé en la refaisant** : à soixante-dix points de haut, le bouton
+central DÉBORDAIT de la barre. Or ce qui déborde d'un parent ne reçoit pas les appuis :
+le haut du bouton le plus important de l'application était mort. La barre mesure
+désormais quatre-vingt-six points, et il tient entièrement dedans. Le cas d'essai qui
+vérifiait « il dépasse vers le haut » vérifie maintenant ce qui compte vraiment : il
+est AU CENTRE, à moins de deux points du milieu de l'écran.
+
+**Les champs de saisie cessent d'être des cases.** Un filet gris tout autour, au repos
+comme à la saisie : l'allure d'un formulaire administratif. Désormais une surface
+teintée sans aucun filet au repos, un liseré de deux points dans la teinte d'action à
+la saisie, cinquante-six points de haut, et l'étiquette EN HAUT, toujours.
+
+⚠️ **Deux défauts vus au rendu, corrigés** : l'étiquette flottante se posait SUR le
+texte tapé — les deux se lisaient l'un par-dessus l'autre ; et l'espacement intérieur,
+symétrique, ne lui laissait aucune place. L'étiquette est maintenant fixée en haut, ce
+qui a l'avantage de nommer le champ en permanence : trois champs plus bas, on sait
+encore ce qu'on écrit.
+
+Application : 218 tests, analyse sans remarque. Rendus relus en clair, en sombre et en
+police agrandie ; version installée sur l'appareil.
+
+## 23 septembre 2026 (soir) — Le téléphone prend un rendu contemporain, et deux règles changent
+
+Le cabinet a demandé un rendu « plus parlant », au niveau des interfaces mobiles
+d'aujourd'hui. Trois décisions ont été prises avec lui, et deux reviennent sur des
+choix antérieurs. Elles sont écrites là où elles s'appliquent, avec leur date.
+
+- **Les angles passent de 8 à 16 points, sur le TÉLÉPHONE SEULEMENT.** Ils avaient été
+  resserrés pour s'aligner sur la console. La console ne bouge pas : un tableau de
+  quarante lignes aux angles de seize points devient mou. C'est la seule divergence
+  assumée entre le poste de travail et le téléphone, et `marque.dart` la porte.
+- **Le dégradé de marque est autorisé**, alors que le § 10.7 l'interdisait. Sous trois
+  conditions qui le gardent honnête : il ne relie que les deux teintes de la marque ;
+  il ne porte que DEUX surfaces (l'en-tête de l'espace adhérent, la grande action) ;
+  le texte posé dessus est mesuré sur l'extrémité la plus CLAIRE, jamais sur la
+  moyenne. Mesuré : blanc sur magenta 600, 7,41:1 ; sur l'indigo, 15,22:1.
+- **L'accueil montre où l'on en est, dessiné.** Un anneau de progression donne
+  « 2 sur 5 » pour le mois — l'application ne lisait pas `justificatifs_du_mois`, que
+  le serveur rendait depuis toujours, et ne pouvait donc rien montrer de l'avancement.
+  Une barre à deux parts donne la part du retard dans l'échéancier. Les deux portent
+  leurs nombres écrits : la couleur ne dit jamais seule.
+
+⚠️ **Deux défauts corrigés dans la foulée**, tous deux vus au rendu :
+
+- en mode sombre, la grande action prenait l'encre « sur primaire », qui y est FONCÉE :
+  posée sur le dégradé sombre, elle disparaissait. Le blanc est la seule encre qui
+  tienne sur les deux dégradés ;
+- à 130 % de police, « documents » ne rentrait plus dans une tuile sur trois colonnes
+  et se coupait en plein mot. Borner l'agrandissement aurait rendu illisible ce qu'on
+  venait d'agrandir : les trois tuiles passent en colonne au-delà de 115 %.
+
+Application : 218 tests, analyse sans remarque. Contrastes mesurés sur les deux
+extrémités de chaque dégradé, en clair et en sombre : le plus bas tient 6,26:1.
+
+## 23 septembre 2026 (fin) — La revue de fond de l'application
+
+Tous les écrans de l'espace adhérent redessinés en trois variantes — clair, sombre,
+police à 130 % — et relus un par un, plus les écrans publics. Trois défauts trouvés,
+tous corrigés :
+
+- **La barre du bas débordait de quatre points à 130 %** : les libellés grandissent,
+  la barre non. Sa hauteur suit désormais l'échelle du système ; le bouton central,
+  lui, ne bouge pas.
+- **Deux appareils photo à trois centimètres l'un de l'autre** sur l'onglet du dépôt :
+  le bouton flottant de l'écran, et le bouton central de la barre. Le geste vit
+  maintenant dans la barre : sur son propre onglet, le bouton central **déclenche la
+  prise de vue** au lieu de ne rien faire, et le bouton flottant a disparu. Sans
+  dossier rattaché, la prise de vue s'arrête et le dit — un cas d'essai le tient.
+- **La marge basse de l'accueil** était réglée à 96 points par excès de prudence ;
+  ramenée à 48, la valeur qui dégage le débord du bouton central.
+
+**Contrastes mesurés** sur les treize couples de couleurs nouveaux (grande action,
+tuiles chiffrées, barre du bas, chiffres du cabinet), en clair et en sombre : tous
+au-dessus des seuils — 5,16:1 au plus bas pour du texte, 6,33:1 pour une icône.
+**Cibles tactiles** : un cas d'essai vérifie que les cinq destinations font au moins
+quarante-huit points.
+
+**Suites complètes** : serveur 3 806 tests, application 218 tests (trois nouveaux sur
+la barre), types et lint de la console et de la vitrine sans erreur, contrat des
+écrans 281/282 (le seul illisible est antérieur), document de conception sans tiret
+cadratin.
+
+## 23 septembre 2026 (suite) — L'accueil dit enfin où l'on en est, et le dépôt prend le centre
+
+L'accueil connecté enchaînait trois sections de même poids ; rien n'y disait ce que
+l'adhérent vient faire. Et la barre du bas alignait cinq onglets identiques, alors
+qu'un adhérent ouvre l'application une facture à la main : neuf fois sur dix pour la
+DÉPOSER, le reste il le consulte.
+
+- **Trois chiffres, chacun avec son signe** : pièces attendues, périodes en retard,
+  documents déposés. Ils se lisent d'un regard et mènent chacun à l'écran qui les
+  détaille. Le retard se dit en rouge, le reste en indigo. ⚠️ « — » et jamais zéro
+  quand le serveur n'a pas répondu : zéro veut dire « rien en retard », ce n'est pas
+  la même nouvelle.
+- **Une grande action « Déposer une pièce »**, pleine largeur, en couleur d'action :
+  c'est la seule action pleine de l'écran (§ 10.7).
+- **Les raccourcis redeviennent auxiliaires** : trois tuiles compactes (mes pièces,
+  mon entreprise, écrire au cabinet). Le dépôt n'y figure plus — il a sa grande action
+  et la place centrale.
+- **La barre du bas** : quatre onglets, et le dépôt au centre, en bouton rond surélevé,
+  plus grand, sous le pouce. Mêmes index, mêmes clés, même écran : ce qui change est ce
+  que l'œil comprend. Un anneau de la couleur de la barre le détache du contenu qui
+  défile dessous — posé avec une simple ombre, il dessinait un halo gris sale.
+- **Les chiffres du cabinet, sur la page publique, reçoivent leurs icônes** : quatre
+  nombres alignés sans signe se lisaient comme un tableau.
+- Deux défauts de mise en page corrigés au passage : les rangées de tuiles demandaient
+  une hauteur infinie dans une page qui défile (`IntrinsicHeight`), et la dernière carte
+  de l'accueil passait sous la barre du bas.
+
+Application : 216 tests passent, dont deux nouveaux sur la barre (le dépôt est rond,
+plus grand, et déborde vers le haut), analyse sans remarque.
+
+## 23 septembre 2026 — Cent cinquante-neuf cas d'usage éprouvés en direct, et l'écran se calme
+
+**Le balayage.** Chaque cas d'usage du système a été exercé sur la pile en service,
+avec le rôle qui le porte : vitrine et devis, acquisition du prospect à l'espace
+ouvert, collecte, comptabilité, revue, obligations fiscales, conformité, clôture,
+social, création d'entreprise, portefeuille, pilotage, administration, exploitation.
+159 cas, tous conformes. Les refus rencontrés sont ceux que le domaine doit opposer,
+et ils l'ont fait au bon moment :
+
+- une écriture ne se valide pas sans sa pièce justificative ;
+- un mois ne se transmet pas en revue avec un brouillon, ni avec des pièces non
+  traitées, ni deux fois ;
+- un dépôt de déclaration exige une session renforcée par le second facteur ;
+- réinitialiser un second facteur ferme les sessions du compte visé, et de lui seul ;
+- la connexion est limitée en débit : un balayage qui ouvre trop de sessions se fait
+  refuser, comme un robot ;
+- relancer un adhérent appartient au chargé de clientèle, déposer une déclaration au
+  réviseur, fixer un prix à la direction.
+
+**Un défaut trouvé et corrigé.** La LISTE des dossiers commerciaux affichait le nom du
+responsable (« Patricia MOUKOURI »), la FICHE ne le rendait pas : l'écran de détail
+n'avait que « C-007 ». Le nom est désormais résolu des deux côtés, et la console
+l'affiche sous le titre du dossier.
+
+**Le design mobile, d'un cran.** Vu sur l'appareil, l'écran des échéances était un mur
+rouge : bandeau latéral, icône et phrase disaient trois fois la même alerte, sur
+chacune des huit cartes, chacune portant l'ombre pleine.
+
+- **Deux niveaux de relief.** La carte posée garde son ombre ; les éléments répétés
+  d'une liste reçoivent `ombreListe`, presque nulle. Huit ombres pleines l'une sous
+  l'autre faisaient vibrer la page.
+- **L'ombre de carte adoucie** : le bord de l'ombre se lisait comme un trait gris.
+- **Le bandeau d'alerte à trois points** au lieu de quatre : à quatre, il lisait comme
+  une barre d'erreur pleine hauteur.
+- **L'état en étiquette** et non en phrase rouge pleine largeur ; la précision
+  « et 1 autre période » passe en encre douce : c'est une précision, pas un second cri.
+- **Le chapeau compact** : icône sur la ligne du titre, titre d'un cran plus bas dans
+  l'échelle. Il occupait le tiers de l'écran avant la première échéance.
+- **Un rythme nommé** (4, 8, 12, 16, 20, 24, 32) : les écrans écrivaient 6, 10, 14, 18,
+  26 selon l'humeur. Et un **titre de section unique**, là où trois variantes coexistaient.
+- Interligne du texte courant à 1,55, étiquettes plus discrètes.
+
+**Vérifié sur le téléphone**, connecté à la pile : accueil, échéances, documents,
+entreprise. Application : 215 tests, analyse sans remarque.
+
+## 22 septembre 2026 (nuit) — Le dossier de démonstration rattrape le calendrier
+
+Revue complète de l'application mobile, écran par écran, branchée sur la vraie
+pile : 46 écrans dessinés par le moteur de Flutter, au format d'un téléphone, avec
+les vraies polices, en clair, en sombre et en police agrandie à 130 %. Aucun
+débordement, aucune erreur. Le défaut était ailleurs : dans les données.
+
+**L'adhérent de démonstration affichait « 81 périodes en retard »**, dont des
+retards de 584 jours, et des documents déposés par le cabinet datés de 2024. Le jeu
+d'essai ne portait que six accusés de dépôt, écrits à une date que le calendrier
+avait dépassée. Montré à un prospect, le client modèle du cabinet avait l'air en
+infraction depuis deux ans.
+
+- **`app/demonstration_a_jour.py`** calcule les accusés manquants **sur l'échéancier
+  du dossier, par rapport au jour** : chaque période échue depuis plus de trente jours
+  reçoit son accusé, par le domaine (`enregistrer_accuse`), avec un numéro et un
+  montant stables. Plus aucune date écrite en dur : rien ne vieillira.
+- **Le mois que la comptabilité de démonstration traite reste ouvert.** Le jeu
+  d'essai porte des écritures de juillet 2026 : c'est le mois que la console montre en
+  cours de déclaration. La première version le déclarait d'office, et la suite l'a vu :
+  le parcours de dépôt de TVA répondait « déjà déclarée ». Une période mensuelle qui
+  porte des écritures n'est donc jamais consignée.
+- **L'amorçage** l'appelle : une base recréée naît à jour. **Une base existante** se
+  recale sans rien effacer, et rejouer n'ajoute rien (`outils/recaler_la_demonstration.py`).
+- Le locataire est établi par le module lui-même : un amorçage appelé hors requête
+  échouait sinon sous le cloisonnement, et laissait la base à moitié versée.
+
+**Résultat sur la pile déployée** : 120 accusés ajoutés, 0 au second passage.
+L'adhérent voit 8 périodes en retard (juillet, 38 jours ; août, 7 jours) au lieu de
+81, et 126 accusés de dépôt dont les plus récents de juin 2026. Serveur : 3 806 tests
+passent ; quatre nouveaux cas tiennent la règle (retards récents seulement, rejouable,
+dossier de démonstration seul, mois en cours de déclaration laissé ouvert).
+
+**Ce que la revue n'a pas couvert** : le passage sur le vrai téléphone (débranché),
+l'émulateur de la machine étant plein d'applications d'autres projets, auxquelles on
+n'a pas touché ; l'iPhone ; la prise de photo réelle.
+
+## 22 septembre 2026 (soir) — Une demande trouve son responsable en trois secondes
+
+Le client lit « un responsable vous contacte ». Jusqu'ici, aucun responsable n'était
+désigné : chaque dossier restait `DÉPOSÉE` jusqu'à ce qu'un collaborateur ouvre la
+console et clique sur « affecter ». Le code citait l'événement `DemandeDéposée`
+depuis l'étape 2 du parcours, et **rien ne le publiait**.
+
+- **Le dépôt publie `DemandeDéposée`** dans la boîte d'envoi, dans la même
+  transaction que le dossier, et seulement pour un dossier neuf : une demande
+  rattachée ne republie rien, sans quoi l'affectation tournerait une seconde fois et
+  pourrait changer de responsable en plein échange. Identifiant dérivé de la
+  référence : un rejeu ne dépose pas deux fois.
+- **Un abonné l'affecte** (`abonne_d_affectation.py`) : la même affectation que le
+  bouton de la console, mêmes candidats, même grille du référentiel. Il ne touche
+  qu'un dossier encore `DÉPOSÉE`, parce que le relais garantit « au moins une fois »
+  et qu'un collaborateur a pu passer avant. Aucun candidat n'est un fait métier, pas
+  une panne : il ne lève pas, et la veille remonte le dossier.
+- **La pile de démonstration n'exécutait aucun travail.** La production a son
+  ordonnanceur (`30-ordonnanceur.yaml`) ; la démonstration n'en avait aucun, et donc
+  ni relais, ni relance, ni ouverture d'espace sur paiement. L'ordonnanceur tourne
+  désormais dans le processus de l'API (`CGA_ORDONNANCEUR_EN_PROCESSUS`). Rien ne
+  sort de la machine : paiement simulé, courriels arrêtés au relais `courrier`.
+
+**Vérifié.** Quatre cas passent par le vrai relais sur PostgreSQL (demande neuve
+affectée ; dossier affecté à la main laissé tel quel ; demande rattachée sans second
+événement ; rappel d'un devis). Contrôle : l'abonné désinscrit, le premier cas tombe.
+Sur la pile déployée : une demande déposée est `AFFECTÉE` en 3,3 s, et le rappel d'un
+devis de formation aussi ; aucune erreur au journal, quarantaine vide. Serveur :
+3 802 tests passent.
+
+**Ce qui reste `DÉPOSÉE`.** Les trois dossiers de démonstration déposés avant ce
+changement n'ont pas d'événement : ils attendent une affectation à la main, ou la
+veille.
+
+## 22 septembre 2026 (fin) — « Prix à confirmer » prévient enfin quelqu'un
+
+L'application et la page du devis sur la vitrine écrivaient « un responsable vous
+rappelle » sous tout devis au prix non arrêté, ou sur étude. **Rien ne prévenait
+personne** : le devis dormait sur le serveur, et le client attendait un appel.
+
+- **Nouvelle route publique `POST /acquisition/devis/{reference}/rappel`.** Elle
+  dépose une demande de contact dans la file du responsable, avec la référence du
+  devis et les prestations dont le prix est à arrêter. C'est l'entrée du parcours
+  mis en place plus tôt dans la journée : échange, prix arrêté, proforma envoyée par
+  courriel ou WhatsApp. Les coordonnées viennent **du devis**, jamais du corps de la
+  requête ; aucun accord WhatsApp n'est déduit d'un numéro laissé pour un devis ; deux
+  appuis ne font pas deux dossiers (rattachement anti-doublon existant). Refus 409 pour
+  un devis déjà engagé ou déjà réglable. Déclarée dans les deux listes closes (routes
+  publiques, routes du parcours), avec sa raison.
+- **Un bouton « Faire confirmer mon prix »** à la place de la phrase, dans
+  l'application et sur la vitrine. Le message du serveur remplace le bouton après
+  succès ; un refus ou une panne se lit, et le bouton reste.
+- **Deux contradictions vues sur le téléphone, corrigées.** Le résumé du devis
+  annonçait « À régler maintenant » et « Ce prix est garanti » sur un tarif
+  indicatif, juste au-dessus du bloc qui disait l'inverse : il dit désormais « Tarif
+  indicatif » et « prix à confirmer par le cabinet », dans l'application comme sur la
+  vitrine. Et une formation, qui n'ouvre aucun espace, promettait un « lien d'accès »
+  sous le champ du courriel.
+- **La page du devis de la vitrine** reprend la mise en page de la proforma : même
+  classe `conteneur` inexistante, même titre passé sous l'en-tête. L'annonce
+  promotionnelle n'y paraît plus. Le surtitre n'impose plus de capitales : il porte
+  une référence qu'un client peut dicter au téléphone.
+
+**Vérifié.** Sur le téléphone : formation au tarif indicatif, « Voir mon prix »,
+« Faire confirmer mon prix », message du serveur affiché ; le dossier apparaît dans
+les demandes entrantes, `DEPOSEE`, avec le message « Devis DV-… : prix à arrêter pour
+Formation — session interentreprises ». Même parcours depuis la vitrine au format
+téléphone. Serveur : 3 798 tests passent sur PostgreSQL. Application : 215 tests,
+analyse sans remarque.
+
+## 22 septembre 2026 (suite) — Le prix arrêté après l'échange part chez le client
+
+Tous les prix ne sont pas au catalogue. Pour un service sur étude, le prix se décide
+**après l'échange** : le responsable l'arrête dans la console, et le client doit
+retrouver la proforma dans sa boîte de courriel ou dans WhatsApp, avec le lien pour la
+lire et l'accepter sans compte.
+
+**Ce qui manquait.** La console affichait le lien d'acceptation une fois, et le
+responsable devait le recopier à la main dans un message, puis cocher « j'ai envoyé ».
+Trois défauts se cachaient derrière :
+
+- **Le lien menait au mauvais site.** Il était construit sur `SITE_URL`, qui vaut le
+  domaine de production par défaut ; la page de la proforma vit sur la vitrine. En
+  démonstration, le client aurait ouvert une page inexistante. Il est désormais
+  construit sur l'adresse de la vitrine, côté console comme côté serveur.
+- **Le lien disparaissait avant d'être envoyé.** L'émission rafraîchit la page et le
+  dossier passe à « proforma émise » ; deux panneaux distincts démontaient le
+  formulaire à cet instant, et avec lui le seul affichage du lien. Un panneau unique,
+  à la même place, garde désormais son état.
+- **Toute la surface d'acquisition répondait 500 sur la pile déployée**, demande de
+  contact publique comprise : le référentiel était lu dans le dépôt, que l'image ne
+  contient pas. Il est lu où la configuration le dit (`CGA_DOSSIER_REFERENTIEL`), et
+  un test le sert depuis une copie modifiée, dépôt rendu introuvable.
+
+**Ce qui est fait.**
+
+- **Envoi par courriel à l'émission.** Case cochée d'office quand le dossier porte une
+  adresse. C'est le serveur qui écrit, au moment où il forge le lien : le lien ne
+  transite par personne. Un courriel parti vaut transmission et arme la relance ; un
+  courriel refusé n'annule pas l'émission, la réponse le dit (`ENVOYE`,
+  `SANS_ADRESSE`, `REFUSE`). Nouveau gabarit `proforma.envoi`, le seul qui porte le
+  lien d'acceptation.
+- **Envoi par WhatsApp.** Un bouton ouvre la conversation du client, message déjà
+  rédigé, repris mot pour mot du modèle `cga_envoi_proforma`. **Seulement si le client
+  a donné son accord WhatsApp**, et non révoqué ; sinon l'écran dit pourquoi.
+- **La page du client, refaite pour le téléphone.** Elle employait deux classes
+  inexistantes : le texte touchait le bord et le bouton qui engage le client
+  s'affichait en texte nu. Le service s'affichait par son code (`creation sarl`), et
+  l'annonce promotionnelle « votre SARL pour 275 000 FCFA » se posait par-dessus une
+  proposition à 250 000 FCFA. Deux cartes désormais, une bande indigo sous l'en-tête
+  comme sur toute page intérieure, aucune annonce sur cette page.
+- **Un relais de messagerie de démonstration** (`courrier`, Mailpit) dans la pile :
+  les courriels partent vraiment par SMTP et s'arrêtent là, lisibles sur
+  `http://localhost:${PORT_COURRIER}`. Une pile locale n'écrit toujours à personne.
+- `CGA_ADRESSE_PUBLIQUE_VITRINE` : nouvelle variable, exigée en https en production,
+  ajoutée au manifeste Kubernetes, à `.env.example` et au script de démonstration.
+
+**Vérifié de bout en bout sur la pile déployée.** Demande publique avec courriel et
+accord WhatsApp, affectation, qualification, chiffrage (200 000 à 375 000 FCFA),
+émission à 250 000 FCFA depuis la console : courriel reçu dans le relais, lien ouvert
+sur la vitrine au format téléphone, proposition acceptée ; le dossier passe
+`ACCEPTEE`, la proforma est marquée transmise. Suite complète du serveur : 3 793 tests
+passent sur PostgreSQL.
+
+**Reste à faire.** L'envoi WhatsApp automatique attend l'ouverture du compte de la
+plateforme et l'approbation des modèles. (« Prix à confirmer » dépose désormais une
+vraie demande : voir l'entrée suivante.)
+
+## 22 septembre 2026 — Le prix est une décision du gérant, et les angles se resserrent
+
+**Demandé.** Ne pas oublier l'intervention humaine dans la définition des prix : c'est
+au gérant de les fixer, après. Relever encore le dessin de l'application, et réduire
+les arrondis.
+
+**Ce qui a été constaté.** Les prix de l'offre publique (12 500, 35 000, 180 000,
+75 000 F) venaient des textes de la maquette de la vitrine. Ils étaient affichés comme
+fermes et **encaissés en ligne**, sans qu'aucun responsable du cabinet ne les ait
+arrêtés. Ils n'étaient pas non plus sur la fiche de contreseing : ils échappaient à
+toute validation. Le référentiel de tarification disait pourtant déjà que le moteur
+« rend un intervalle, jamais un prix », et le code du catalogue annonçait « une table
+éditable par la direction, avec un écran ».
+
+**Ce qui a été décidé, et pourquoi.**
+
+* Un tarif porte un **statut** : `A_VALIDER` par défaut (c'est l'état réel du barème
+  aujourd'hui), `FIXE` quand la direction l'a arrêté, avec qui et quand.
+* Fixer un prix **ouvre une période** à partir d'une date, aujourd'hui au plus tôt. On
+  ne réécrit jamais un prix passé : un devis déjà remis changerait de montant.
+* Chaque décision est **conservée en base** (table `tarif_fixe`, cloisonnée par cabinet)
+  et rejouée sur le catalogue à chaque lecture. L'historique dit qui a fixé quoi.
+* Le devis **recopie** si son prix était arrêté (`prix_arrete`, `prix_arretes`), comme il
+  recopie le montant. L'application et la vitrine lisent ce champ au lieu de recopier la
+  règle : deux copies d'une règle divergent toujours.
+* **Aucun paiement en ligne sur un prix non fixé** : le serveur refuse (409) et dit
+  pourquoi. Un devis établi sur un prix indicatif le reste ; on en établit un nouveau.
+* La permission `FIXER_LES_TARIFS` est réservée à la **direction**.
+
+**Livré.**
+
+* Serveur : le statut, la table et sa migration, deux routes réservées à la direction
+  (lire l'état des prix, fixer un prix), le refus au paiement, le nom de l'auteur.
+* Console : l'écran **Tarifs de l'offre** : combien de prix restent à fixer, le prix du
+  jour de chaque prestation et de chaque tranche, le geste « fixer ce prix » (montant,
+  date d'effet, motif, confirmation), l'historique des décisions.
+* Application et vitrine : « tarif indicatif, le cabinet confirme ce prix avant tout
+  paiement » ; pas de bouton de paiement sur un prix non fixé, mais la phrase qui dit
+  qu'un responsable rappelle, et le moyen de le joindre. La note de développeur que
+  l'application affichait (« voir l'en-tête du module ») ne sort plus.
+* Dessin : les rayons de l'application sont maintenant **exactement ceux de la console**
+  (8 et 4), et la pilule n'est plus gardée que pour les étiquettes.
+
+**Vérifié.** Serveur : 3 786 cas sur PostgreSQL, aucun sauté, dont 20 sur les tarifs, et
+le parcours réel sur PostgreSQL (la gérante fixe le prix, le visiteur souscrit, la
+décision survit au redémarrage). Application : 213 cas. Contrat écrans–API : 280 appels
+sur 281 conformes (le seul signalé préexistait). Sur la pile en ligne, par l'écran de la
+console : un prix fixé par la gérante, le compteur passé de 5 à 4 ; un devis d'adhésion
+refusé au paiement, un devis de domiciliation accepté.
+
+**Ce qui reste.**
+
+* **Le gérant doit fixer les prix réels.** Quatre restent à fixer, et la domiciliation
+  l'a été en démonstration à 180 000 F. Tant qu'il ne l'a pas fait, rien d'autre ne se
+  paie en ligne : c'est voulu.
+* L'écran des tarifs n'exige pas encore de second facteur, contrairement aux actes
+  sensibles de la fiche de sécurité. À décider.
+
+---
+
+## 21 septembre 2026 — L'application mobile devient une application : la vitrine, l'accueil, le suivi
+
+**Demandé.** L'application était « vide » : un mur de connexion, puis un appareil
+photo. Le cabinet la veut complète et attrayante : un visiteur sans compte doit y
+voir tout ce que la vitrine propose et pouvoir souscrire ; un adhérent connecté doit
+y trouver ce qu'il doit, ce que le cabinet lui demande, et les documents qu'on
+dépose pour lui ; la page de connexion était jugée amateur ; le dessin, trop
+classique.
+
+**Ce qui a été constaté en essai réel, et qui a changé la réponse.**
+
+* **Une adhésion souscrite depuis l'application ne pouvait jamais être payée.** Le
+  formulaire ne demandait pas le NIU ; le serveur établit le devis sans lui, puis
+  refuse le paiement d'une prestation qui ouvre un dossier. Trouvé en jouant le
+  parcours contre le vrai serveur, pas en test. **La vitrine avait le même défaut** :
+  son champ NIU n'était pas obligatoire. Corrigé des deux côtés.
+* **« dès 0 F par mois » pour l'adhésion.** Les tarifs sans montant (le régime du
+  réel, la création, le ponctuel, tous sur étude) étaient lus comme zéro, et zéro
+  gagnait le classement du prix d'entrée. Absent veut désormais dire *sur étude*.
+* **« 75 000 F une fois » pour la formation**, facturée *par personne*. C'est
+  maintenant l'unité du barème qui s'affiche.
+* **« Mot de passe oublié » existait côté serveur.** On l'avait cru absent. Il
+  répond 202 pour toute adresse, connue ou non, pour ne pas révéler qui est client :
+  l'écran dit donc « si un compte est ouvert à cette adresse, un lien vient d'y
+  partir », jamais « un lien vous a été envoyé ».
+* **Les quatre témoignages de la vitrine sont des noms inventés sur des portraits
+  de banque d'images.** Ils ne sont pas repris dans l'application. **À trancher par
+  le cabinet** pour la vitrine elle-même.
+* **Le PDF de l'accusé du guichet n'est pas conservé** : le système garde le contenu
+  déclaré, le numéro et l'empreinte, pas le reçu du guichet. La prévisualisation
+  porte donc sur ce qui existe : le fichier de chaque pièce déposée, photo ou PDF.
+
+**Livré (application mobile).**
+
+* **La page publique reprend la vitrine en une page** : promesse, chiffres, annonce
+  du moment, les prestations avec leur barème, ce que l'adhésion change, les trois
+  étapes, le blog lisible dans l'application, les institutions, les trois moyens de
+  joindre le cabinet. Une rangée d'onglets épinglée mène à chaque section.
+* **La connexion** : une photographie, la phrase « le cabinet ne vous demandera
+  jamais votre mot de passe », le lien de réinitialisation, un retour vers l'offre.
+* **L'accueil connecté** : le mois dans les mots du serveur (« Il manque 3
+  justificatifs »), les demandes du cabinet avec les deux réponses toutes faites,
+  le résumé des échéances, les derniers documents, des raccourcis. Les onglets
+  deviennent Accueil, Échéances, Déposer, Documents, Entreprise.
+* **La visionneuse** : photo ou PDF d'une pièce, tel que le serveur le conserve ;
+  depuis « Mes pièces envoyées », et depuis une demande « à corriger » pour revoir
+  la facture refusée.
+* **Le suivi d'une souscription** : paiement demandé, reçu, *identité vérifiée par
+  le cabinet*, accès ouvert ; puis les mensualités une fois l'abonnement en vigueur.
+  La troisième étape est celle qu'on oublie : sans elle, le souscripteur attend un
+  lien qui ne peut pas encore partir.
+* **Le dessin, repris depuis le thème** : fond teinté et cartes blanches posées par
+  une ombre teintée d'indigo, une carte partagée au lieu de sept dessinées à la
+  main, les chapeaux d'écran en indigo (le magenta est réservé à l'action), une
+  échelle typographique française, des champs remplis plutôt que cerclés.
+  Chaque contraste a été **calculé**, et trois choix initiaux ne tenaient pas.
+
+**Vérifié.** Application : 208 cas, analyse stricte sans remarque. Serveur : 3 765
+cas sur PostgreSQL, aucun sauté. Console et vitrine : lint et typage propres.
+Document de conception : aucun tiret cadratin, contenu conforme, compilation.
+
+**Ce qui reste.**
+
+* **Le parcours complet sur le téléphone**, bloqué par un appareil verrouillé.
+* Les photographies sont des illustrations libres de droits ; celles du cabinet
+  doivent les remplacer avant toute publication sur les magasins.
+* Le serveur accepte n'importe quelle chaîne comme NIU au devis : la forme n'est
+  contrôlée qu'à l'écran. La vérification d'identité par le cabinet couvre le fond.
+* L'estimation du coût de création n'est pas encore dans l'application.
+
+---
+
 ## 18 août 2026 (nuit) — La séance de démonstration, et trois pièges de shell
 
 **Demandé.** Comment repartir d'une base propre pour une séance de tests logique et

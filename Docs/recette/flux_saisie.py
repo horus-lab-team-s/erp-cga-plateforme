@@ -42,6 +42,7 @@ from __future__ import annotations
 
 import json
 import re
+import os
 import sys
 import urllib.error
 import urllib.request
@@ -52,8 +53,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from verifier_profils import Client, champs_caches
 
-FRONT = "http://localhost:3011"
-API = "http://127.0.0.1:8010"
+#: ⚠️ RÉGLABLES, COMME POUR LES AUTRES FLUX.
+#:
+#: Elles étaient écrites en dur. Un flux pointé sur une pile qui n'écoute pas ces
+#: ports-là rendait sept étapes rouges d'affilée, toutes sur « Connection
+#: refused » : un faux rouge, qui ne dit rien du produit et fait douter du
+#: cahier. Constaté le 29 septembre en jouant les quatre flux à la suite.
+#:
+#: Les noms et les valeurs par défaut sont ceux de `cas_usage.py` : deux
+#: conventions pour une même question finiraient par diverger.
+FRONT = os.environ.get("CGA_FRONT_RECETTE", "http://localhost:3011")
+API = os.environ.get("CGA_API_RECETTE", "http://127.0.0.1:8010")
 MOT_DE_PASSE = "cabinet brcg douala 2026"
 EXERCICE = "2026"
 

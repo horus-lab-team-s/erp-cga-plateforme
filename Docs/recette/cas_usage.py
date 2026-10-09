@@ -65,14 +65,45 @@ def _depot_du_serveur() -> Path:
 
 
 SERVEUR = _depot_du_serveur()
+
+
+#: Le dépôt de l'application mobile, quand un cas d'usage s'y rejoue.
+#:
+#: ⚠️ CONTRAIREMENT AU SERVEUR, SON ABSENCE N'ARRÊTE PAS LE REGISTRE — mais elle
+#: ne valide rien non plus. Les cas qui s'y rejouent rendent « dépôt du mobile
+#: introuvable », donc **en échec**, jamais « validé ». Le registre reste
+#: utilisable par quelqu'un qui n'a cloné que le serveur, sans jamais lui faire
+#: croire que le mobile a été vérifié.
+def _depot_du_mobile() -> Path | None:
+    regle = os.environ.get("CGA_RACINE_MOBILE")
+    candidats = [Path(regle)] if regle else [RACINE.parent / "erp-cga-mobile"]
+    for candidat in candidats:
+        if (candidat / "pubspec.yaml").is_file():
+            return candidat
+    return None
+
+
+MOBILE = _depot_du_mobile()
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 # ⚠️ `noqa: E402` : ces imports suivent `sys.path.insert` parce qu'ils désignent
 # des modules voisins, introuvables avant. C'est la seule position qui marche.
 from verifier_profils import Client, champs_caches  # noqa: E402
 
-FRONT = "http://localhost:3011"
-API = "http://127.0.0.1:8010"
+#: Où trouver la pile à éprouver.
+#:
+#: ⚠️ **RÉGLABLES, ET ELLES NE L'ÉTAIENT PAS.** Les deux adresses étaient codées
+#: en dur sur les ports du développement (3011 et 8010). Le registre était donc
+#: impointable sur la pile de démonstration — qui écoute 3100 et 8100 — sans
+#: éditer ce fichier, c'est-à-dire sans modifier l'instrument de recette pour
+#: pouvoir l'exécuter. C'est exactement ce que les conventions du projet
+#: évitent ailleurs : `CGA_RACINE_*` pour les outils, `CGA_API` pour le
+#: téléphone.
+#:
+#: Les valeurs par défaut restent celles du développement : un poste qui lance
+#: `uvicorn` et `npm run dev` n'a rien à régler.
+FRONT = os.environ.get("CGA_FRONT_RECETTE", "http://localhost:3011")
+API = os.environ.get("CGA_API_RECETTE", "http://127.0.0.1:8010")
 MOT_DE_PASSE = "cabinet brcg douala 2026"
 JOUR = "2026-08-17"
 D1 = "M065544332211L"  # AGRO-NKOLO SA
@@ -208,6 +239,15 @@ class CasUsage:
     #: était attendu : c'est lui qu'on relit six mois plus tard.
     preuve: Callable[[], tuple[bool, str]] | None = None
     test: str | None = None
+    #: Sur quel banc `test` se rejoue : `pytest` sur le serveur, `flutter` sur
+    #: l'application mobile.
+    #:
+    #: ⚠️ AJOUTÉ LE 27 SEPTEMBRE, PARCE QUE CE REGISTRE COMPTAIT 75 CAS ET PAS
+    #: UN SEUL POUR LE MOBILE — alors que c'est l'un des quatre livrables, et
+    #: celui par lequel l'adhérent remet ses pièces. Un cahier de recette qui
+    #: ignore un livrable entier ne dit pas « il reste à couvrir » : il ne dit
+    #: rien, et son total rassure à tort.
+    banc: str = "pytest"
 
 
 def _ecran(adresse: str, chemin: str) -> tuple[int, str]:
@@ -977,10 +1017,24 @@ def uc_reponse_au_cabinet() -> tuple[bool, str]:
     accord, repondue = api(session(ADHERENT), "POST", chemin, {"nature": "INTROUVABLE"})
     double, _ = api(session(ADHERENT), "POST", chemin, {"nature": "INTROUVABLE"})
     refus, _ = api(session(COMPTABLE), "POST", chemin, {"nature": "INTROUVABLE"})
-    ouverte = repondue.get("statut") == "OUVERTE" if isinstance(repondue, dict) else False
+
+    # ⚠️ **REJOUABLE.** Une exécution précédente a déjà déposé la réponse : le
+    # premier envoi rend alors 409, et c'est le bon comportement — c'est
+    # exactement ce que le second envoi vérifie. Exiger 201 ferait échouer le cas
+    # au deuxième passage, et l'échec accuserait le produit au lieu du cahier.
+    #
+    # On lit donc l'état de la demande **séparément**, au lieu de le tirer du
+    # corps du premier envoi qui n'existe pas en cas de 409.
+    _, apres = api(session(ADHERENT), "GET", f"/collecte/demandes?entreprise={D3}")
+    la_demande = next(
+        (d for d in apres if isinstance(apres, list) and d["identifiant"] == demande), None
+    )
+    ouverte = bool(la_demande and la_demande.get("statut") == "OUVERTE")
+    repondu = accord in (201, 409)
     return (
-        accord == 201 and double == 409 and refus == 403 and ouverte,
-        f"adhérent 201 (demande toujours OUVERTE : {ouverte}), double {double}, comptable {refus}",
+        repondu and double == 409 and refus == 403 and ouverte,
+        f"adhérent {accord} (demande toujours OUVERTE : {ouverte}), "
+        f"double {double}, comptable {refus}",
     )
 
 
@@ -1003,21 +1057,75 @@ def uc_echeances_de_l_adherent() -> tuple[bool, str]:
     code, vue = api(session(ADHERENT), "GET", f"/obligations/dossiers/{D3}/mes-echeances")
     if code != 200 or not isinstance(vue, dict):
         return False, f"HTTP {code}"
-    codes = [e["code_obligation"] for e in vue["echeances"] if e["etat"] != "DEPOSEE"]
-    unique = len(codes) == len(set(codes))
+    # ⚠️ UNE CARTE PAR OBLIGATION **ET PAR PÉRIODE**, et non par obligation seule.
+    #
+    # L'assertion d'origine exigeait un code d'obligation unique. Elle tenait
+    # tant que le jeu de démonstration ne laissait qu'une période ouverte par
+    # obligation ; elle est fausse en général, et elle l'est devenue en pratique.
+    # Relevé sur la pile : `IRPP_ACOMPTE` en août (EN_RETARD) et en juillet
+    # (PREUVE_ENVOYEE), `CNPS` en juillet et en septembre. Une TVA mensuelle a
+    # une carte par mois : c'est le comportement voulu, et le confondre avec un
+    # doublon accuse le produit à tort.
+    cles = [(e["code_obligation"], e["periode"]) for e in vue["echeances"] if e["etat"] != "DEPOSEE"]
+    unique = len(cles) == len(set(cles))
     lisible = all(e["periode"] and e["titre"] for e in vue["echeances"])
-    return unique and lisible, f"{len(vue['echeances'])} carte(s), une par obligation : {unique}"
+    return unique and lisible, (
+        f"{len(vue['echeances'])} carte(s), une par obligation et période : {unique}"
+    )
 
 
 def uc_preuve_de_paiement() -> tuple[bool, str]:
     """« J'ai déjà payé » : la quittance rejoint le dossier et dit ce qu'elle règle (pas 113)."""
     from uuid import uuid4
 
+    # ─────────────────────────────────────────────────────────────────────────
+    # ⚠️ CE CAS CONSOMMAIT SON PROPRE TERRAIN, ET FINISSAIT PAR SE DÉCLARER ROUGE.
+    #
+    # Il n'acceptait que les échéances `EN_RETARD` ou `A_VENIR`. Or il en règle une
+    # à chaque exécution : au bout de quatorze passages sur la même pile, il ne
+    # restait plus rien et il rendait « aucune échéance à régler ». Relevé le
+    # 29 septembre — 14 cartes en `PREUVE_ENVOYEE`, 4 en `DEPOSEE`, et un cas rouge
+    # pour un produit qui n'avait rien fait de mal.
+    #
+    # ⚠️ **Le filtre était aussi plus étroit que le produit.** Vérifié sur la pile :
+    # une quittance NEUVE sur une échéance déjà prouvée rend **201**. C'est juste —
+    # l'adhérente qui a envoyé la mauvaise quittance doit pouvoir envoyer la bonne.
+    # Le 409 documenté porte sur **la même pièce** rejouée, pas sur l'échéance.
+    #
+    # On écarte donc `DEPOSEE`, et rien d'autre : sur une obligation déjà déposée,
+    # il n'y a effectivement rien à prouver, et la route rend 409 pour le dire.
+    #
+    # ⚠️ On préfère quand même une échéance non réglée quand il en reste une : c'est
+    # le scénario réel, et le constat dit lequel des deux a été joué.
+    # ─────────────────────────────────────────────────────────────────────────
     code, vue = api(session(ADHERENT), "GET", f"/obligations/dossiers/{D3}/mes-echeances")
-    a_regler = [e for e in (vue.get("echeances", []) if isinstance(vue, dict) else []) if e["etat"] in ("EN_RETARD", "A_VENIR")]
-    if code != 200 or not a_regler:
-        return False, f"aucune échéance à régler (HTTP {code})"
-    echeance = a_regler[0]
+    cartes = vue.get("echeances", []) if isinstance(vue, dict) else []
+    impayees = [e for e in cartes if e["etat"] in ("EN_RETARD", "A_VENIR")]
+    # ─────────────────────────────────────────────────────────────────────────
+    # ⚠️ LA PLUS PROCHE, ET JAMAIS UNE ÉCHÉANCE FUTURE SI UNE PASSÉE EXISTE.
+    #
+    # Ce cas prenait `prouvables[0]`, c'est-à-dire la première dans l'ordre de la
+    # réponse. Relevé le 30 septembre en parcourant l'espace de l'adhérente : il
+    # avait attaché des quittances à des échéances de **novembre**, depuis
+    # septembre. Le produit l'accepte — on peut payer d'avance —, mais le jeu de
+    # démonstration s'en trouvait appauvri : plus une seule carte « à venir » ou
+    # « en retard » à montrer, alors que c'est le cas principal de cet écran.
+    #
+    # Un cas de recette qui abîme le jeu qu'il traverse ne le dit à personne.
+    # ─────────────────────────────────────────────────────────────────────────
+    # ⚠️ Un tri par DATE CROISSANTE suffit, et la réponse ne porte pas la date du
+    # jour : la plus ancienne échéance est nécessairement la plus pertinente, et
+    # l'ordre croissant place tout ce qui est échu avant tout ce qui vient. Écrire
+    # une comparaison à « aujourd'hui » aurait demandé un champ que le serveur ne
+    # rend pas, et le commentaire aurait décrit un tri que le code ne fait pas.
+    prouvables = sorted(
+        impayees or [e for e in cartes if e["etat"] != "DEPOSEE"],
+        key=lambda carte: carte["echeance"],
+    )
+    if code != 200 or not prouvables:
+        return False, f"aucune échéance sur laquelle une preuve ait un sens (HTTP {code})"
+    echeance = prouvables[0]
+    scenario = "première preuve" if impayees else "quittance corrigée"
     marqueur = uuid4().hex[:8]
     envoi, fichier = envoyer_un_fichier(
         session(ADHERENT), f"/collecte/fichiers?entreprise={D3}", f"quittance-{marqueur}.pdf", _pdf(marqueur)
@@ -1051,7 +1159,8 @@ def uc_preuve_de_paiement() -> tuple[bool, str]:
     etat = vue_apres.get((echeance["code_obligation"], echeance["periode_debut"]))
     return (
         accord == 201 and double == 409 and etat == "PREUVE_ENVOYEE",
-        f"{recue['titre'] if isinstance(recue, dict) else '—'} : preuve reçue, carte « {etat} », seconde fois {double}",
+        f"{recue['titre'] if isinstance(recue, dict) else '—'} ({scenario}) : preuve reçue, "
+        f"carte « {etat} », même pièce une seconde fois {double}",
     )
 
 
@@ -1110,9 +1219,22 @@ def uc_lien_d_acces_rendu() -> tuple[bool, str]:
     )
     refus, _ = api(session(COMPTABLE), "POST", chemin, {"verification": "Rappelé au numéro du dossier"})
     type_du_lien = lien.get("type") if isinstance(lien, dict) else "—"
+    # ⚠️ **LE 409 EST UNE RÉUSSITE, PAS UN ÉCHEC.**
+    #
+    # Le produit borne à deux le nombre de liens renvoyés par jour à un compte :
+    # « au-delà, chaque lien valide de plus est un risque : faites venir
+    # l'adhérent au cabinet ». Deux exécutions du cahier dans la même journée
+    # atteignent donc la borne, et le troisième envoi est refusé — ce qui prouve
+    # que le garde-fou tient.
+    #
+    # Exiger 201 faisait échouer le cas au deuxième passage, et l'échec accusait
+    # le produit alors qu'il protégeait l'adhérent.
+    envoye = accord == 201 or (accord == 409 and "aujourd'hui" in str(lien))
     return (
-        courte == 422 and accord == 201 and refus == 403,
-        f"vérification courte {courte}, lien {type_du_lien} envoyé, comptable {refus}",
+        courte == 422 and envoye and refus == 403,
+        f"vérification courte {courte}, "
+        f"{'lien ' + str(type_du_lien) + ' envoyé' if accord == 201 else 'borne du jour atteinte (409)'}, "
+        f"comptable {refus}",
     )
 
 
@@ -1148,7 +1270,28 @@ def uc_piece_d_appui() -> tuple[bool, str]:
             "motif": "Attestation obtenue du fournisseur et vérifiée au fichier DGI, recette du pas 119.",
         },
     )
-    if pose not in (200, 201) or not isinstance(ecart, dict):
+    # ⚠️ **REJOUABLE.** Une exécution précédente a déjà écarté ce constat : le
+    # domaine rend alors 409, et c'est le bon comportement — un second écart sur
+    # le même constat serait un doublon. On retrouve donc l'écart existant plutôt
+    # que d'échouer, sans quoi le cas ne passe qu'une fois par jeu de données.
+    if pose == 409:
+        # ⚠️ **Le JOURNAL, parce qu'il n'y a pas de GET sur les écarts d'une
+        # pièce.** Ma première relecture interrogeait
+        # `/conformite/pieces/{ref}/ecarts`, qui n'existe qu'en POST : elle
+        # rendait 405 et le cas concluait « introuvable » sur un écart pourtant
+        # posé. Le journal des dérogations est la seule lecture qui les liste.
+        _, journal_deja = api(session(REVISEUR), "GET", "/conformite/derogations")
+        deja = [
+            d
+            for d in (journal_deja.get("derogations", []) if isinstance(journal_deja, dict) else [])
+            if d.get("reference_document") == ligne["piece"]
+            and d.get("code_regle") == ligne["code_regle"]
+        ]
+        if not deja:
+            return False, "écart refusé 409 et introuvable au journal des dérogations"
+        # Le journal rend l'écart à plat ; la suite attend `{"ecart": {...}}`.
+        ecart = {"ecart": deja[0]}
+    elif pose not in (200, 201) or not isinstance(ecart, dict):
         return False, f"écart refusé : HTTP {pose}"
     identifiant = ecart["ecart"]["identifiant"]
     chemin = f"/conformite/pieces/{ligne['piece']}/ecarts/{identifiant}/piece-appui"
@@ -1385,6 +1528,141 @@ REGISTRE: list[CasUsage] = [
              test="tests/test_courriel.py::TestConfigurationDeProduction"),
     CasUsage("UC-33", "K", "Architecte", "Voir les frontières de contexte tenir",
              test="tests/test_architecture.py"),
+    # ── C · L'application mobile de l'adhérent ───────────────────────────────
+    #
+    # ⚠️ AJOUTÉS LE 27 SEPTEMBRE. Ce registre couvrait le serveur, la console et
+    # la vitrine, et pas une ligne du mobile — alors que c'est par là que
+    # l'adhérent remet ses pièces. Le défaut qui a motivé ces trois cas ne
+    # pouvait donc être vu par personne : l'écran promettait que les pièces
+    # partiraient toutes seules, et rien ne les envoyait.
+    CasUsage("UC-76", "C", "Adhérent",
+             "Voir une pièce photographiée partir sans aucun geste",
+             test="test/ecran_accueil_test.dart -k part toute seule",
+             banc="flutter"),
+    CasUsage("UC-77", "C", "Adhérent",
+             "Voir la file repartir au retour dans l'application, après un essai sans réseau",
+             test="test/ecran_accueil_test.dart -k repart quand on revient",
+             banc="flutter"),
+    CasUsage("UC-78", "C", "Adhérent",
+             "Lire une promesse d'envoi que l'application tient vraiment",
+             test="test/ecran_accueil_test.dart -k dit quoi en attendre",
+             banc="flutter"),
+    CasUsage("UC-79", "C", "Adhérent",
+             "Garder la dernière section lisible sous la barre du bas",
+             test="test/espace_sous_la_barre_test.dart",
+             banc="flutter"),
+    CasUsage("UC-80", "C", "Adhérent",
+             "Retrouver un accusé de dépôt parmi soixante-cinq, accents compris",
+             test="test/ecran_documents_test.dart -k Retrouver un accusé",
+             banc="flutter"),
+    CasUsage("UC-81", "C", "Adhérent",
+             "Retrouver une pièce remise par émetteur ou par mois",
+             test="test/ecran_historique_test.dart -k Retrouver une pièce",
+             banc="flutter"),
+    CasUsage("UC-82", "C", "Adhérent",
+             "Lire « rien ne correspond » et jamais « vous n'avez aucun document »",
+             test="test/recherche_test.dart",
+             banc="flutter"),
+    # ── M→I · La création d'entreprise souscrite depuis le site ──────────────
+    #
+    # ⚠️ AJOUTÉS LE 27 SEPTEMBRE. Ce parcours — celui que le site vend en
+    # première page — n'était couvert par aucun cas : `flux_souscription` part
+    # d'une adhésion, `flux_creation` part d'un dossier déjà ouvert par un
+    # collaborateur. Entre les deux, le client qui achète sa société.
+    CasUsage("UC-83", "M", "Prospect",
+             "Déposer une demande de création depuis le site, sans compte",
+             test="tests/test_demande_de_contact.py"),
+    CasUsage("UC-84", "M", "Chargé de clientèle",
+             "Chiffrer une création, ou entendre nommer ce qui manque",
+             test="tests/test_prix_du_dossier.py"),
+    CasUsage("UC-85", "I", "Prospect",
+             "Voir son dossier de formalité ouvert du seul fait d'avoir payé",
+             test="tests/test_dossier_de_creation_a_l_encaissement.py"),
+    CasUsage("UC-86", "M", "Chargé de clientèle",
+             "Renvoyer à un client le lien de sa proforma, sans en émettre une autre",
+             test="tests/test_lien_d_acceptation.py -k renvoyer"),
+    CasUsage("UC-87", "M", "Chargé de clientèle",
+             "Retrouver une création payée, sortie de la file des dossiers en cours",
+             test="tests/test_recette_du_parcours.py -k filet"),
+    CasUsage("UC-88", "M", "Chargé de clientèle",
+             "Ouvrir la fiche d'un dossier dont le service n'a pas de questionnaire",
+             test="tests/test_prix_du_dossier.py -k sans_questionnaire"),
+    CasUsage("UC-89", "M", "Prospect",
+             "Recevoir sa proposition par courriel, avec un lien qui l'ouvre",
+             test="tests/test_envoi_de_la_proforma.py"),
+    CasUsage("UC-90", "M", "Chargé de clientèle",
+             "Vendre sous le plancher du barème, motif écrit à l'appui",
+             test="tests/test_prix_du_dossier.py -k intervalle"),
+    # ── Pas 134 : trois messages que la cliente lisait, et qui disaient faux ──
+    CasUsage("UC-91", "M", "Prospect",
+             "Recevoir par écrit l'accusé de sa demande, avec sa référence",
+             test="tests/test_accuse_de_depot.py -k avec_adresse"),
+    CasUsage("UC-92", "M", "Prospect",
+             "N'être accusé qu'une fois, même si le relais remet l'événement",
+             test="tests/test_accuse_de_depot.py -k republication"),
+    CasUsage("UC-93", "M", "Adhérent",
+             "Ne pas se voir réclamer une patente antérieure à sa société",
+             test="tests/test_obligations.py -k AvantSaPeriode"),
+    CasUsage("UC-94", "M", "Adhérent",
+             "Être appelé par son nom quand le produit ne connaît pas son prénom",
+             test="tests/test_courriel.py -k SalutationNEstJamaisVide"),
+    # ── Pas 135 : le monitoring cesse de mentir dans les deux sens ───────────
+    CasUsage("UC-95", "K", "Exploitant",
+             "Voir les quatorze services réellement sondés, aucun « sans sonde »",
+             test="tests/test_registre_http.py -k sans_sonde"),
+    CasUsage("UC-96", "K", "Exploitant",
+             "Apprendre au déploiement qu'aucun bulletin ne sortira, et pourquoi",
+             test="tests/test_sondes_des_trois_derniers.py -k Social"),
+    CasUsage("UC-97", "K", "Exploitant",
+             "Apprendre qu'aucun adhérent n'obtiendrait son abattement CGA",
+             test="tests/test_sondes_des_trois_derniers.py -k Cloture"),
+    CasUsage("UC-98", "K", "Exploitant",
+             "Ne pas voir un panneau rouge quand la plateforme refuse à raison",
+             test="tests/test_charge_de_la_plateforme.py -k refus"),
+    # ── Pas 136 : la voie WhatsApp de la proforma survit au rechargement ─────
+    CasUsage("UC-99", "M", "Chargé de clientèle",
+             "Retrouver le lien d'une proforma le lendemain, pour le renvoyer",
+             test="tests/test_lien_d_acceptation.py -k RetrouverLeLien"),
+    CasUsage("UC-100", "M", "Chargé de clientèle",
+             "Ne pas armer la relance en relisant simplement un lien",
+             test="tests/test_lien_d_acceptation.py -k relire_ne_date"),
+    # ── Pas 137 : trois services mouraient dans le tunnel ────────────────────
+    CasUsage("UC-101", "M", "Chargé de clientèle",
+             "Déclarer avoir joint un client, sans avoir à le qualifier",
+             test="tests/test_prix_du_dossier.py -k ArreteParLeGerant"),
+    CasUsage("UC-102", "M", "Gérant",
+             "Voir une formation se vendre au prix qu'il a lui-même arrêté",
+             test="tests/test_prix_du_dossier.py -k rend_la_formation_facturable"),
+    CasUsage("UC-103", "M", "Contrôle interne",
+             "Vérifier qu'un prix que personne n'a fixé reste invendable",
+             test="tests/test_prix_du_dossier.py -k sans_decision_du_gerant"),
+    # ── Pas 138 : les gabarits, relus un par un ─────────────────────────────
+    CasUsage("UC-104", "M", "Prospect",
+             "Garder une trace écrite de l'engagement qu'il vient de prendre",
+             test="tests/test_lien_d_acceptation.py -k LaisseUneTrace"),
+    CasUsage("UC-105", "M", "Chargé de clientèle",
+             "Ne pas perdre une signature parce que la messagerie s'est tue",
+             test="tests/test_lien_d_acceptation.py -k poste_muet"),
+    CasUsage("UC-106", "K", "Exploitant",
+             "Voir un modèle WhatsApp mal formé refusé ici, non à la soumission",
+             test="tests/test_conversation.py -k emplacement_est_refuse"),
+    # ── Pas 139 : elle avait répondu, l'écran lui disait d'envoyer ───────────
+    CasUsage("UC-107", "J", "Adhérent",
+             "Ne plus se voir réclamer ce à quoi il a déjà répondu",
+             test="tests/test_espace_adherent.py -k ElleARepondu"),
+    CasUsage("UC-108", "K", "Exploitant",
+             "Voir qu'une suite verte n'a rien vérifié, faute de base",
+             test="tests/test_conftest_garde_de_base.py"),
+    # ── Pas 141 : elle suit sa formalité sans compte ────────────────────────
+    CasUsage("UC-109", "I", "Fondateur",
+             "Suivre sa création et déposer ses pièces, sans aucun compte",
+             test="tests/test_suivi_de_ma_creation.py"),
+    CasUsage("UC-110", "I", "Chargé de formalités",
+             "Ouvrir le document que la fondatrice vient d'envoyer",
+             test="tests/test_suivi_de_ma_creation.py -k ouvre_ce_qu_elle"),
+    CasUsage("UC-111", "M", "Prospect",
+             "Ne lire aucun tiret cadratin dans les messages du cabinet",
+             test="tests/test_courriel.py -k AucunTiretCadratin"),
 ]
 
 
@@ -1410,6 +1688,12 @@ LIGNE_DE_COMPTE = re.compile(
 )
 #: Un couple « nombre + état » à l'intérieur de cette ligne.
 COMPTE = re.compile(r"(\d+)\s+(passed|failed|skipped|error|errors|xfailed|xpassed)")
+
+
+#: Une ligne d'avancement de `flutter test` : « 00:13 +240 -2: … ».
+AVANCEMENT_FLUTTER = re.compile(r"^\d{2}:\d{2} [+~-]\d+")
+#: Les compteurs qu'elle porte, signe par signe.
+COMPTE_FLUTTER = re.compile(r"([+~-])(\d+)")
 
 
 def _depouiller(sortie: str) -> tuple[str, dict[str, int]]:
@@ -1445,6 +1729,66 @@ def _depouiller(sortie: str) -> tuple[str, dict[str, int]]:
     return resume, compte
 
 
+def _depouiller_flutter(sortie: str) -> tuple[str, dict[str, int]]:
+    """La dernière ligne d'avancement de `flutter test`, et ce qu'elle compte.
+
+    ⚠️ **FLUTTER NE REND PAS UNE LIGNE DE RÉSUMÉ COMME PYTEST.** Il rend une
+    ligne d'avancement réécrite en place, de la forme :
+
+        00:13 +240: All tests passed!
+        00:03 +16 -2: Some tests failed.
+
+    `+n` compte les cas passés, `-n` les échecs, `~n` les cas sautés. On lit la
+    DERNIÈRE ligne de cette forme : les précédentes sont des états intermédiaires
+    et compteraient moins que le total.
+
+    ⚠️ Même règle que pour pytest : « aucun cas exécuté » n'est pas « validé ».
+    Un fichier mal nommé, un `--plain-name` qui ne correspond à rien, et flutter
+    sort 0 sans avoir rien joué.
+    """
+    lignes = [
+        ligne.strip()
+        for ligne in sortie.strip().splitlines()
+        if AVANCEMENT_FLUTTER.match(ligne.strip())
+    ]
+    if not lignes:
+        return "aucun cas exécuté", {}
+    resume = lignes[-1]
+    compte: dict[str, int] = {}
+    for signe, nombre in COMPTE_FLUTTER.findall(resume):
+        compte[{"+": "passed", "-": "failed", "~": "skipped"}[signe]] = int(nombre)
+    return resume, compte
+
+
+def _rejouer_sur_le_mobile(cible: list[str]) -> tuple[bool, str]:
+    """Rejoue un fichier de cas Flutter, et rend (verdict, constat)."""
+    if MOBILE is None:
+        return False, (
+            "dépôt du mobile introuvable — régler CGA_RACINE_MOBILE, ou cloner "
+            "`erp-cga-mobile` à côté de la plateforme"
+        )
+    commande = ["flutter", "test", cible[0]]
+    if len(cible) > 1:
+        # ⚠️ `--plain-name` est le `-k` de flutter : il filtre sur l'intitulé.
+        commande += ["--plain-name", cible[1]]
+    try:
+        issue = subprocess.run(
+            commande,
+            cwd=MOBILE,
+            capture_output=True,
+            text=True,
+            timeout=600,
+            check=False,
+        )
+    except FileNotFoundError:
+        return False, "`flutter` absent du PATH : ce cas n'a pas été vérifié"
+    resume, compte = _depouiller_flutter(issue.stdout)
+    a_tourne = compte.get("passed", 0) > 0
+    sans_echec = compte.get("failed", 0) == 0
+    rien_saute = compte.get("skipped", 0) == 0
+    return (a_tourne and sans_echec and rien_saute), resume
+
+
 def executer_suite(cas: list[CasUsage]) -> dict[str, tuple[bool, str]]:
     """Lance pytest une seule fois par cible et rend le verdict de chacune.
     ⚠️ L'environnement est transmis tel quel — `CGA_URL_BASE_DE_DONNEES_TEST`
@@ -1458,6 +1802,9 @@ def executer_suite(cas: list[CasUsage]) -> dict[str, tuple[bool, str]]:
         if c.test is None:
             continue
         cible = c.test.split(" -k ")
+        if c.banc == "flutter":
+            resultats[c.reference] = _rejouer_sur_le_mobile(cible)
+            continue
         # ⚠️ `-rs` : quand rien ne tourne, la raison des cas ignorés est la seule chose
         # qui dise quoi faire. Sans elle, le cahier affiche « aucun test exécuté », ce
         # qui est exact et parfaitement inutile à celui qui doit corriger.

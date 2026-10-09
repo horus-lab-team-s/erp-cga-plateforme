@@ -23,6 +23,8 @@ cohérence du code avec lui-même.
 
 from __future__ import annotations
 
+import os
+
 import html.parser as _parser
 import sys
 import urllib.error
@@ -30,7 +32,13 @@ import urllib.request
 import uuid
 from dataclasses import dataclass, field
 
-BASE = "http://localhost:3011"
+#: Le front à éprouver.
+#:
+#: ⚠️ **RÉGLABLE, ET ELLE NE L'ÉTAIT PAS.** Codée en dur sur le port du
+#: développement, cette adresse rendait la recette impointable sur la pile de
+#: démonstration — qui écoute 3100. Même variable que `cas_usage.py`, pour que
+#: les deux ne puissent pas viser deux piles différentes.
+BASE = os.environ.get("CGA_FRONT_RECETTE", "http://localhost:3011")
 MOT_DE_PASSE = "cabinet brcg douala 2026"
 
 # ── Les comptes de démonstration, et le ou les rôles qu'ils portent ───────────

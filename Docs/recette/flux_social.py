@@ -12,16 +12,26 @@ vérifications qui distinguent un calcul juste d'un calcul plausible :
 from __future__ import annotations
 
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
 import uuid
 from decimal import Decimal
+from pathlib import Path
 
-sys.path.insert(0, "/tmp/cga-pg")
+# ⚠️ Le dossier de CE fichier, et non un chemin de brouillon.
+#
+# Il pointait sur `/tmp/cga-pg`, resté d'une mise au point. Sur une machine qui
+# n'a pas ce dossier, l'import échoue et le flux ne démarre pas du tout — et rien
+# dans le message ne dit que la cause est une ligne du dépôt.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from verifier_profils import Client, champs_caches
 
-API = "http://127.0.0.1:8010"
+#: ⚠️ Réglables, comme pour les autres flux. Voir l'en-tête de `flux_saisie.py` :
+#: écrites en dur, elles rendaient toutes les étapes rouges sur une pile dont les
+#: ports diffèrent, sans rien dire du produit.
+API = os.environ.get("CGA_API_RECETTE", "http://127.0.0.1:8010")
 JOUR = "2026-08-17"
 MOT_DE_PASSE = "cabinet brcg douala 2026"
 COMPTABLE = "l.fotso@cga-brcg.cm"
@@ -141,10 +151,39 @@ def main() -> int:
         echecs.append("l'IRPP affiche un taux unique, ce qu'un barème progressif n'a pas")
 
     # 6 · Les valeurs non validées sont signalées ─────────────────────────────
-    non_valides = sum(1 for ligne in bulletin["lignes"] if ligne["non_valide"])
-    if not etape(6, "Valeurs non validées signalées", non_valides == len(bulletin["lignes"]),
-                 f"{non_valides}/{len(bulletin['lignes'])} lignes marquées A_VALIDER"):
-        echecs.append("des lignes reposent sur des valeurs non validées sans le dire")
+    #
+    # ─────────────────────────────────────────────────────────────────────────
+    # ⚠️ CE CAS EXIGEAIT QUE **TOUTES** LES LIGNES SOIENT MARQUÉES, ET IL RENDAIT
+    # UN FAUX ROUGE.
+    #
+    # C'était juste quand le référentiel entier était `A_VALIDER`. Les sept taux
+    # de cotisation ont été validés depuis ; seuls les deux barèmes progressifs
+    # ne le sont pas. Le produit marque donc exactement deux lignes sur neuf —
+    # et le cas l'accusait d'un défaut.
+    #
+    # ⚠️ **UN DRAPEAU UNIFORME NE VAUT RIEN.** S'il est vrai partout, il ne dit
+    # plus lequel des chiffres repose sur une valeur que personne n'a validée, et
+    # le comptable cesse de le lire. Ce qu'on vérifie ici, c'est donc qu'il
+    # **discrimine**, et sur quoi.
+    #
+    # ⚠️ **L'ATTENTE EST FERMÉE, ET NON « AU MOINS CELLES-LÀ ».** Le jour où le
+    # cabinet validera le barème de l'IRPP, ce cas tombera — et c'est ce qu'on
+    # veut : quelqu'un reviendra ici constater que le produit a cessé d'alerter,
+    # au lieu de le découvrir sur une fiche de paie. C'est la convention déjà
+    # tenue pour la liste des services sans sonde.
+    # ─────────────────────────────────────────────────────────────────────────
+    marquees = sorted(l["code"] for l in bulletin["lignes"] if l["non_valide"])
+    validees = sorted(l["code"] for l in bulletin["lignes"] if not l["non_valide"])
+    attendues = ["IRPP", "TDL"]
+    if not etape(6, "Seules les valeurs non validées sont signalées",
+                 marquees == attendues,
+                 f"marquées {marquees or '—'} · assises sur des valeurs validées : "
+                 f"{len(validees)} ligne(s)"):
+        echecs.append(
+            f"le signalement des valeurs non validées a changé : {marquees} au lieu "
+            f"de {attendues}. Soit un barème a été validé — mettre ce cas à jour —, "
+            "soit une ligne repose sur une valeur non validée sans le dire."
+        )
 
     # 7 · La déclaration mensuelle ────────────────────────────────────────────
     code, dipe = appeler(

@@ -59,6 +59,63 @@ délibéré : un outil de vérification qui, faute de trouver ce qu'il doit lire
 après la scission, ne lire que la console a fait tomber le compte de 226 à 222 sans
 qu'aucune route n'ait disparu : les quatre manquantes étaient celles de la vitrine.
 
+## Sauvegarder, et vérifier que la sauvegarde vaut quelque chose
+
+```bash
+outils/sauvegarde.sh   sauvegardes/                       # rôles + base, avec contrôle
+outils/restauration.sh sauvegardes/cga-….dump  …roles.sql # dans une base NEUVE
+```
+
+⚠️ **Il n'y avait aucune procédure.** La seule phrase écrite disait « une base infogérée
+dont quelqu'un vérifie les sauvegardes ». « Quelqu'un » n'est pas une procédure, et une
+sauvegarde qu'on n'a jamais restaurée n'est pas une sauvegarde.
+
+### Le piège, mesuré sur la pile en service
+
+La base porte 35 politiques de cloisonnement. Une sauvegarde prise sous le rôle applicatif
+`cga_app`, qui ne les contourne pas, **échoue bruyamment** :
+
+```
+pg_dump: error: query would be affected by row-level security policy
+```
+
+Le réflexe est d'ajouter l'option qui fait taire l'erreur, `--enable-row-security`. Elle la
+fait taire, en effet :
+
+| Sauvegarde | Taille | Lignes réellement présentes |
+| --- | --- | --- |
+| sous le rôle propriétaire | 193 035 octets | **1 173** |
+| avec `--enable-row-security` | 10 171 octets | **8** |
+
+Le fichier déclare bien ses 38 tables, donc il *paraît* complet. Il contient zéro compte,
+zéro accusé de réception, zéro écriture comptable. Et la commande rend zéro : aucune
+alerte, et on le découvre le jour de la restauration.
+
+`sauvegarde.sh` compte donc les lignes en base et refuse une archive manifestement vide.
+
+### Ce que `pg_dump` n'emporte pas
+
+`cga_app` et `cga_migration` vivent dans la **grappe**, pas dans la base. Restaurée sur un
+serveur neuf, la base seule retrouve ses 35 politiques et ses 152 privilèges — qui
+désignent des rôles inexistants. `pg_dumpall --roles-only` les emporte, et le script le
+fait toujours.
+
+### Ce qui a été exercé, en vrai
+
+| Contrôle | Résultat |
+| --- | --- |
+| 38 tables, ligne par ligne, avant et après | identiques |
+| 35 politiques, 35 tables protégées | conservées |
+| 152 privilèges de `cga_app` | conservés |
+| Cloisonnement exercé sous `cga_app` | 0 ligne sans locataire, 12 comptes avec le bon, 0 avec un locataire étranger |
+| Refus de restaurer par-dessus une base existante | déclenché |
+| Refus d'une archive vide | déclenché sur les valeurs mesurées |
+
+⚠️ **`restauration.sh` ne restaure jamais par-dessus une base existante.** On restaure le
+plus souvent pour *vérifier* une sauvegarde, et c'est le cas où écraser la base en service
+serait catastrophique. Le jour d'un vrai sinistre : restaurer dans une base neuve, puis
+basculer.
+
 ## Le site de documentation
 
 ```bash

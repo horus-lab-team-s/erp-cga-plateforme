@@ -290,6 +290,11 @@ ecrans:
       - { geste: Accepter la proforma, côté client, route: "POST /acquisition/proformas/{numero}/acceptation" }
       - { geste: Demander le règlement, route: "POST /acquisition/proformas/{numero}/reglement" }
       - { geste: Confirmer l'encaissement, route: "POST /acquisition/proformas/{numero}/encaissement" }
+      # Pas 93 : l'écran annonçait « l'espace s'ouvre » dans tous les cas, alors
+      # que la saga peut se terminer avec le compte administrateur SUBSTITUÉ —
+      # le client n'a alors ni identifiant ni lien. L'information était calculée
+      # et stockée depuis toujours, et exposée nulle part.
+      - { geste: Lire ce que l'ouverture a réellement fait, route: "GET /acquisition/dossiers/{reference}/ouverture" }
       - { geste: Classer sans suite, route: "POST /acquisition/dossiers/{reference}/sans-suite" }
       - { geste: Clore un rappel, route: "POST /acquisition/rappels/{identifiant}/fait" }
       - { geste: Lire l'état des canaux, route: "GET /acquisition/canaux" }
@@ -373,6 +378,9 @@ ecrans:
       - { geste: Établir un devis, route: "POST /souscription/devis" }
       - { geste: Lire un devis, route: "GET /souscription/devis/{reference}" }
       - { geste: S'engager sur un devis, route: "POST /souscription/devis/{reference}/engagement" }
+      # Pas 92 : le prospect qui ne veut pas payer en ligne demande qu'on le
+      # rappelle. Le geste crée une VRAIE demande commerciale, pas un courriel.
+      - { geste: Demander à être rappelé sur un devis, route: "POST /acquisition/devis/{reference}/rappel" }
       - { geste: Lire une souscription, route: "GET /souscription/souscriptions/{reference}" }
       - { geste: Lire l'échéancier d'une souscription, route: "GET /souscription/souscriptions/{reference}/echeancier" }
       - { geste: Activer une souscription, route: "POST /souscription/souscriptions/{reference}/activation" }
@@ -381,6 +389,18 @@ ecrans:
       - { geste: Rapprocher les paiements, route: "POST /souscription/reconciliation" }
       - { geste: Lire les relances de souscription, route: "GET /souscription/relances" }
       - { geste: Lire les services à suspendre, route: "GET /souscription/services-a-suspendre" }
+
+  - ref: HORS-TARIFS
+    libelle: Tarifs du cabinet, les décisions de prix du gérant
+    priorite: null
+    # Pas 91 : le prix n'était pas une donnée mais une constante du code. Il est
+    # devenu une décision DATÉE, prise par le gérant et opposable : un devis
+    # émis hier garde le prix d'hier. L'écran est celui où cette décision se
+    # prend, et il est distinct de la souscription qui la consomme.
+    pages: [/tarifs]
+    gestes:
+      - { geste: Lire les tarifs en vigueur à une date, route: "GET /souscription/tarifs" }
+      - { geste: Arrêter un tarif, route: "POST /souscription/tarifs" }
 
   - ref: HORS-EXPLOITATION
     libelle: Exploitation de la plateforme
@@ -401,6 +421,11 @@ ecrans:
 
   # Pas 99 : les écrans du parcours réviseur absents de l'inventaire E00-E13 (maquette
   # « Parcours reviseur CGA », écrans « Journal des dérogations » et « F · Qualité des règles »).
+      # Pas 94 : l'écran montrait ce qui FONCTIONNE — services, boîte d'envoi,
+      # travaux — et rien de ce que la machine ENDURE. Or c'est ce qu'on
+      # regarde en premier quand « c'est lent ».
+      - { geste: Lire la charge de la plateforme, route: "GET /transverse/charge" }
+
   - ref: HORS-REVUE
     libelle: Revue de conformité (journal des dérogations, qualité des règles)
     priorite: null

@@ -14,9 +14,16 @@ câblage entre elles.
 | `recette_complete.py` | Les cinq passes A→E, en matrices. À lire quand un cas d'usage tombe. |
 | `flux_souscription.py` | Le parcours M, du prospect anonyme à l'adhérent connecté. |
 | `flux_creation.py` | Le parcours I, du porteur de projet à l'entreprise adhérente — la dernière étape vérifie que F lui calcule un échéancier sans qu'on l'ait généré. |
+| `flux_creation_souscrite.py` | **Le parcours M→I**, du visiteur anonyme à l'entreprise immatriculée : le seul qui traverse la frontière entre ce que le site vend et ce que le cabinet livre. Trente-cinq étapes, dont l'accusé de dépôt lu dans la boîte de la cliente et le refus de toute échéance antérieure à la naissance de sa société. |
 | `flux_saisie.py` | Le parcours E, de la saisie d'écriture à la contre-passation : le seul qui prouve que le cabinet peut **produire**. |
 | `flux_social.py` | Le parcours G, du fichier du personnel à la déclaration mensuelle — dont l'asymétrie du plafond CNPS, invisible sous le plafond. |
 | `verifier_profils.py` | Le socle : comptes, permissions par rôle, client HTTP, classement des réponses. |
+
+⚠️ **Les quatre flux lisent `CGA_API_RECETTE` et `CGA_FRONT_RECETTE`**, avec les
+mêmes valeurs par défaut. Deux d'entre eux portaient leurs adresses en dur
+jusqu'au 29 septembre : joués sur une pile aux autres ports, ils rendaient
+toutes leurs étapes rouges sur « Connection refused », ce qui ne dit rien du
+produit et fait douter du cahier.
 
 ⚠️ Exporter `CGA_URL_BASE_DE_DONNEES_TEST` avant `cas_usage.py`. Sans lui, les
 tests de persistance et de concurrence se **sautent** au lieu de tourner. Le
@@ -106,6 +113,7 @@ python Docs/recette/cas_usage.py            # le registre, à montrer
 python Docs/recette/recette_complete.py     # A→E, à lire quand un cas tombe
 python Docs/recette/flux_souscription.py    # le parcours M
 python Docs/recette/flux_creation.py        # le parcours I
+python Docs/recette/flux_creation_souscrite.py   # le parcours M→I, de bout en bout
 python Docs/recette/flux_social.py          # le parcours G
 python Docs/recette/flux_saisie.py          # le parcours E, écriture comptable
 python Docs/recette/cahier_de_recette.py    # le PDF, depuis le registre qui vient de tourner

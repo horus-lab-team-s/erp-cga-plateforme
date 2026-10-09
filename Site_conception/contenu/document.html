@@ -3147,7 +3147,18 @@ if seuil.atteint(montant) and mode == ModeReglement.ESPECES:</code></pre>
               <p>Le lien d'acceptation qui accompagne le document est un lien signé, à usage unique,
                 avec une durée de validité. Il n'exige aucun compte, ce qui est le point : demander
                 à un prospect de s'inscrire pour accepter un devis fait perdre une partie des
-                prospects.</p>
+                prospects.
+                Le même raisonnement ouvre un second lien signé, celui du suivi de formalité. Entre son
+                règlement et son immatriculation, la fondatrice n'avait aucun moyen de voir son dossier
+                ni d'y déposer ses pièces : les routes de la formalité demandent toutes une habilitation
+                de collaborateur. Le canal prévu était la messagerie instantanée, et il ne tient pas,
+                sa fenêtre de service se refermant vingt-quatre heures après le dernier message du
+                client, quand une formalité dure des semaines. Ce lien-ci diffère de celui de
+                l'acceptation sur deux points, et les deux comptent : il se rouvre autant de fois qu'elle
+                le veut, et il n'a pas de date d'expiration. Sa durée de vie est celle du dossier, parce
+                qu'une durée fixée d'avance l'aurait soit enfermée dehors au milieu de sa formalité,
+                soit laissée entrer sur un dossier clos. Le compte avec mot de passe, lui, arrive avec
+                la société, au numéro de contribuable, et seulement si elle a pris le suivi.</p>
               <dl class="fiche">
                 <dt>Acteur</dt><dd>Le système</dd>
                 <dt>Service</dt><dd><code>Commerce</code> génère, <code>Pièces</code> conserve, <code>Conversation</code> transmet</dd>
@@ -11825,8 +11836,13 @@ GET /api/comptabilite/ecritures?limite=50&amp;curseur=cur_9f2a1c</code></pre>
           couvre désormais les barèmes de paie, qui sont sa ressource et non celle du Social. Un fichier de barèmes absent ne dit rien, un
           fichier présent et vide de barèmes est suspect : quelqu'un l'a posé, donc quelqu'un compte dessus.</p>
 
-        <p>La Clôture et la Création d'entreprise restent sans sonde, et c'est juste : elles n'ont aucune ressource à elles, et relire celle
-          d'un autre créerait deux vérités sur une même question. Le registre le dit plutôt que de les déclarer saines.</p>
+        <p>La Clôture, la Création d'entreprise et le Social ont pris la leur au pas 135, et les quatorze services sont désormais sondés.
+          La règle invoquée jusque-là restait bonne : relire la ressource d'un autre créerait deux vérités sur une même question. Ce qui a changé, c'est ce qu'elle
+          portait. La Création d'entreprise a maintenant des ressources à elle, sa checklist de pièces et trois codes de capital minimum. La Clôture ne persiste
+          toujours rien, mais elle a un contrat : deux codes d'abattement CGA que personne d'autre ne lit. Le Social n'a pas de ressource nouvelle, c'est la question
+          qui l'est : la sonde du Référentiel demande si le fichier se charge, celle du Social demande s'il porte les onze valeurs nommées sans lesquelles aucun
+          bulletin ne sort. Un référentiel de soixante paramètres auquel manque le plafond CNPS répond oui à la première et non à la seconde. L'état sans sonde
+          demeure au registre, parce qu'il est ce qu'il répondra le jour où quelqu'un retirera une sonde ou l'inscrira sous un nom mal orthographié.</p>
 
         <p><strong>Une sonde n'est pas une porte d'entrée</strong>, et le registre a dû l'apprendre : il compte les adaptateurs entrants pour
           décider qu'un service est joignable, et poser une sonde chez les Tenants les aurait promus « en service » alors qu'ils n'exposent
@@ -13212,7 +13228,7 @@ GET /api/comptabilite/ecritures?limite=50&amp;curseur=cur_9f2a1c</code></pre>
               <tr><th style="width:24%">Événement</th><th style="width:16%">Émetteur</th><th style="width:30%">Consommateurs</th><th style="width:30%">Ce qu'il déclenche</th></tr>
             </thead>
             <tbody>
-              <tr><td class="nowrap">DemandeDéposée</td><td>Commerce</td><td>Commerce, Audit</td><td>Affectation à un responsable selon agence, compétence et charge.</td></tr>
+              <tr><td class="nowrap">DemandeDéposée</td><td>Commerce</td><td>Commerce, Audit</td><td>Affectation à un responsable selon agence, compétence et charge, et accusé de réception écrit au client, portant la référence de son dossier. Les deux abonnés sont indépendants : l'accusé ne nomme personne, et part donc même lorsque l'annuaire n'a trouvé aucun responsable.</td></tr>
               <tr><td class="nowrap">DemandeAffectée</td><td>Commerce</td><td>Notification, Audit</td><td>Avis au responsable, démarrage du délai de veille de 24 h.</td></tr>
               <tr><td class="nowrap">MessageÉchangé</td><td>Conversation</td><td>Commerce, Assistant, Audit</td><td>Avancement de l'état du dossier, réouverture de la fenêtre de service, alimentation du corpus.</td></tr>
               <tr><td class="nowrap">QualificationComplétée</td><td>Commerce</td><td>Commerce, Audit</td><td>Ouverture du chiffrage.</td></tr>

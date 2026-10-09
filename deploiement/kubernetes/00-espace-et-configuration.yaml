@@ -42,6 +42,9 @@ data:
   # courriels dont les liens ne mènent nulle part.
   CGA_ADRESSE_PUBLIQUE: "https://api.exemple.cm"
   CGA_ADRESSE_PUBLIQUE_SITE: "https://www.exemple.cm"
+  # La vitrine : c'est elle qui porte la page où le client lit et accepte sa
+  # proforma. Le lien envoyé par courriel mène ici.
+  CGA_ADRESSE_PUBLIQUE_VITRINE: "https://vitrine.exemple.cm"
   CGA_ORIGINES_CORS: '["https://www.exemple.cm"]'
 
   CGA_DOSSIER_FICHIERS: "/application/fichiers"
