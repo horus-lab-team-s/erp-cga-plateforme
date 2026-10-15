@@ -61,7 +61,7 @@ export default {
       carton: {
         type: "chapitre", num: "Pour passer en production",
         titre: "Ce qui dépend du cabinet",
-        sous: "La clé d'API qui active l'agent des prestations et la lecture des factures. Les identifiants marchands Tara Money. Le modèle DGI des annexes et de la DSF, obtenu à la télédéclaration. La validation des taux de paie par le fiscaliste.",
+        sous: "Les identifiants marchands Tara Money. La validation des taux de paie par le fiscaliste. L'agent, lui, ne fait que proposer : sans clé d'API, tout se traite à la main, et rien n'est bloqué.",
       },
     },
     {
