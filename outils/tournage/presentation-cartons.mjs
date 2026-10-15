@@ -2,7 +2,8 @@
  * LES CARTONS DE LA PRÉSENTATION COMPLÈTE (15 octobre 2026).
  *
  * Un fichier par carton : l'ouverture générale, un carton par partie, la clôture. Le
- * montage (`monter-presentation.sh`) les intercale entre les flux déjà tournés.
+ * montage les intercale entre les flux déjà tournés. Pour une vidéo nouvelle, préférer
+ * un programme de `montage.mjs` (voir `programmes/`), qui fait cartons, montage et sommaire.
  *
  *     node presentation-cartons.mjs
  */
