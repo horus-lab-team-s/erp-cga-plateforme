@@ -117,6 +117,9 @@ await chapitre("2 · ce qui arrive : une recrue aux RH", async () => {
   await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => undefined);
   await souffle(1500);
   await centrer(page.locator(".matrice__grille"));
+  // La colonne du nouveau rôle est la dernière : la grille défile jusqu'à elle.
+  await page.locator(".matrice__grille").evaluate((g) => g.scrollTo({ left: g.scrollWidth, behavior: "smooth" }));
+  await souffle(1400);
   await projecteur(page, '.matrice__role:has-text("Ressources humaines")', { tenir: 2600, centrer: false });
   await legende(page, C, "Le rôle paraît dans la matrice, « réglé » par le cabinet. Il s'attribue ensuite depuis Comptes et habilitations.");
   await souffle(4600);
@@ -150,7 +153,7 @@ await chapitre("3 · ce qui arrive : un adhérent en retard", async () => {
   await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => undefined);
   const situation = page.locator(".situation-dossier").first();
   await centrer(situation);
-  await legende(page, C, `${nom} : la fiche dit où en est le règlement, et ce que cela change pour le cabinet.`);
+  await legende(page, C, `${nom} : en retard depuis plus de quinze jours, le dossier est « Bloqué ». Saisie, déclarations et DSF sont refusées.`);
   await souffle(4600);
 });
 

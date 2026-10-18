@@ -72,7 +72,7 @@ await chapitre("2 · ce qui arrive : la candidature", async () => {
   await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => undefined);
   const fo = page.locator("form.candidature");
   await centrer(fo);
-  await saisir(page, "form.candidature input[name=nom]", "Ngo Biyong Claire");
+  await saisir(page, "form.candidature input[name=nom]", "Claire Ngo Biyong");
   await saisir(page, "form.candidature input[name=telephone]", "699887766");
   await saisir(page, "form.candidature input[name=courriel]", "claire.ngobiyong@exemple.cm");
   await saisir(page, "form.candidature textarea[name=message]", "Deux ans en cabinet à Douala, à l'aise sur le SYSCOHADA.");
@@ -111,8 +111,12 @@ await chapitre("3 · ce que la plateforme en fait : décider, répondre", async 
   await souffle(5200);
 
   await page.getByRole("button", { name: "Envoyer au candidat" }).click();
-  await page.waitForSelector(".offres__reponse .offres__echec", { timeout: 15000 }).catch(() => undefined);
-  await centrer(page.locator(".offres__reponse .offres__echec"));
+  await page.waitForSelector(".offres__reponse .offres__echec", { timeout: 15000 });
+  // Le refus paraît sous le bouton, en bas de page, là où passe la légende : une marge
+  // laisse la page remonter d'autant.
+  await page.evaluate(() => { document.body.style.paddingBottom = "320px"; });
+  await page.locator(".offres__reponse .offres__echec").evaluate((e) => e.scrollIntoView({ block: "center", behavior: "smooth" }));
+  await souffle(900);
   await legende(page, C, "Oubliée, la mention « [à compléter] » est refusée : elle serait partie telle quelle chez le candidat.");
   await souffle(4800);
 
