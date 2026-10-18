@@ -336,8 +336,9 @@ et que le nom du fichier est le bon.
    dépôt réel.
 2. **Aucun dépôt réel** n'a encore été fait sur le portail. Le premier doit être
    fait avec un dossier de test et relu ligne à ligne.
-3. **Les accusés de dépôt** sont gardés en mémoire : ils sont perdus au
-   redémarrage du serveur. C'est le stockage le plus urgent à rendre durable.
+3. **Les accusés de dépôt** sont rangés en base (table `accuse_reception`) et
+   survivent au redémarrage. *Corrigé le 18 octobre : une première version de ce
+   document les disait gardés en mémoire, à tort.*
 4. **Les fiches R1 à R3** sont remplies, mais l'emplacement de leurs cellules est
    à confirmer sur le portail.
 5. **Les notes annexes** ne sont pas remplies.
