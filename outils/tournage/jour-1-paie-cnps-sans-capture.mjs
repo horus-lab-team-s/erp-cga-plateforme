@@ -222,7 +222,7 @@ await chapitre("fin", async () => {
   await carton(page, {
     type: "chapitre", num: "Ce que ce film montre",
     titre: "Un montant décidé une fois, et suivi jusqu'au bout",
-    sous: "La paie propose, la comptable arrête, l'appel se remplit, l'adhérent règle depuis son téléphone, la caisse reçoit d'elle-même, le cabinet paie. Le film suivant : la même scène, sur l'application mobile.",
+    sous: "La paie propose, la comptable arrête, l'appel se remplit, l'adhérent règle depuis son téléphone, la caisse reçoit d'elle-même, le cabinet paie.",
   }, 11000);
   await carton(page, {
     type: "ouverture",

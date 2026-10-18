@@ -122,8 +122,11 @@ def relancer(paquet: str = "cm.cgabrcg.cga_mobile"):
 
 
 def se_connecter(courriel: str, mot_de_passe: str = "cabinet brcg douala 2026"):
-    toucher("Se connecter")
-    attendre("Accéder à votre dossier")
+    # ⚠️ Après une déconnexion, le formulaire est DÉJÀ ouvert : toucher « Se connecter »
+    # l'envoyait vide, et le film montrait « Courriel ou mot de passe incorrect ».
+    if not attendre("Accéder à votre dossier", 3):
+        toucher("Se connecter")
+        attendre("Accéder à votre dossier")
     # Le clavier remonte l'écran : la place du second champ change. On y passe par TAB.
     premier = champs()[0]
     tap(premier[1], premier[2], 0.5)

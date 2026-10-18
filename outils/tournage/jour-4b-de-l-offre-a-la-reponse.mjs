@@ -114,7 +114,12 @@ await chapitre("3 · ce que la plateforme en fait : décider, répondre", async 
   await page.waitForSelector(".offres__reponse .offres__echec", { timeout: 15000 });
   // Le refus paraît sous le bouton, en bas de page, là où passe la légende : une marge
   // laisse la page remonter d'autant.
-  await page.evaluate(() => { document.body.style.paddingBottom = "320px"; });
+  // ⚠️ La marge va au contenu, pas à la page : posée sur <body>, elle laissait une bande
+  // blanche sous un menu latéral coupé net.
+  await page.evaluate(() => {
+    const contenu = document.querySelector(".page-travail");
+    if (contenu) contenu.style.paddingBottom = "220px";
+  });
   await page.locator(".offres__reponse .offres__echec").evaluate((e) => e.scrollIntoView({ block: "center", behavior: "smooth" }));
   await souffle(900);
   await legende(page, C, "Oubliée, la mention « [à compléter] » est refusée : elle serait partie telle quelle chez le candidat.");
