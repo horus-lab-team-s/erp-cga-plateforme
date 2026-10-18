@@ -9,6 +9,55 @@ ce qui a été décidé et pourquoi, ce qui a été livré, ce qui reste.
 
 ---
 
+## 18 octobre 2026 (suite 14) : l'identité fiscale se saisit plus tard, la facture l'attend
+
+Le gérant ne dispose pas encore du NIU, du RCCM et du régime de TVA du cabinet : « il
+faudrait juste donner la possibilité de saisir cela plus tard ».
+
+### Ce qui change
+
+* **L'identité fiscale du cabinet** se saisit dans « Tarifs de l'offre », panneau
+  « Identité fiscale du cabinet », par la direction seule (`FIXER_LES_TARIFS`) :
+  * le NIU (contrôlé : une lettre, douze chiffres, une lettre) ;
+  * le RCCM ;
+  * le régime de TVA (assujetti, non assujetti, exonéré) ;
+  * pour un cabinet assujetti, le taux, et si les honoraires convenus s'entendent HT ou
+    TTC ;
+  * pour un cabinet exonéré, le texte qui fonde l'exonération.
+
+  Chaque champ peut attendre. L'écran dit ce qui manque, et chaque modification
+  passe au journal d'audit.
+* **La facture définitive** d'une échéance réglée ne s'émet que lorsque l'identité est
+  complète. Avant cela, l'adhérent ne voit pas le lien, la note d'honoraires reste son
+  document, et la route refuse en nommant ce qui manque.
+* **Une facture émise est figée** : identité du cabinet, HT, TVA et TTC du jour de son
+  émission. Corriger le RCCM ne réécrit pas les factures d'hier.
+* **Numérotation continue par année d'émission** : F-2026-0001, F-2026-0002…, attribuée
+  à la première émission. Une seule facture par échéance (contrainte en base).
+* **TVA au franc près** : TTC = HT + TVA. Pour des honoraires convenus TTC, la TVA
+  s'extrait ; HT, elle s'ajoute.
+
+Migration `a7c3e5f91b24` : tables `identite_fiscale_du_cabinet` et
+`facture_d_honoraires`, avec la sécurité par ligne.
+
+### Vérifié
+
+* Neuf cas nouveaux (`tests/test_facturation.py`).
+* Trois gardes vues échouer sur un mutant : l'identité incomplète, la facture figée,
+  la direction seule. Le refus d'une échéance non réglée survit à son mutant, qui est
+  équivalent : une échéance porte un règlement si et seulement si elle est réglée.
+* Dans le navigateur :
+  * saisie partielle, puis complète ;
+  * le lien « Facture (PDF) » apparaît chez l'adhérent ;
+  * la facture F-2026-0001 sort juste : 45 000 TTC, 37 736 HT, 7 264 de TVA.
+* Les valeurs fictives de l'essai ont été retirées de la base de démonstration.
+
+### Reste
+
+Saisir les vraies mentions du cabinet, quand la direction les aura.
+
+---
+
 ## 18 octobre 2026 (suite 13) : la suite du serveur entièrement verte
 
 Le dernier échec, présent depuis le début de la séance, venait du chantier des
