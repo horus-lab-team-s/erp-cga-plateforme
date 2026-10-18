@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Studio mobile</title>
+<!--
+  LE STUDIO DES FILMS MOBILES (18 octobre 2026).
+
+  L'écran du téléphone, filmé par `screenrecord`, joué dans un cadre de téléphone ; à
+  côté, le fil de chaque cas : ce qui arrive, ce que la plateforme en fait, le résultat.
+  Les légendes sont datées depuis le début de l'enregistrement (`telephone.py`) : elles
+  suivent la vidéo, image par image, et non une horloge à part.
+
+  La demande arrive dans le fragment : {video, titre, sur, legendes}.
+-->
+<style>
+  :root {
+    --indigo-900: #1a0f2e; --indigo-800: #2e1b4d; --indigo-700: #492f79;
+    --magenta: #c05fb8; --magenta-fort: #8c2d86;
+    --clair: #f4f1f8; --doux: #b9b0cc; --discret: #8b839e;
+    --police: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1600px; height: 900px; overflow: hidden; }
+  body {
+    background:
+      radial-gradient(1100px 700px at 18% 50%, rgba(192,95,184,.16), transparent 60%),
+      radial-gradient(900px 600px at 95% 0%, rgba(73,47,121,.55), transparent 60%),
+      var(--indigo-900);
+    color: var(--clair); font-family: var(--police);
+    display: grid; grid-template-columns: 640px 1fr; align-items: center;
+  }
+  .scene { display: flex; justify-content: center; align-items: center; height: 900px; }
+  .telephone {
+    width: 394px; height: 856px; border-radius: 54px; padding: 12px;
+    background: linear-gradient(160deg, #3a3150, #120c1f);
+    box-shadow: 0 40px 90px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.08);
+  }
+  .telephone video {
+    width: 370px; height: 832px; border-radius: 44px; object-fit: cover; display: block;
+    background: #000;
+  }
+  .fil { padding: 0 110px 0 30px; }
+  .sur { font: 600 13px/1 var(--police); letter-spacing: .22em; text-transform: uppercase;
+    color: var(--magenta); margin-bottom: 18px; }
+  h1 { font: 700 40px/1.15 var(--police); letter-spacing: -.02em; margin-bottom: 44px; }
+  h1 em { font-style: normal; color: var(--magenta); }
+  ol { list-style: none; padding: 0; display: grid; gap: 14px; margin-bottom: 42px; }
+  li { display: flex; align-items: center; gap: 16px; font: 600 15px/1 var(--police);
+    letter-spacing: .14em; text-transform: uppercase; color: var(--discret);
+     }
+  li::before { content: ""; width: 12px; height: 12px; border-radius: 50%;
+    border: 2px solid var(--discret);  }
+  li.passee { color: var(--doux); }
+  li.passee::before { background: var(--doux); border-color: var(--doux); }
+  li.courante { color: var(--clair); }
+  li.courante::before { background: var(--magenta); border-color: var(--magenta);
+    box-shadow: 0 0 0 6px rgba(192,95,184,.22); }
+  .texte { font: 400 30px/1.42 var(--police); color: var(--clair); min-height: 190px;
+    border-left: 3px solid var(--magenta); padding-left: 26px; }
+  .texte b { color: var(--magenta); font-weight: 600; }
+  .pied { position: absolute; left: 640px; bottom: 34px; font: 400 14px/1.6 var(--police);
+    color: var(--discret); padding-left: 30px; }
+  .pied b { color: var(--doux); font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="scene"><div class="telephone"><video id="ecran" muted playsinline></video></div></div>
+  <div class="fil">
+    <div class="sur" id="sur"></div>
+    <h1 id="titre"></h1>
+    <ol id="etapes">
+      <li data-etape="arrive">Ce qui arrive</li>
+      <li data-etape="traite">Ce que la plateforme en fait</li>
+      <li data-etape="resultat">Le résultat</li>
+    </ol>
+    <p class="texte" id="texte"></p>
+  </div>
+  <p class="pied"><b>Zayra Technologies</b> · Entreprise porteuse du projet · joué en direct sur l'application</p>
+<script>
+  const demande = JSON.parse(decodeURIComponent(location.hash.slice(1)));
+  document.getElementById("sur").textContent = demande.sur;
+  document.getElementById("titre").innerHTML = demande.titre;
+  const legendes = demande.legendes.filter((l) => !l.fin);
+  const ordre = ["arrive", "traite", "resultat"];
+  const texte = document.getElementById("texte");
+  let posee = -1;
+
+  function poser(i) {
+    if (i === posee || i < 0) return;
+    posee = i;
+    const l = legendes[i];
+    texte.innerHTML = l.texte;
+    texte.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }],
+                  { duration: 380, easing: "cubic-bezier(.2,.7,.3,1)" });
+    const rang = ordre.indexOf(l.etape);
+    for (const li of document.querySelectorAll("#etapes li")) {
+      const r = ordre.indexOf(li.dataset.etape);
+      li.className = r < rang ? "passee" : r === rang ? "courante" : "";
+    }
+  }
+
+  // Le décor seul, sans fondu : `studio.mjs` le photographie, une image par légende.
+  window.poserFixe = (i) => {
+    const l = legendes[i];
+    texte.innerHTML = l.texte;
+    const rang = ordre.indexOf(l.etape);
+    for (const li of document.querySelectorAll("#etapes li")) {
+      const r = ordre.indexOf(li.dataset.etape);
+      li.className = r < rang ? "passee" : r === rang ? "courante" : "";
+    }
+  };
+
+  const ecran = document.getElementById("ecran");
+  if (demande.video) ecran.src = demande.video;
+  // La légende suit l'image affichée, pas une horloge à part.
+  function suivre(_, meta) {
+    const t = meta?.mediaTime ?? ecran.currentTime;
+    let i = -1;
+    while (i + 1 < legendes.length && legendes[i + 1].t <= t) i++;
+    poser(i);
+    ecran.requestVideoFrameCallback(suivre);
+  }
+  window.studioPret = new Promise((resoudre) => ecran.addEventListener("canplaythrough", resoudre, { once: true }));
+  window.jouer = () => new Promise((resoudre) => {
+    poser(0);
+    ecran.addEventListener("ended", resoudre, { once: true });
+    ecran.requestVideoFrameCallback(suivre);
+    ecran.play();
+  });
+</script>
+</body>
+</html>
