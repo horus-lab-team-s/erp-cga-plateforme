@@ -9,6 +9,807 @@ ce qui a été décidé et pourquoi, ce qui a été livré, ce qui reste.
 
 ---
 
+## 18 octobre 2026 (suite 13) : la suite du serveur entièrement verte
+
+Le dernier échec, présent depuis le début de la séance, venait du chantier des
+immobilisations : `Immobilisation.marquer_dotee` se recopiait par `model_copy`, qui ne
+rejoue pas l'invariant `_coherente`. Elle passe par `transiter`, comme les autres
+entités à invariant.
+
+Suite complète : **4 541 réussis, aucun échec** (5 cas sautés, comme d'ordinaire).
+
+Reste de la liste du jour : la facture définitive, qui attend le NIU, le RCCM et le
+régime de TVA du cabinet.
+
+---
+
+## 18 octobre 2026 (suite 12) : les écrans vus dans un navigateur
+
+Jusqu'ici, aucun écran de la séance n'avait été vu. Revue dans Chromium headless, sur la
+pile de démonstration (base `cga_dev`, qui était vide, recréée par
+`pile-de-demonstration.sh neuve`).
+
+### Parcouru
+
+* **Quinze écrans**, en adhérent (téléphone, 390 px), réviseur, juriste, super
+  administrateur et directrice : aucune erreur JavaScript, aucun état « Impossible
+  d'afficher ».
+* **De bout en bout :**
+  * l'adhérent verse une pièce de sa DSF, et le cabinet la voit « Versée » ;
+  * les deux boutons d'agent répondent sans clé ;
+  * une rédaction part du modèle de bail (neuf articles, cahier prérempli), un article
+    est reformulé, et le `.docx` téléchargé le contient.
+
+### Corrigé à la vue
+
+* **« Ma DSF » faisait 7 400 px sur téléphone** : trois exercices de treize pièces,
+  chacune avec son formulaire ouvert. Maintenant :
+  * seul le dernier exercice est déplié ;
+  * le formulaire d'une pièce s'ouvre à la demande ;
+  * les pièces établies par le cabinet ou sans objet tiennent en une ligne.
+
+  La page fait 1 960 px.
+* **Une phrase dit quoi faire d'une pièce qui ne concerne pas l'entreprise** (prix de
+  transfert, droits d'accises) : ne pas chercher à la produire, le dire au cabinet.
+* **La barre d'onglets de l'espace adhérent se chevauchait** à 390 px : sept libellés
+  pour la largeur d'un téléphone. Sur écran étroit, elle défile, et chaque onglet garde
+  son libellé entier. Le défaut précédait la séance.
+
+### Non vérifié
+
+Le rendu dans un vrai téléphone et dans Safari ; l'ouverture du `.docx` dans Word ou
+LibreOffice ; une vraie réponse des agents (pas de clé).
+
+---
+
+## 18 octobre 2026 (suite 11) : l'arrêté des charges préremplit l'appel de fonds
+
+Reliquat du point 8. L'arrêté des charges sociales disait « seul l'arrêté sert
+ensuite » ; rien ne s'en servait encore. Le cabinet tapait à la main le montant de
+l'appel de fonds d'un adhérent mandaté.
+
+### Ce qui change
+
+* **L'arrêté devient le montant de l'échéance.** Pour la CNPS et les retenues sur
+  salaires d'un mois arrêté, l'échéancier porte le montant arrêté, avec « Arrêté par le
+  cabinet sur la paie de … ». Le formulaire « Arrêter le montant » de l'appel de fonds
+  le reprend déjà : il est donc prérempli, et l'adhérent lit le même montant dans ses
+  échéances.
+* **Ce que chaque obligation déclare :**
+  * CNPS : la rubrique CNPS seule ;
+  * « Retenues sur salaires : IRPP et taxes assises » : IRPP, CFC, FNE, TDL et RAV,
+    que la DGI perçoit ensemble.
+
+  La correspondance est tenue dans le domaine social (`RUBRIQUES_PAR_OBLIGATION`).
+* **Un mois sans arrêté n'a pas de montant** : jamais la proposition de la paie à sa
+  place. C'est la décision du point 8 : la paie propose, le cabinet arrête.
+
+### L'autre reliquat
+
+Le test de persistance « qui fixait un prix au 17 octobre » lit désormais la date du
+jour (`maintenant()`), et il passe aux dernières suites : rien à y faire.
+
+### Vérifié
+
+Un cas nouveau sur une vraie base : arrêté d'août corrigé, échéancier relu, juillet
+sans montant. Deux mutants tués : les taxes assises retirées, l'estimateur social
+débranché.
+
+---
+
+## 18 octobre 2026 (suite 10) : l'agent comptable, et ce que le plan dit sans lui
+
+Point 15 : « un agent IA comptable ». L'explication de la balance et du grand livre est
+dans `points-d-ombre-2026-10-18.md`, § 4. Il restait l'agent.
+
+### Deux couches
+
+1. **Les soldes à regarder, sans agent.** Le plan SYSCOHADA dit à lui seul où un solde
+   surprend :
+   * une caisse créditrice ;
+   * un fournisseur débiteur, ou un client créditeur (sauf en 409 et 419, où une
+     avance est déjà reclassée) ;
+   * un découvert bancaire ;
+   * un virement interne non soldé ;
+   * un compte d'attente non soldé, à la clôture seulement ;
+   * un amortissement débiteur, une charge créditrice, un produit débiteur.
+
+   Les exceptions du plan sont tenues : les rabais obtenus (60x9) et accordés (70x9),
+   ainsi que les variations de stocks (603, 73), vont dans l'autre sens par nature. Le
+   relevé tourne sur chaque balance, sans clé ni réseau, et s'affiche au-dessus d'elle.
+2. **L'agent comptable**, sur demande : « Demander une relecture de la balance à
+   l'agent ». Il lit la balance compte par compte et le relevé ci-dessus. Il propose ce
+   qu'un réviseur verrait : une régularisation de fin d'exercice qui manque, une TVA
+   incohérente avec le chiffre d'affaires, un compte qui ne cadre pas avec le régime.
+   Une écriture envisagée est décrite en comptes et en sens, **sans montant inventé**.
+
+### Ce que l'agent ne fait pas
+
+Il **n'écrit aucune écriture**. Le comptable saisit, un autre valide. Sans clé, l'écran
+dit que le relevé reste valable. Ne partent chez Anthropic que les comptes, leurs
+intitulés et leurs montants, la forme, le régime et les dates de l'exercice : ni le
+NIU, ni la dénomination, ni un libellé d'écriture, ni un tiers.
+
+### Au passage
+
+Huit erreurs de ruff dans des tests de lots précédents (lignes trop longues, une variable
+`l`) : mes vérifications ne lisaient que `app` et les tests du lot. Corrigées ;
+`ruff check app tests` est propre.
+
+### Vérifié
+
+Sept cas nouveaux (`tests/test_soldes_a_regarder.py`). Six gardes vues échouer sur un
+mutant : la caisse, les deux exceptions du plan, l'avance reclassée, le compte d'attente
+à la clôture, et l'envoi de l'identité du dossier à l'agent. Console : tsc, eslint,
+451 cas, `npm run build`.
+
+**Non vérifié :** l'écran dans un navigateur, et une vraie relecture par l'agent (pas
+de clé sur ce poste).
+
+---
+
+## 18 octobre 2026 (suite 9) : des modèles de contrat, et le projet en Word
+
+Point 23 : « un agent rédacteur de contrat ». L'agent existait : le juriste écrit un
+cahier de rédaction, l'agent propose des articles, le juriste décide de chacun, un
+second valide. Il manquait un point de départ, et un document que les parties
+retouchent.
+
+### Ce qui change
+
+* **Cinq modèles du cabinet** : prestation de services, bail à usage professionnel,
+  contrat de travail à durée indéterminée, à durée déterminée, accord de
+  confidentialité. Chacun apporte :
+  * le **canevas du cahier**, c'est-à-dire les questions à poser au client ;
+  * des **articles types**, versés comme propositions à décider, marqués « tiré du
+    modèle ».
+* **Sans clé d'API, on rédige quand même** : le modèle suffit comme point de départ.
+  Avec la clé, l'agent complète d'après le cahier rempli.
+* Le cahier déjà écrit n'est pas écrasé. Un modèle ne se verse qu'une fois par mission.
+* **Aucun article de loi cité** dans les modèles : un numéro recopié d'une version
+  périmée se lit comme vérifié. Les règles qui comptent (durée de l'essai, préavis,
+  renouvellement du bail, nombre de CDD successifs) sont signalées « à vérifier par le
+  juriste ».
+* **Une garde nouvelle.** Un article retenu qui porte encore « [À COMPLÉTER » ne se
+  soumet plus : la mention partait au client dans le livrable. Elle s'applique aussi aux
+  articles de l'agent.
+* **Le projet en Word** (`.docx`), à côté du PDF : les mêmes articles retenus, la même
+  numérotation, « PROJET · non validé » en tête tant que la mission n'est pas livrée,
+  et aucun nom interne.
+
+### Dépendance
+
+`python-docx` entre dans `pyproject.toml`. C'est du Python pur, comme reportlab et
+openpyxl ; il amène `lxml`, distribué en roues binaires. `uv.lock` n'a fait que
+s'enrichir de ces deux paquets ; aucune autre version n'a bougé. **L'image Docker du
+serveur est à reconstruire** pour les embarquer.
+
+### Vérifié
+
+Six cas nouveaux (`tests/test_modeles_de_contrat.py`), et toute la suite des missions.
+Quatre gardes vues échouer sur un mutant : la mention à compléter, le modèle versé deux
+fois, le cahier gardé, les seuls articles retenus dans le Word. Le refus d'un modèle
+dans une analyse survit à son mutant : le domaine refuse déjà d'écrire un cahier hors
+d'une rédaction, la route ne fait que le dire plus tôt. Console : tsc, eslint, 451 cas,
+`npm run build`.
+
+**Non vérifié :** les écrans dans un navigateur, l'ouverture du `.docx` dans Word ou
+LibreOffice (relu seulement par python-docx), et la relecture juridique des modèles
+par un juriste du cabinet, qui reste indispensable.
+
+---
+
+## 18 octobre 2026 (suite 8) : la DSF dans l'espace adhérent, et l'agent qui la relit
+
+Point 24 : « le module DSF en libre-service pour l'utilisateur en ligne, ou à la
+demande avec un espace de dépôt comme la création ; un agent rédacteur DSF ».
+
+### Ce qui existait
+
+Côté cabinet, tout le chemin : la liasse depuis la balance, la fiche signalétique
+(R1 à R3) que l'adhérent renseigne déjà dans son espace, les dix-neuf pièces du guide
+de la DGI, la préparation, le second regard, l'accusé. Mais l'adhérent ne voyait
+**ni les pièces qu'on attendait de lui, ni où en était sa déclaration**.
+
+### Ce qui change
+
+* **Une page « Ma DSF »** dans l'espace adhérent, reliée depuis l'accueil et la page
+  Entreprise (pas de huitième onglet sur un téléphone). Pour chacun des trois derniers
+  exercices clos :
+  * l'état, en clair : en préparation, en relecture, validée, déposée ;
+  * les pièces du guide, chacune avec son état ; celles **à fournir se versent ici**,
+    avec l'aperçu avant l'envoi ;
+  * une fois déposée : le numéro d'accusé, la date, et **la copie à télécharger**.
+* **Ce que l'adhérent ne fait pas.** Il ne déclare pas une pièce « sans objet » et ne
+  touche pas à une pièce que le cabinet a traitée : c'est un jugement du cabinet. Il
+  remplace la sienne tant que la DSF n'est pas déposée ; déposée, elle ne reçoit plus
+  rien.
+* **Ce qu'il ne lit pas.** Aucun chiffre avant le dépôt (la règle de la matrice :
+  l'adhérent ne lit pas une comptabilité en cours), aucun nom de collaborateur. Sa
+  copie de la DSF signe chaque visa « le cabinet » (point 21).
+* **Le cabinet retrouve la pièce** dans sa propre liste, versée sous le compte de
+  l'adhérent, et la juge comme les autres.
+* **L'agent de relecture**, sur l'écran DSF du cabinet : « Demander une relecture à
+  l'agent ». Il lit le dossier (forme, activité, codes NACAM et chiffre d'affaires par
+  activité, rubriques manquantes de la fiche, état des pièces, contrôles et
+  avertissements de la liasse) et **propose** des remarques : une activité sans code,
+  une pièce que l'activité rend probable, une note annexe qu'un contrôle appelle. Il ne
+  touche à aucun chiffre. Sans clé, l'écran dit « la DSF se prépare sans lui ». Ne
+  part chez Anthropic ni le NIU, ni la dénomination, ni un nom, ni la banque.
+
+### Libre-service ou à la demande
+
+Les deux tiennent dans ce chemin. En libre-service, l'adhérent renseigne sa fiche et
+verse ses pièces lui-même. À la demande, il les envoie par WhatsApp et le cabinet les
+verse (point 1) : la liste est la même, et l'état aussi.
+
+### Vérifié
+
+Huit cas nouveaux (`tests/test_ma_dsf.py`). Quatre gardes vues échouer sur un mutant :
+le refus après dépôt, la pièce traitée par le cabinet, la copie sans noms, le document
+avant dépôt (ce dernier mutant survivait d'abord : le test n'avait aucune version
+validée, il en a une maintenant). Console : tsc, eslint, 451 cas, `npm run build`.
+
+**Non vérifié :** les écrans dans un navigateur, et une vraie relecture par l'agent
+(pas de clé sur ce poste ; la lecture de sa réponse est éprouvée sur un client factice).
+
+---
+
+## 18 octobre 2026 (suite 7) : une demande ponctuelle trouve sa mission
+
+Point 22 : « pour les demandes ponctuelles, je n'ai pas vu l'investigateur via la
+vitrine, ni comment cela arrive dans le système pour traitement ».
+
+### Le chemin, tel qu'il est
+
+1. Sur la vitrine, la page « Prestations ponctuelles » dépose une **demande**
+   (`POST /acquisition/demandes`, service `PONCTUEL`).
+2. Elle arrive dans la file des demandes. Un **responsable commercial** lui est
+   affecté automatiquement, au score : c'est « l'investigateur » côté cabinet.
+3. Il chiffre, la proforma part, le client paie par Tara ou au guichet : le dossier
+   passe à « payé ».
+
+C'est ensuite que le chemin se perdait :
+
+* la mission s'ouvrait à la main, en recopiant la référence `DC-…` ;
+* rien n'empêchait d'en ouvrir deux pour la même demande ;
+* le responsable d'une mission ne se changeait pas ;
+* le client n'apprenait rien.
+
+### Ce qui change
+
+* **La file « demandes payées, à ouvrir »**, en tête de l'écran des missions : client,
+  téléphone, adresse, message, date de paiement. On choisit la prestation, l'objet est
+  prérempli avec le message, et la mission s'ouvre en un geste.
+* **Une demande, une mission.** La seconde ouverture est refusée, avec la référence de
+  la première.
+* **La réaffectation.** Qui affecte les dossiers peut confier une mission non livrée à
+  un autre collaborateur qui instruit les missions (lu à la matrice), avec un motif
+  écrit au journal.
+* **Le client est prévenu**, par courriel, quand un juriste prend sa demande en charge,
+  puis quand le livrable est validé. Sans nom de juriste : c'est le cabinet qui répond.
+
+### Vérifié
+
+Deux cas nouveaux, sur une vraie demande déposée, affectée et payée. La garde « une
+demande, une mission » a été vue échouer sur un mutant. Console : 451 cas et
+`npm run build`.
+
+**Non vérifié : les écrans dans un navigateur.**
+
+---
+
+## 18 octobre 2026 (suite 6) : le recrutement répond aux candidats
+
+Point 25 de la liste du gérant : « pouvoir charger une image au moment de définir
+l'offre », un module de traitement des dossiers, et des réponses, éventuellement
+automatiques, « en prenant en compte le contexte de l'offre et la réponse du RH ».
+
+### L'image de l'offre
+
+JPEG ou PNG, 2 Mo au plus. Le type est lu dans les octets : une page HTML déguisée
+en image est refusée (`415`), puisqu'elle serait servie sur le site public. L'image
+est aperçue avant l'envoi. Sur la vitrine, elle s'affiche en vignette dans la liste
+et en tête de l'offre, et seulement tant que l'offre est ouverte.
+
+### Le traitement d'une candidature
+
+Une candidature passe par les états reçue, présélectionnée, entretien, retenue et
+non retenue. Chaque décision garde sa note, son auteur et sa date. Une décision
+finale ne se revoit pas sans dire pourquoi.
+
+### La réponse
+
+* **Le texte type** de la décision, rempli avec l'offre (poste, lieu) et le prénom
+  du candidat. Il ne promet ni salaire ni date : la date d'entretien est
+  « [à compléter] ».
+* **L'agent** peut proposer un texte plus personnel à partir de l'offre, de la
+  décision et de la note du RH. Il ne reçoit ni le CV, ni le téléphone, ni
+  l'adresse. Sans clé, l'écran garde le texte type.
+* **Un humain relit et envoie.** Un « [à compléter] » oublié est refusé (`422`). La
+  réponse part par courriel, avec le gabarit `recrutement.reponse`, si le candidat
+  a laissé une adresse. Sinon, elle est gardée pour être dite au téléphone. Chaque
+  réponse reste sous la candidature.
+
+### Qui peut le faire
+
+Un droit dédié, **« Traiter les candidatures »** (`GERER_RECRUTEMENT`). Un CV est
+une donnée personnelle : qui édite le site n'a pas à lire les dossiers des
+candidats. L'administrateur perd donc l'accès aux CV, et la direction le garde.
+Le super administrateur peut créer un rôle « Ressources humaines » dans la matrice
+et lui donner ce droit. Qui recrute peut aussi rédiger les offres.
+
+### En passant
+
+Le rendu des courriels n'écrit plus un paragraphe vide. Aucun gabarit existant n'en
+avait ; la réponse au candidat en a jusqu'à dix.
+
+### Vérifié
+
+Trois cas nouveaux. Deux gardes ont été vues échouer sur un mutant : le
+« [à compléter] » oublié, et l'accès aux CV par le seul droit dédié. Console : 451
+cas, vitrine : 96 cas, et les deux `npm run build`.
+
+**Non vérifié : les écrans dans un navigateur, et une vraie proposition de l'agent**
+(aucune clé sur le poste).
+
+---
+
+## 18 octobre 2026 (suite 5) : un espace adhérent plus doux, des documents plus nets
+
+Points 10, 19 et 20 de la liste du gérant.
+
+### Point 10 : l'espace adhérent web
+
+« Un rendu plus soft et attrayant. » Une couche posée après tout le reste et bornée
+à `[data-espace="adherent"]` : les écrans du cabinet n'en voient rien. Les couleurs
+de marque et les cibles de 44 px ne changent pas.
+
+* les cartes perdent leur cadre et prennent une ombre douce teintée d'indigo, avec
+  un rayon de 16 points, ceux de l'application mobile ;
+* l'en-tête est plus aéré ;
+* les champs sont plus ronds, avec un anneau de focus ; l'action principale est
+  pleine et arrondie ;
+* la barre d'onglets flotte en bas, comme sur le téléphone.
+
+En thème sombre, l'élévation revient au filet. `--rayon-lg`, employé sept fois sans
+être défini, l'est enfin.
+
+⚠️ C'est une exception assumée à la règle « jamais d'ombre » du dossier de design :
+elle vaut pour la console du cabinet, qui lit des tableaux denses, pas pour
+l'adhérent, qui lit des cartes.
+
+**Le mobile** était déjà dans cet esprit (décision du 23 septembre). Il lui
+manquait les polices de marque : il affichait celle du système. Sur décision du
+gérant, **Poppins et Inter sont jointes à l'application** (`assets/polices/`,
+licence SIL OFL jointe) : aucun appel à un serveur tiers au démarrage, et le texte
+reste juste sans réseau. Inter sert au texte, Poppins aux titres et aux grands
+chiffres. Inter est le sous-ensemble latin : il couvre le français, et
+l'application n'emploie pas l'espace fine insécable qui lui manque.
+`flutter analyze` ne relève rien, et les 265 cas passent. Le rendu sur un
+téléphone n'a pas été regardé.
+
+**Facture définitive :** le gérant fournira le NIU, le RCCM et le régime de TVA du
+cabinet. Elle sera produite avec ces mentions dès réception.
+
+### Points 19 et 20 : les documents
+
+« Des factures plus soft, avec de bonnes séparations, comme chez les grandes
+entreprises. » La charte commune de la proforma et des reçus est refaite :
+
+* une page blanche, sans bandeau plein ;
+* le logo et la maison en tête, sur un filet fin ;
+* le type de document en grand, puis deux colonnes : « établie pour » et la
+  référence ;
+* des rubriques en petites capitales sur un filet ;
+* le total dans un cartouche clair, et le pied en petit gris.
+
+L'indigo est enfin celui de la marque (`#2E1B4D`), et non un voisin approximatif.
+La DSF, les livres légaux, le bulletin de paie et le livrable de mission prennent
+la même palette.
+
+**Nouveau : la note d'honoraires** d'une échéance. Elle dit ce qui est dû, la
+période, la date d'exigibilité, le net à payer en chiffres et en lettres, et les
+deux façons de régler. Réglée, elle le dit.
+
+    GET /souscription/honoraires/{niu}/echeances/{periode}/note
+
+Elle est accessible depuis chaque échéance de l'espace adhérent.
+
+⚠️ **Aucune mention fiscale inventée.** Le NIU, le RCCM et le régime de TVA du
+cabinet ne sont pas connus de la plateforme : la note n'en porte aucun plutôt qu'un
+faux. Une **facture définitive** au sens fiscal demande ces mentions ; elle attend
+que le cabinet les fournisse.
+
+### Vérifié
+
+Rendus regardés en image : proforma (deux pages), note d'honoraires, reçu. Les 101
+cas des documents restent verts, avec les mêmes textes attendus et le même nombre
+de pages. Deux cas nouveaux pour la note. Console : 451 cas et `npm run build`.
+
+**Non vérifié : l'espace adhérent dans un navigateur**, la pile n'ayant pas été
+montée.
+
+---
+
+## 18 octobre 2026 (suite 4) : la paie propose, l'agent prépare, la quittance s'écrit
+
+Points 8, 13 et 7 de la liste du gérant.
+
+### Point 8 : IRPP et CNPS proposés, puis arrêtés
+
+« Les frais IRPP et CNPS ne doivent pas être calculés automatiquement. » Le
+gérant a ensuite choisi : « proposition, et modification possible ».
+
+Le calcul de la paie reste, et devient une **proposition**, en six rubriques :
+CNPS (les quatre cotisations), IRPP, CFC, FNE, TDL et RAV. Un collaborateur
+l'**arrête**, en corrigeant s'il le faut. Un écart à la proposition exige un
+motif. La proposition du jour est gardée avec l'arrêté, et le journal d'audit
+conserve chaque arrêté.
+
+Arrêter est un geste de traitement : un dossier bloqué pour honoraires ne
+s'arrête pas (point 5). L'adhérent lit l'arrêté, il ne le fait pas.
+
+    GET|PUT /social/dossiers/{e}/declaration/{a}/{m}/arrete
+
+**Reste :** préremplir l'appel de fonds d'un adhérent mandaté avec la CNPS
+arrêtée. Le montant se saisit encore à la main sur l'appel.
+
+### Point 13 : l'agent lit au dépôt, sans bloquer
+
+« L'agent d'analyse de conformité se déclenche quand le client dépose. Il n'est
+pas bloquant, il est au choix de l'admin, et si l'adhérent le veut bien. »
+
+Trois conditions, toutes nécessaires :
+
+* le cabinet a activé la fonctionnalité (direction ou super administrateur, avec
+  un motif) ;
+* l'adhérent a donné son accord, depuis ses réglages : son document part chez
+  Anthropic, et c'est à lui d'en décider ;
+* la clé de l'agent est posée.
+
+Il n'y a aucune lecture pendant le dépôt. Un **travail de fond**, toutes les deux
+minutes, lit au plus cinq pièces reçues par le portail ou le mobile, et range la
+proposition à côté de la pièce. Une panne de l'agent est rangée avec son
+incident, sans le détail de l'erreur, et la pièce n'est pas relue en boucle.
+
+À l'écran de lecture, la facture est **déjà préremplie**, avec ses champs « à
+vérifier » et des **points à vérifier**, constatés sans l'agent : NIU absent,
+HT + TVA ≠ TTC, taux de TVA inhabituel. Le contrôle de conformité qui fait foi
+reste celui de la pièce identifiée, après confirmation humaine : le juger sur des
+valeurs supposées serait plus dangereux que de ne pas le faire.
+
+### Point 7 : la quittance s'écrit
+
+Au verdict, le montant de la quittance se relève. Une quittance validée
+**propose son écriture de paiement** : au débit 431 (CNPS), 4441 (IRPP) ou 4431
+(TVA), au crédit la banque, le mobile money ou la caisse. La console l'enregistre
+en brouillon par la route de saisie, qui rejoue ses contrôles, et le comptable la
+valide.
+
+Le serveur propose sans écrire. Les obligations ne touchent pas à la
+comptabilité, et le graphe des contextes reste le même.
+
+**Corrigé dans le document des points d'ombre :** j'y avais écrit 4441 pour la
+TVA. Au plan du cabinet, 4441 est l'IRPP retenu à la source.
+
+**Écarté :** comparer le montant de la quittance au montant déclaré. La
+correspondance entre une échéance et son accusé n'est pas assez sûre, et un
+écart faux ferait plus de mal qu'aucun écart.
+
+### Vérifié
+
+Treize cas nouveaux. Quatre gardes ont été vues échouer sur un mutant : l'écart
+sans motif, l'accord donné par le cabinet, la fonctionnalité coupée, et
+l'écriture d'une quittance non validée. Console : 451 cas et `npm run build`.
+
+**Non vérifié : les écrans dans un navigateur, et une vraie lecture par l'agent**
+(aucune clé sur le poste).
+
+---
+
+## 18 octobre 2026 (suite 3) : le journal de caisse, et ce que la caisse ne voit plus
+
+Point 6 de la liste du gérant : la caissière suit les versements Tara, avec leur
+motif, pour un suivi financier global par axe (inscription, honoraires, CNPS…).
+Le rapprochement Tara est automatique ; seuls les versements manuels sont saisis,
+dans l'axe constaté.
+
+### Ce qui existait, et ce qui manquait
+
+Le rapprochement Tara était déjà automatique : la notification est confirmée
+auprès de l'opérateur, et une passe de secours rattrape ce qu'elle a manqué. Le
+guichet imposait déjà l'axe : chaque versement se constate sur l'objet qu'il
+règle (une proforma, une échéance d'honoraires, un appel de fonds), et cet objet
+porte son axe.
+
+Ce qui manquait, c'était la **lecture d'ensemble**. Il y avait trois panneaux
+séparés, et un seul avait un total.
+
+### Ce qui est livré
+
+    GET /souscription/caisse/journal        période, lignes, totaux par axe et par canal
+    GET /souscription/caisse/journal.xlsx   le même, en Excel (lignes, puis totaux)
+    GET /souscription/caisse/non-rattaches  les notifications Tara que rien n'attendait
+
+Il y a huit axes : inscription, création, prestation, abonnement en ligne,
+honoraires, TVA, CNPS et IRPP sur salaires. **Les fonds de tiers ont leur propre
+total** : ils sont dus à l'administration, et le « total du cabinet » les exclut.
+
+Les notifications non rattachées n'étaient écrites qu'au journal d'audit. La
+caisse les voit désormais dans une file, avec la consigne : appeler le numéro,
+retrouver ce qui est réglé, le constater au guichet. Jamais au hasard.
+
+La direction lit le journal sans encaisser (`LIRE_PILOTAGE`).
+
+### « L'administrateur peut retirer la vue sur certains versements »
+
+Précision du gérant, traitée par la même logique que les rôles. Trois droits
+entrent dans la matrice, un par famille : commerce, honoraires, fonds de tiers.
+La caisse, l'administration et la direction les ont par défaut.
+
+Décocher une famille la retire à la fois du journal, de ses totaux, de l'export
+et du panneau correspondant de la caisse. Elle n'est même pas lue côté serveur.
+L'écran dit ce qui n'est pas affiché pour ce rôle.
+
+### Une faute de méthode, la troisième fois
+
+J'ai modifié des fichiers du serveur pendant qu'une suite complète tournait en
+arrière-plan. C'est exactement la faute n° 2 du 30 septembre. Je m'en suis
+aperçu avant le verdict : la suite a été arrêtée, et son résultat écarté. La
+règle est maintenant écrite plus durement dans ma mémoire : une suite lancée en
+arrière-plan est le dernier geste d'un lot, jamais une pause entre deux
+modifications.
+
+Autre faux pas, réparé : `prettier`, que ce projet n'emploie pas, avait
+reformaté la page de la caisse en entier. Elle a été reprise de sa version
+commitée, et seules mes modifications ont été réappliquées.
+
+### Vérifié
+
+Cinq cas nouveaux. Deux gardes ont été vues échouer sur un mutant : le filtre des
+familles dans le journal, et le droit de visibilité sur le panneau des
+honoraires. Console : 451 cas et `npm run build`.
+
+**Non vérifié : l'écran dans un navigateur.**
+
+---
+
+## 18 octobre 2026 (suite 2) : qui est en règle, et qui ne se traite plus
+
+Points 2, 4a, 5 et 9 de la liste du gérant. Ils reposent tous sur le super
+administrateur créé au point 4b.
+
+### Point 5 : la situation de règlement
+
+« D'office, quand tu n'es pas en règle, on ne doit pas pouvoir traiter ton
+dossier ; l'administrateur définit la règle de dépassement et peut faire des
+grâces. »
+
+La situation se calcule, elle ne se stocke pas. Elle se lit en trois faits :
+
+* l'échéancier dit depuis quand une échéance est en retard, soit quinze jours
+  après son exigibilité ;
+* la **règle de dépassement** du cabinet dit combien de jours de retard se
+  tolèrent. Sans règle fixée, c'est zéro : le « d'office » demandé ;
+* une **grâce** datée rouvre le traitement d'un adhérent nommé.
+
+Les cinq états sont : sans contrat, en règle, en retard, sous grâce, bloqué. Un
+règlement constaté à 10 h rend le dossier traitable à 10 h, sans que personne ne
+« débloque » rien.
+
+**Ce qui s'arrête** : les gestes de traitement, c'est-à-dire identifier une
+pièce, contrôler, saisir, valider, contre-passer, réviser, déclarer, clôturer,
+préparer la DSF et traiter une mission (`PERMISSIONS_DE_TRAITEMENT`). La garde
+est posée une seule fois, dans `exiger_dossier`, par un port que le contexte
+souscription installe. Le refus rend `423`, avec le montant dû et la date du
+retard.
+
+**Ce qui ne s'arrête pas** : la lecture, le dépôt de pièces, la relance et
+l'encaissement. Couper ces portes empêcherait précisément de régulariser.
+
+La règle et les grâces exigent `ACCORDER_FAVEURS`, le second facteur et un motif.
+Les responsables voient au portefeuille la liste des dossiers hors règle. La
+fiche du dossier dit quand le traitement s'arrêtera. L'adhérent lit dans son
+espace que son dossier est suspendu, et pourquoi.
+
+### Point 4a : des honoraires datés
+
+Refixer le contrat réécrivait aussi le passé, et un reçu déjà remis ne
+concordait plus avec l'échéancier. Une **révision** vaut désormais à partir
+d'une date, pour les périodes qui commencent ensuite. Elle est refusée sur une
+période déjà réglée. Les révisions s'affichent sur la fiche du dossier. Dans son
+espace, l'adhérent voit le prix du jour et la prochaine révision annoncée.
+
+### Point 9 : « le cabinet paie pour moi » est une faveur
+
+Le mandat de paiement n'existait que dans la démonstration : aucune route ne le
+créait. Le super administrateur l'accorde, pour la TVA, la CNPS ou l'IRPP sur
+salaires, avec la date et l'auteur de l'accord écrit de l'adhérent. Il peut
+aussi le retirer. Le mandat en cours se ferme à la veille du suivant ; un retrait
+ferme, il n'efface pas.
+
+### Point 2 : NIU et RCCM par le responsable
+
+Décision du gérant : seul le responsable affecté au dossier commercial inscrit
+l'entreprise, ou la direction. Jusqu'ici, tout réviseur le pouvait. La file
+« à inscrire » ne montre à un responsable que les dossiers qu'il suit.
+
+La direction est reconnue à ses droits (`INSCRIRE_STATUT` et `AFFECTER_DOSSIER`)
+et non au nom de son rôle, puisque la matrice se règle.
+
+### Une bombe à retardement désamorcée
+
+Les périodes d'honoraires de démonstration commençaient le 1er du mois. Après le
+15, le mois en cours passait « en retard » : la démonstration ne montrait plus
+« à régler », et trois cas de la suite échouaient selon le jour. Elles commencent
+maintenant cinq jours avant l'amorçage. Vérifié le 3, le 18 et le 31 du mois : les
+mêmes états à chaque fois.
+
+La démonstration fixe une règle de trente jours. Sans elle, Bâtiment Plus, en
+retard d'un mois, aurait été bloqué dès l'amorçage.
+
+### Vérifié
+
+Dix-sept cas nouveaux. Quatre gardes ont été vues échouer sur un mutant, puis
+passer une fois rétablies : le blocage `423`, la révision sur une période réglée,
+le responsable de l'inscription, et le refus d'élévation (point 4b). Console :
+451 cas et `npm run build`.
+
+**Non vérifié : les écrans dans un navigateur.**
+
+---
+
+## 18 octobre 2026 (suite) : la matrice des rôles se règle, et l'administrateur ne s'élève pas
+
+Point 4b de la liste : « un RBAC dynamique, qui ressorte aisément la matrice des
+rôles et cache les vues dont un rôle n'a pas le droit ».
+
+### Deux décisions du gérant
+
+* **Un rôle Super administrateur, à part.** Il règle la matrice et accorde les
+  faveurs (mandat « le cabinet paie pour moi », grâce de règlement, points 5 et 9).
+  Il ne tient aucun dossier : la séparation des tâches de `roles.py` tient
+  toujours, elle passe d'une constante à une décision tracée.
+* **Des rôles se créent** (« ressources humaines », pour le point 25).
+
+### Ce qui a été construit
+
+La matrice livrée (`PERMISSIONS_PAR_ROLE`) reste dans le code, et sert de
+défaut. Le cabinet la règle par-dessus : une ligne `role_du_cabinet` par rôle
+livré retouché ou par rôle créé. `permissions_de` lit la matrice du cabinet
+servi. La source est posée une fois par l'adaptateur et lue une fois par
+requête. Revenir au défaut efface la ligne : le cabinet suit alors ce que la
+plateforme ajoutera à ce rôle.
+
+    GET  /transverse/matrice-des-roles               la grille, rôles × droits par famille
+    PUT  /transverse/matrice-des-roles/{code}        régler un rôle
+    POST /transverse/matrice-des-roles               créer un rôle du cabinet
+    POST /transverse/matrice-des-roles/{code}/retrait retirer un rôle que personne ne tient
+
+Les trois gestes exigent `GERER_ROLES`, le second facteur et un motif. Ils vont
+au journal d'audit avec l'avant et l'après.
+
+Console : `/roles`, avec la grille complète et le réglage d'un rôle à la fois.
+Les cases que le serveur refuserait sont grisées. L'écran des comptes propose
+les rôles créés, sous leur nom.
+
+**Les vues cachées** : la navigation masquait déjà chaque entrée sans sa
+permission. Comme les permissions de la session viennent maintenant de la
+matrice, retirer un droit retire l'écran au prochain accès du collaborateur.
+
+### Les bornes qui ne se règlent pas
+
+* `GERER_ROLES` et `ACCORDER_FAVEURS` n'appartiennent qu'au super
+  administrateur, et il ne peut pas les perdre : une matrice que plus personne ne
+  peut régler ne se répare qu'en base.
+* Un rôle externe ne reçoit que des droits externes : un adhérent qui
+  validerait des écritures validerait les siennes.
+* Les gestes du client (régler ses honoraires, confier ses fonds…) ne vont pas
+  à un collaborateur : sur tout le portefeuille, ils feraient payer le cabinet à
+  la place de tous.
+* Un rôle créé par le cabinet est toujours interne.
+
+### Le trou refermé en passant
+
+`GERER_COMPTES` suffisait pour accorder n'importe quel rôle. L'administrateur
+aurait pu s'accorder le rôle de super administrateur, puis se donner tout le
+reste. Accorder ce rôle exige désormais `GERER_ROLES`. Le test le prouve : sans
+la garde, il échoue.
+
+### Démonstration
+
+Un compte à part, `C-010` (h.kamga@cga-brcg.cm), tient le rôle. Il fallait un
+compte distinct : donner ce rôle à la directrice aurait changé les droits d'un
+compte sur lequel des dizaines de cas de séparation des tâches s'appuient.
+
+### Vérifié
+
+Onze cas nouveaux. Deux gardes ont été vues échouer sur un mutant, puis passer
+une fois rétablies : le refus d'élévation, et la lecture de la matrice du
+cabinet. Console : `tsc`, `eslint`, 447 cas, `npm run build`.
+
+⚠️ La migration `c3e9a5d27f41` suit `b8d1f4a73c20`, celle des
+immobilisations, qui n'est pas encore commitée. Si ce travail est abandonné, il
+faut changer sa révision parente.
+
+**Non vérifié : l'écran dans un navigateur.**
+
+---
+
+## 18 octobre 2026 : vingt-cinq demandes, rangées avant d'être traitées
+
+Le cabinet a remis une liste de vingt-cinq points, mêlant des questions, des
+retouches et des modules entiers. Avant d'écrire une ligne, chacun a été
+confronté au code : plusieurs demandes existaient déjà en partie, et une
+correction posée sans le savoir aurait refait ce qui marche.
+
+### Le découpage
+
+* **Questions**, réunies dans un document à part (points d'ombre) : groupe de
+  risque CNPS (3), rapprochement des quittances (7), calcul des charges (12),
+  balance et grand livre (15), postes d'actif (16), transmission de la DSF (17),
+  IS et bulletin de paie (18).
+* **Mises à jour** du code existant : 1, 2, 4a, 8, 9, 10, 11, 13, 14, 19/20, 21.
+* **Évolutions**, modules nouveaux : rôles dynamiques (4b), situation de
+  règlement et grâce (5), journal de caisse par axe (6), écriture de quittance
+  (7), demandes ponctuelles (22), contrats (23), DSF en libre-service ou à la
+  demande (24), recrutement (25), agent comptable (15).
+
+Ordre retenu avec le gérant : les correctifs sûrs d'abord (21, 14, 1, 11), puis
+les rôles dynamiques, dont dépendent 5, 9 et 25.
+
+### Deux décisions du gérant
+
+* **Point 2** : l'inscription d'une entreprise existante (NIU, RCCM) revient au
+  **responsable affecté** au dossier commercial, ou à la direction. Aujourd'hui,
+  tout réviseur peut la faire.
+* **Point 8** : l'IRPP et la CNPS restent calculés, mais comme une
+  **proposition modifiable** ; seul le montant arrêté par un humain sert.
+
+### Lot 1, livré
+
+**21 · Rien d'interne sur ce que le client reçoit.** Le reçu d'honoraires
+imprimait « Encaissé par » suivi du nom de la caissière ; le livrable d'une
+mission, « Instruit par … ; validé par … ». Les deux disent désormais « le
+cabinet ». Le bulletin ne parle plus du « fiscaliste du cabinet » : il se dit
+provisoire. La DSF en PDF garde ses visas nommés : l'adhérent n'y a pas accès
+(`LIRE_COMPTABILITE`), c'est un document de travail. L'« interlocuteur » montré
+dans l'espace adhérent reste : c'est son contact, pas un exécutant.
+
+**14 · Le TTC suffit.** Sur la lecture d'une facture, « Calculer HT et TVA
+depuis le TTC » propose HT = TTC ÷ 1,1925 arrondi au franc, et la TVA en reste,
+pour que HT + TVA refasse exactement le TTC. Le taux est lu au référentiel
+(`TVA_TAUX_GENERAL`) à la date de la facture ; illisible, le bouton disparaît.
+Une facture exonérée se corrige à la main.
+
+**1 · Une pièce hors liste.** Le versement par le juriste d'un document reçu par
+WhatsApp existait. Manquait le document que la liste n'a pas prévu : il se
+nomme (« Plan de localisation ») et reçoit le code `AUTRE-1`, `AUTRE-2`… Le nom
+ne renomme jamais une pièce de la liste.
+
+**11 · L'aperçu, partout.** Aucun point de dépôt ne montrait le fichier choisi
+avant l'envoi. `ChampFichier` le dessine depuis le navigateur (image, ou PDF par
+pdf.js ; le TIFF se décrit), sur les neuf points de dépôt, y compris la photo
+prise au téléphone. Après l'envoi, trois écrans ne savaient que télécharger :
+la fiche d'une pièce au cabinet, les pièces de la DSF, le tableau de bord de
+l'adhérent. Les trois ont maintenant « Aperçu ». L'action de téléchargement
+devenue inutile, doublon exact d'une autre, est retirée.
+
+### Vérifié
+
+Les deux gardes du point 21 vues échouer sur un mutant (le nom remis), puis
+passer une fois le code rétabli. Console : `tsc`, `eslint`, 445 cas, et
+`npm run build`. Serveur : les fichiers touchés, puis la suite complète.
+
+**Non vérifié : le rendu visuel** de l'aperçu avant envoi dans un navigateur.
+
+### Reste
+
+Les vingt et un autres points, dans l'ordre ci-dessus. Rien n'est commité.
+
+---
+
 ## 30 septembre 2026 (suite 2) — Elle suit sa création, sans compte
 
 Le cabinet a tranché après avoir nommé la contrainte lui-même : **on ne peut
