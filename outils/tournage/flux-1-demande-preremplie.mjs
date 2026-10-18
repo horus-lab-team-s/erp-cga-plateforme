@@ -96,7 +96,7 @@ await chapitre("1 · le client dit son projet", async () => {
     "Elle aurait pu tout sauter : sa demande serait partie quand même. Un champ obligatoire de plus, c'est un visiteur de moins.");
   await souffle(2400);
 
-  await page.locator('.formulaire-service__consentement input[type="checkbox"]').check({ timeout: 5000 });
+  await page.locator('.formulaire-service__consentement input[type="checkbox"]').first().check({ timeout: 5000 });
   await souffle(900);
   await projecteur(page, '.formulaire-service button[type="submit"]', { tenir: 1800 });
   await page.click('.formulaire-service button[type="submit"]', { timeout: 8000 });

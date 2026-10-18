@@ -120,7 +120,12 @@ await chapitre("3 · passer la dotation", async () => {
     "L'écriture : 681 au débit, 28 au crédit, avec le tableau des amortissements pour pièce. Elle se relit, puis se valide.",
   );
   await souffle(4200);
-  await page.getByRole("button", { name: "Valider" }).first().click();
+  // ⚠️ La fiche se relit ; le brouillon se valide depuis la saisie, sur son article.
+  await aller(page, `${CONSOLE}/fr/comptabilite/saisie?dossier=${BATIMENT}&exercice=2026`, C,
+    "Relue, elle se valide depuis la saisie : le brouillon devient une écriture du journal.");
+  const article = page.locator("article", { hasText: `OD n° ${numero}` }).first();
+  await centrer(article);
+  await article.getByRole("button", { name: "Valider" }).click();
   await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => undefined);
   await souffle(3200);
 });

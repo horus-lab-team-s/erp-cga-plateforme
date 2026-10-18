@@ -59,9 +59,15 @@ async function horsChamp() {
   });
   if (q.status !== 200) throw new Error(`qualification : ${q.status} ${await q.text()}`);
   const sql = `update dossier_commercial set etat='PAYEE', donnees = jsonb_set(donnees::jsonb, '{etat}', '"PAYEE"')::json where reference='${reference}'`;
-  execFileSync("docker", ["compose", "-p", PILE, "exec", "-T", "base", "sh", "-c", `psql -U "\${POSTGRES_USER:-cga}" -d "\${POSTGRES_DB:-cga}" -c "${sql.replaceAll('"', '\\"')}"`], {
-    cwd: new URL("../..", import.meta.url).pathname, stdio: "inherit",
-  });
+  // `TOURNAGE_PSQL=local` : la pile de démonstration (`pile-de-demonstration.sh`) et sa base
+  // sur le port 55432, au lieu d'une pile Docker.
+  if (process.env.TOURNAGE_PSQL === "local") {
+    execFileSync("psql", ["-h", "127.0.0.1", "-p", "55432", "-U", "cga", "-d", "cga_dev", "-c", sql], { stdio: "inherit" });
+  } else {
+    execFileSync("docker", ["compose", "-p", PILE, "exec", "-T", "base", "sh", "-c", `psql -U "\${POSTGRES_USER:-cga}" -d "\${POSTGRES_DB:-cga}" -c "${sql.replaceAll('"', '\\"')}"`], {
+      cwd: new URL("../..", import.meta.url).pathname, stdio: "inherit",
+    });
+  }
   return reference;
 }
 
