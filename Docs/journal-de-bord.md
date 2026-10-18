@@ -9,6 +9,77 @@ ce qui a été décidé et pourquoi, ce qui a été livré, ce qui reste.
 
 ---
 
+## 18 octobre 2026 (suite 15) : l'application mobile, claire, complète, et ses actions soignées
+
+Le gérant : « il faudrait corriger le style, c'était vraiment moche côté application
+mobile, et fournir tous les onglets, avec une belle expérience pour le traitement des
+actions ».
+
+### Ce qui était vu sur le téléphone
+
+Passée en revue sur un vrai téléphone (TECNO, Android 15), branchée à la démonstration :
+
+* **Toute sombre.** Le téléphone était en mode nuit et l'application suivait le système :
+  cartes violettes sur fond noir, loin de l'espace adhérent web, clair et doux.
+* **Une barre de titre indigo pleine** en tête de chaque écran.
+* **Cinq onglets seulement** : il manquait les honoraires (et le règlement), la DSF et la
+  paie, que l'espace web offre.
+
+### Ce qui change
+
+* **Le thème clair, toujours.** Le titre est posé sur le fond de page, en indigo, dans la
+  police des titres ; il ne prend un fond qu'au défilement. Les icônes de la barre d'état
+  passent en sombre.
+* **La barre du bas** : Accueil · Échéances · Déposer · Documents · **Plus**. Cinq places,
+  pas une de plus, au-delà de quoi les libellés deviennent illisibles. « Plus » range
+  Mes honoraires, Ma DSF, Mes pièces envoyées, Mon entreprise et Ma paie. Ce qui demande
+  un geste y porte une pastille (« 90 000 F à régler », « 7 à fournir »).
+* **Mes honoraires**, avec un vrai parcours de règlement :
+  * une carte par période due, avec son montant et depuis quand elle est due ;
+  * « Payer par mobile money » ouvre une feuille qui récapitule et demande le numéro ;
+  * une fois la demande envoyée, l'écran dit « Validez sur votre téléphone » ;
+  * l'écran ne marque jamais une période réglée de lui-même : c'est l'opérateur qui la
+    règle, et l'écran relit le serveur ;
+  * les reçus, notes et factures (la facture si l'identité fiscale est complète)
+    s'ouvrent dans l'application.
+* **Ma DSF** :
+  * une frise en quatre étapes ;
+  * les pièces à fournir se photographient et partent, avec leur état d'envoi ;
+  * la pièce versée se remplace ;
+  * une fois la DSF déposée : l'accusé et la copie.
+* **Ma paie** : le mois clos par défaut (l'avenir ne s'ouvre pas), ce qu'il faut verser
+  et avant quand, et les bulletins nommés.
+* **L'accueil signale les honoraires dus** d'une carte qui mène droit au paiement. Sans
+  elle, le règlement rangé sous « Plus » ne se trouverait qu'en cherchant.
+* **Les actions** passent par un même jeu de composants (`composants/actions.dart`) :
+  * le bouton s'occupe aussitôt (roue dans le bouton, pas de double envoi) ;
+  * un retour au doigt ;
+  * l'issue dite en clair, avec le message du serveur quand il en écrit un ;
+  * se déconnecter demande confirmation.
+
+Un port à part (`ServiceDeLEspace`) porte les nouveaux appels, pour que les doublures de
+test existantes n'aient pas à les connaître.
+
+### Vérifié
+
+* Sur le téléphone, de bout en bout :
+  * connexion, accueil, « Plus » avec ses pastilles réelles ;
+  * honoraires, puis paiement par mobile money jusqu'à « Validez sur votre téléphone »
+    (démonstration, aucun débit réel) ;
+  * la note d'honoraires ouverte dans la visionneuse ;
+  * Ma DSF, avec la pièce versée le matin depuis le web, vue « Reçue » ;
+  * Ma paie et Mon entreprise.
+* `flutter analyze` propre ; 278 tests, dont 13 nouveaux (honoraires, DSF, paie,
+  « Plus », la carte de l'accueil).
+
+**Non vérifié sur l'appareil :** les dernières retouches (titre clair, boutons de pièce
+adoucis, chiffres de la paie alignés, carte de l'accueil). Le téléphone a été débranché
+avant la dernière construction ; elles sont couvertes par les tests et l'analyse.
+**Non fait :** joindre un PDF à la DSF depuis le téléphone (seule la photo est offerte :
+l'application n'a pas de sélecteur de fichiers).
+
+---
+
 ## 18 octobre 2026 (suite 14) : l'identité fiscale se saisit plus tard, la facture l'attend
 
 Le gérant ne dispose pas encore du NIU, du RCCM et du régime de TVA du cabinet : « il
