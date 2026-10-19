@@ -179,7 +179,7 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
 <p>Pour fermer votre session, cliquez sur la flèche à droite de votre nom, en bas de la barre latérale (« Se déconnecter »). Fermez toujours votre session sur un poste partagé.</p>
 
 <h3 id="s-2fa">Le second facteur : quand il est exigé</h3>
-<div class="fiche"><dt>À quoi ça sert</dt><dd>Protéger les gestes les plus sensibles par un code à six chiffres affiché sur votre téléphone, en plus du mot de passe.</dd><dt>Qui</dt><dd>Le réviseur (consigner un dépôt de déclaration, déposer la TVA, consigner l'accusé de la DSF) et le super administrateur (régler la matrice des rôles, accorder une faveur).</dd></div>
+<div class="fiche"><dt>À quoi ça sert</dt><dd>Protéger les gestes les plus sensibles par un code à six chiffres affiché sur votre téléphone, en plus du mot de passe.</dd><dt>Qui</dt><dd>Le réviseur (consigner un dépôt de déclaration, déposer la TVA, consigner l'accusé de la DSF), l'administrateur (inviter, suspendre ou rétablir un compte, fermer une habilitation, retirer le second facteur d'un collègue) et le super administrateur (régler la matrice des rôles, accorder une faveur).</dd></div>
 <p>Le second facteur n'est <strong>pas demandé à la connexion</strong>. Il l'est au moment du geste sensible : l'écran affiche alors « … exige le second facteur ». Une fois le code saisi, la session reste <strong>renforcée quinze minutes</strong> : vous enchaînez les gestes sans retaper de code.</p>
 
 <h4>Associer votre application d'authentification (une seule fois)</h4>
@@ -743,6 +743,7 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
 
 <h3 id="s-inviter">Inviter un collaborateur</h3>
 <div class="fiche"><dt>Qui</dt><dd>Administrateur (et super administrateur).</dd></div>
+<div class="note"><p><strong>Renforcez d'abord la session.</strong> Inviter, suspendre, rétablir un compte, fermer une habilitation ou retirer un second facteur exigent le second facteur (chapitre 2). Tant que la session n'est pas renforcée, la page Comptes affiche l'encadré du code en tête, et ces boutons n'apparaissent pas. Le mot de passe d'un administrateur, à lui seul, ne suffit donc plus à créer un compte.</p></div>
 <ol>
   <li><span class="menu">Comptes et habilitations</span> &gt; <span class="btn">Inviter un collaborateur</span>.</li>
   <li>Saisissez l'adresse, le prénom, le nom, le téléphone, le <strong>rôle</strong> et la date à partir de laquelle il est habilité.</li>
