@@ -90,9 +90,14 @@ C'est ce montant que porte la déclaration déposée. La quittance intervient
   source, 4431 pour la TVA. Au crédit, la trésorerie qui a payé : banque 521,
   mobile money 5231 ou caisse 571.
 
-**Reste à faire :** comparer automatiquement le montant de la quittance au
-montant déclaré. La correspondance entre une échéance et son accusé de dépôt
-n'est pas encore assez sûre pour en tirer un écart fiable.
+**Livré le 19 octobre 2026 :** la quittance se compare automatiquement au
+montant de l'accusé de dépôt. La correspondance est sûre : l'échéancier pose
+lui-même sur l'échéance la référence de son accusé, et seule cette référence sert
+(jamais une estimation). À la vérification, la console affiche le montant de
+l'accusé et l'écart dès que le montant de la quittance est saisi. Un écart de plus
+d'un franc ne bloque pas la validation (paiement partiel, pénalités), mais il exige
+un motif écrit, et l'écart reste au journal d'audit. Sans accusé consigné, la
+quittance se vérifie comme avant.
 
 ---
 
