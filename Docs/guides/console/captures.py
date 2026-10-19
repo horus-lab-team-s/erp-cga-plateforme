@@ -188,8 +188,9 @@ def enroler(navigateur, profil: str, chemin: str, prefixe: str | None) -> None:
     if prefixe and voulu(prefixe):
         prendre(page, f"{prefixe}d-cle-et-code", [
             (page.get_by_text("XXXX XXXX"), 1), (page.locator('input[name="code"]'), 2),
-            (page.get_by_role("button", name="Renforcer la session"), 3)])
-    page.get_by_role("button", name="Renforcer la session").click()
+            (page.get_by_role("button", name="Activer"), 3)])
+    # 19 octobre 2026 : le premier code ACTIVE la clé (il ne fait plus que renforcer).
+    page.get_by_role("button", name="Activer").click()
     page.wait_for_timeout(2500)
     print(f"  · second facteur enrôlé : {profil}")
     ctx.close()

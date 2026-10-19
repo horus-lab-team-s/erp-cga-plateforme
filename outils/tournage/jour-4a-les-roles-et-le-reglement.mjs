@@ -60,7 +60,15 @@ async function enrolerHorsChamp(courriel) {
     body: JSON.stringify({ jeton }),
   });
   if (!confirmation.ok) throw new Error(`confirmation refusée : ${await confirmation.text()}`);
-  return (await confirmation.json()).secret;
+  const { secret } = await confirmation.json();
+  // 19 octobre 2026 : la clé attend son premier code, qui l'active.
+  const activation = await fetch(`${API}/transverse/second-facteur/activation`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", cookie },
+    body: JSON.stringify({ code: codeDuMoment(secret) }),
+  });
+  if (!activation.ok) throw new Error(`activation refusée : ${await activation.text()}`);
+  return secret;
 }
 
 const secret = await enrolerHorsChamp(SUPER_ADMIN);
