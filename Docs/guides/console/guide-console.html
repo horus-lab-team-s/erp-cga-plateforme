@@ -283,10 +283,11 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
 <figure><img src="captures/32-demandes-entrantes.png" alt="Demandes entrantes"><figcaption><span class="rep">1</span>La demande, déjà affectée. Plus bas : les créations payées et les canaux de contact réellement exploités.</figcaption></figure>
 <ol>
   <li>Ouvrez <span class="menu">Demandes entrantes</span>. Traitez d'abord les <strong>Rappels à passer</strong> (un client à qui l'on a promis un appel), puis <strong>Ce qui dort</strong>, puis les dossiers en cours, du plus ancien au plus récent.</li>
-  <li>Cliquez sur le nom du prospect. En haut, « La demande » montre ce que le visiteur a écrit, tel quel.</li>
+  <li>Cliquez sur le nom du prospect. En haut, « La demande » montre ce que le visiteur a écrit, tel quel, et sous <strong>Documents joints par le visiteur</strong> les pièces qu'il a jointes sur le site (bail, statuts, facture) : ouvrez-les avant d'appeler.</li>
   <li>Appelez le client. Dans <strong>Premier échange</strong>, notez ce qui a été dit et validez <span class="btn">J'ai joint le client</span>. Déclarez-le même sans réponse : c'est ce qui arrête le compte à rebours de la réaffectation.</li>
 </ol>
 <figure><img src="captures/33-demande-et-premier-echange.png" alt="Demande et qualification"><figcaption><span class="rep">1</span>Ce que le visiteur a écrit. Dessous, la qualification ouverte.</figcaption></figure>
+<figure><img src="captures/33b-documents-joints.png" alt="Documents joints"><figcaption>Les documents joints par le visiteur, sous sa demande : un clic les ouvre.</figcaption></figure>
 
 <h3 id="s-qualif">Qualifier, puis chiffrer</h3>
 <ol>
@@ -553,9 +554,10 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
 <p>Quand l'adhérent paie lui-même sa TVA ou sa CNPS, il envoie la quittance depuis son espace. Elle apparaît sur l'échéance concernée dans l'échéancier du dossier.</p>
 <ol>
   <li>Ouvrez la quittance en aperçu et comparez-la à l'échéance.</li>
-  <li>Validez-la avec son montant : l'échéance passe à « Payée » et l'écriture de paiement est proposée. Ou refusez-la en écrivant le motif, que l'adhérent lira.</li>
+  <li>Saisissez le montant de la quittance. Si l'accusé de dépôt de l'échéance est consigné, la console affiche son montant et l'écart : « la quittance concorde », ou « écart de −2 618 FCFA ».</li>
+  <li>Validez : l'échéance passe à « Payée » et l'écriture de paiement est proposée. Ou refusez-la en écrivant le motif, que l'adhérent lira.</li>
 </ol>
-<div class="partiel"><p>La comparaison automatique du montant de la quittance avec le montant dû n'est pas encore faite : c'est au collaborateur de la vérifier. Aucune quittance n'attendait sur la pile au moment des captures, d'où l'absence d'image.</p></div>
+<div class="piege"><p>Un écart de plus d'un franc ne bloque pas la validation (paiement partiel, pénalités), mais un champ <strong>Pourquoi la valider malgré l'écart ?</strong> apparaît et doit être rempli : l'écart et votre motif restent au journal d'audit. Sans accusé consigné, la quittance se vérifie à l'œil, comme avant.</p></div>
 
 <h3 id="s-seuils">Veille des seuils</h3>
 <p><span class="menu">Veille des seuils</span> compare le chiffre d'affaires lu dans les livres au seuil d'assujettissement à la TVA, et signale les adhérents qui sortent, ou vont sortir, du champ du centre (CGI art. 118). Cette revue ne résilie rien : la décision reste celle du cabinet.</p>
@@ -653,7 +655,7 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
 <h3 id="s-ouvrir">Ouvrir une mission</h3>
 <ol>
   <li><span class="menu">Prestations ponctuelles</span> &gt; <strong>Ouvrir une mission</strong>.</li>
-  <li>Choisissez la <strong>prestation</strong>, saisissez l'<strong>objet</strong>, le client et son courriel. Si la demande a été payée en ligne, indiquez le dossier commercial payé (DC-…) : la mission s'y rattache sans recopier de référence.</li>
+  <li>Choisissez la <strong>prestation</strong>, saisissez l'<strong>objet</strong>, le client et son courriel. Les demandes payées attendent en tête de l'écran, dans la file <strong>à ouvrir</strong> : la mission s'y rattache sans recopier de référence. Une <strong>DSF achetée en ligne</strong> y paraît aussi, avec le NIU du client : elle s'ouvre en <strong>DSF ciblée</strong>, une seule fois.</li>
   <li>Joignez le document (PDF ou photo) puis <span class="btn">Ouvrir la mission</span>.</li>
 </ol>
 <figure><img src="captures/49-ouvrir-une-mission.png" alt="Ouvrir une mission"><figcaption><span class="rep">1</span>Prestation <span class="rep">2</span>Objet <span class="rep">3</span>Ouvrir la mission</figcaption></figure>
@@ -863,7 +865,7 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
   <tr><td>Quittances</td><td>Comparaison automatique du montant non faite : vérification humaine.</td></tr>
   <tr><td>Balances auxiliaires</td><td>Pas encore au modèle de la DGI.</td></tr>
   <tr><td>Export Sage 100</td><td>Profil non confronté à une installation réelle.</td></tr>
-  <tr><td>Tarifs</td><td>Six prix restent à fixer par la direction ; non payables en ligne d'ici là.</td></tr>
+  <tr><td>Tarifs</td><td>Huit prix restent à fixer par la direction, dont les deux tranches de la DSF achetée en ligne ; non payables en ligne d'ici là.</td></tr>
   <tr><td>Score de charge (proforma)</td><td>Déclaré par le responsable, pas mesuré.</td></tr>
   <tr><td>Lien « Retour au site »</td><td>Sur la pile de démonstration, il pointe une adresse de site qui ne répond pas (réglage de l'adresse du site à corriger par l'exploitant).</td></tr>
 </table>
