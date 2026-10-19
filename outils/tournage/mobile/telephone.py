@@ -78,12 +78,22 @@ def onglet(nom: str, pause: float = 2.0):
     fin = time.time() + 20
     while time.time() < fin:
         for e in elements():
-            if e[0] == nom and e[2] > 2000:
+            if e[0] == nom and e[2] > hauteur() * 0.83:
                 adb("shell", "input", "tap", str(e[1]), str(e[2]))
                 time.sleep(pause)
                 return
         time.sleep(0.7)
     raise RuntimeError(f"onglet introuvable : {nom}")
+
+
+_HAUTEUR: list[int] = []
+
+
+def hauteur() -> int:
+    """La hauteur de l'écran en pixels : 2400 sur l'émulateur, 1600 sur un TECNO KM5."""
+    if not _HAUTEUR:
+        _HAUTEUR.append(int(re.findall(r"x(\d+)", adb("shell", "wm", "size"))[-1]))
+    return _HAUTEUR[0]
 
 
 def tap(x: int, y: int, pause: float = 1.0):

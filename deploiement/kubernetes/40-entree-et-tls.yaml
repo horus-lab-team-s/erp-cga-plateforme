@@ -41,7 +41,14 @@ metadata:
     # L'application lit les en-têtes transmis — voir `--proxy-headers` dans
     # l'image. Sans quoi toutes les requêtes paraîtraient venir du contrôleur,
     # et la limitation de débit compterait le monde entier sur une adresse.
-    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    #
+    # ⚠️ 19 octobre 2026 (audit de sécurité) : `use-forwarded-headers` n'est pas une
+    # annotation d'ingress, c'est un réglage de la ConfigMap du contrôleur. Posé à
+    # « true » sans répartiteur devant nginx, il ferait croire au contrôleur
+    # l'X-Forwarded-For écrit par le client, et la limitation de débit se
+    # contournerait en changeant d'en-tête. Le laisser à « false » (défaut) si nginx
+    # reçoit directement Internet ; sinon, le mettre à « true » ET fixer
+    # `proxy-real-ip-cidr` au seul réseau du répartiteur.
     cert-manager.io/cluster-issuer: "letsencrypt-dns01"
 spec:
   tls:
