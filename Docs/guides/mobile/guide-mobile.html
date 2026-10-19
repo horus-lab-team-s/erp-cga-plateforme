@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide application mobile</title>
+<style>
+  @font-face { font-family: "Poppins"; font-weight: 400; src: url("../../../../erp-cga-mobile/assets/polices/Poppins-Regular.ttf"); }
+  @font-face { font-family: "Poppins"; font-weight: 500; src: url("../../../../erp-cga-mobile/assets/polices/Poppins-Medium.ttf"); }
+  @font-face { font-family: "Poppins"; font-weight: 600; src: url("../../../../erp-cga-mobile/assets/polices/Poppins-SemiBold.ttf"); }
+  @font-face { font-family: "Poppins"; font-weight: 700; src: url("../../../../erp-cga-mobile/assets/polices/Poppins-Bold.ttf"); }
+  @font-face { font-family: "Inter"; font-weight: 400; src: url("../../../../erp-cga-mobile/assets/polices/Inter-Regular.ttf"); }
+  @font-face { font-family: "Inter"; font-weight: 500; src: url("../../../../erp-cga-mobile/assets/polices/Inter-Medium.ttf"); }
+  @font-face { font-family: "Inter"; font-weight: 600; src: url("../../../../erp-cga-mobile/assets/polices/Inter-SemiBold.ttf"); }
+  @font-face { font-family: "Inter"; font-weight: 700; src: url("../../../../erp-cga-mobile/assets/polices/Inter-Bold.ttf"); }
+
+  :root {
+    --indigo: #2E1B4D;
+    --magenta: #8C2D86;
+    --fond: #F4F2F9;
+    --encre: #1F1A2B;
+    --douce: #5E5670;
+    --trait: #DDD7EA;
+    --carte: #FFFFFF;
+    --alerte: #B3261E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --fond: #F4F2F9; }
+  }
+  :root[data-theme="dark"] { --fond: #F4F2F9; }
+
+  @page {
+    size: A4;
+    margin: 18mm 17mm 20mm 17mm;
+    @bottom-left {
+      content: "CGA BRC Group · Guide de l'application mobile adhérent";
+      font-family: "Inter"; font-size: 8pt; color: #8A829C;
+    }
+    @bottom-right {
+      content: "Page " counter(page) " sur " counter(pages);
+      font-family: "Inter"; font-size: 8pt; color: #8A829C;
+    }
+  }
+  @page couverture { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    background: #fff;
+    color: var(--encre);
+    font-family: "Inter", sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+  }
+  h1, h2, h3 { font-family: "Poppins", sans-serif; color: var(--indigo); line-height: 1.25; }
+  h2 {
+    font-size: 20pt; font-weight: 700; margin: 0 0 4mm;
+    break-before: page;
+    padding-bottom: 3mm;
+    border-bottom: 2px solid var(--magenta);
+  }
+  h2 .no { color: var(--magenta); margin-right: 3mm; }
+  h3 { font-size: 13pt; font-weight: 600; margin: 7mm 0 2mm; break-after: avoid; }
+  p { margin: 0 0 3mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+  li { margin-bottom: 1.2mm; }
+  strong { font-weight: 600; color: var(--indigo); }
+  .chapo { font-size: 11.5pt; color: var(--douce); margin-bottom: 5mm; }
+
+  /* Couverture */
+  .couverture {
+    page: couverture;
+    height: 297mm; width: 210mm;
+    background: linear-gradient(150deg, #2E1B4D 0%, #4A2468 55%, #8C2D86 100%);
+    color: #fff;
+    padding: 30mm 22mm;
+    display: flex; flex-direction: column;
+    break-after: page;
+  }
+  .couverture .logo {
+    background: #fff; border-radius: 6mm; padding: 6mm 8mm; width: 62mm;
+  }
+  .couverture .logo img { width: 100%; display: block; }
+  .couverture .sur { margin-top: 42mm; font-family: "Inter"; letter-spacing: .14em; font-size: 10pt; text-transform: uppercase; opacity: .8; }
+  .couverture h1 { color: #fff; font-size: 34pt; margin: 4mm 0 6mm; font-weight: 700; }
+  .couverture .sous { font-size: 13pt; opacity: .92; max-width: 140mm; }
+  .couverture .pied { margin-top: auto; display: flex; justify-content: space-between; font-size: 10pt; opacity: .9; border-top: 1px solid rgba(255,255,255,.35); padding-top: 5mm; }
+
+  /* Sommaire */
+  .sommaire h2 { break-before: auto; }
+  .sommaire ol { list-style: none; padding: 0; margin-top: 6mm; }
+  .sommaire li { display: flex; align-items: baseline; font-size: 11.5pt; margin-bottom: 3mm; }
+  .sommaire li .t { font-weight: 500; }
+  .sommaire li .no { color: var(--magenta); font-family: "Poppins"; font-weight: 600; width: 9mm; }
+  .sommaire li .pts { flex: 1; border-bottom: 1px dotted #B9B0CC; margin: 0 2mm; transform: translateY(-1mm); }
+  .sommaire li .num { font-family: "Poppins"; font-weight: 600; color: var(--indigo); min-width: 6mm; text-align: right; }
+  .sommaire .aide { margin-top: 10mm; background: var(--fond); border-radius: 4mm; padding: 5mm 6mm; }
+
+  /* Encadrés */
+  .astuce, .attention {
+    border-radius: 3mm; padding: 3.5mm 5mm; margin: 4mm 0; break-inside: avoid;
+  }
+  .astuce { background: var(--fond); border-left: 3px solid var(--magenta); }
+  .attention { background: #FBEDEC; border-left: 3px solid var(--alerte); }
+  .astuce b, .attention b { font-family: "Poppins"; font-weight: 600; display: block; margin-bottom: 1mm; color: var(--indigo); }
+  .attention b { color: var(--alerte); }
+
+  .etapes { counter-reset: e; list-style: none; padding-left: 0; }
+  .etapes li { counter-increment: e; position: relative; padding-left: 9mm; margin-bottom: 2.2mm; }
+  .etapes li::before {
+    content: counter(e); position: absolute; left: 0; top: .2mm;
+    width: 6mm; height: 6mm; border-radius: 50%;
+    background: var(--magenta); color: #fff; font-family: "Poppins"; font-weight: 600;
+    font-size: 8.5pt; line-height: 6mm; text-align: center;
+  }
+
+  /* Téléphones */
+  .ecrans { display: flex; justify-content: center; align-items: flex-start; gap: 12mm; margin: 5mm 0 4mm; break-inside: avoid; page-break-inside: avoid; }
+  figure.tel { margin: 0; width: 50mm; break-inside: avoid; page-break-inside: avoid; }
+  .tel .cadre { background: #1B1426; border-radius: 6mm; padding: 1.8mm; }
+  .tel .ecran { border-radius: 4.5mm; overflow: hidden; background: #fff; }
+  .tel .ecran img { width: 100%; display: block; }
+  .tel.court .ecran { height: 92mm; }
+  .tel figcaption { font-size: 8.8pt; color: var(--douce); text-align: center; margin-top: 2.5mm; line-height: 1.4; }
+  .tel figcaption b { color: var(--indigo); font-weight: 600; }
+
+  table.gestes { width: 100%; border-collapse: collapse; margin: 3mm 0 4mm; font-size: 10pt; break-inside: avoid; }
+  table.gestes th, table.gestes td { text-align: left; padding: 2.2mm 3mm; border-bottom: 1px solid var(--trait); vertical-align: top; }
+  table.gestes th { background: var(--fond); font-family: "Poppins"; font-weight: 600; color: var(--indigo); }
+  table.gestes td:first-child { font-weight: 600; color: var(--indigo); width: 36%; }
+
+  .faq h3 { font-size: 11.5pt; margin-top: 5mm; }
+  .contacts { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-top: 5mm; }
+  .contacts div { background: var(--fond); border-radius: 3mm; padding: 4mm 5mm; break-inside: avoid; }
+  .contacts b { display: block; font-family: "Poppins"; font-weight: 600; color: var(--magenta); font-size: 9pt; text-transform: uppercase; letter-spacing: .06em; }
+  .contacts span { font-size: 12pt; font-weight: 600; color: var(--indigo); }
+
+  @media screen {
+    body { background: var(--fond); }
+    main { max-width: 210mm; margin: 0 auto; background: #fff; padding: 16px; }
+    .couverture { width: auto; height: auto; min-height: 100vh; }
+    .ecrans { flex-wrap: wrap; }
+    figure.tel { width: min(62mm, 44%); }
+  }
+  @media screen and (max-width: 600px) {
+    figure.tel { width: 80%; }
+    .contacts { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<section class="couverture">
+  <div class="logo"><img src="../../../../erp-cga-mobile/assets/marque/cga-logo-couleur.jpg" alt="CGA Broad Range Consulting Group"></div>
+  <div class="sur">Guide d'utilisation</div>
+  <h1>Application mobile adhérent</h1>
+  <p class="sous">Déposer vos pièces, suivre vos échéances et retrouver les documents du cabinet, depuis votre téléphone.</p>
+  <div class="pied">
+    <span>CGA Broad Range Consulting Group · Douala</span>
+    <span>Version 1.0 · 19 octobre 2026</span>
+  </div>
+</section>
+
+<section class="sommaire">
+  <h2>Sommaire</h2>
+  <ol>
+    <li><span class="no">1</span><span class="t">Installer et se connecter</span><span class="pts"></span><span class="num" data-chap="1"></span></li>
+    <li><span class="no">2</span><span class="t">Découvrir l'accueil</span><span class="pts"></span><span class="num" data-chap="2"></span></li>
+    <li><span class="no">3</span><span class="t">Déposer une pièce</span><span class="pts"></span><span class="num" data-chap="3"></span></li>
+    <li><span class="no">4</span><span class="t">Suivre vos pièces</span><span class="pts"></span><span class="num" data-chap="4"></span></li>
+    <li><span class="no">5</span><span class="t">Échéances et paiements</span><span class="pts"></span><span class="num" data-chap="5"></span></li>
+    <li><span class="no">6</span><span class="t">Les documents du cabinet</span><span class="pts"></span><span class="num" data-chap="6"></span></li>
+    <li><span class="no">7</span><span class="t">Vos honoraires</span><span class="pts"></span><span class="num" data-chap="7"></span></li>
+    <li><span class="no">8</span><span class="t">Votre déclaration annuelle (DSF)</span><span class="pts"></span><span class="num" data-chap="8"></span></li>
+    <li><span class="no">9</span><span class="t">Votre paie</span><span class="pts"></span><span class="num" data-chap="9"></span></li>
+    <li><span class="no">10</span><span class="t">Mon entreprise</span><span class="pts"></span><span class="num" data-chap="10"></span></li>
+    <li><span class="no">11</span><span class="t">Questions fréquentes</span><span class="pts"></span><span class="num" data-chap="11"></span></li>
+    <li><span class="no">12</span><span class="t">Contacts</span><span class="pts"></span><span class="num" data-chap="12"></span></li>
+  </ol>
+  <div class="aide">
+    <p><strong>À qui s'adresse ce guide ?</strong> À vous, adhérent du CGA : commerçant, artisan, dirigeant de PME. Vous n'avez pas besoin de connaître la comptabilité pour vous servir de l'application.</p>
+    <p style="margin:0"><strong>Ce qu'elle fait d'abord :</strong> envoyer au cabinet vos factures et reçus en quelques secondes, même sans réseau. Le reste (échéances, documents, honoraires, DSF, paie) vous permet de savoir où en est votre dossier sans téléphoner.</p>
+  </div>
+</section>
+
+<!-- 1 -->
+<section>
+  <h2 id="ch1"><span class="no">1.</span>Installer et se connecter</h2>
+  <p class="chapo">Une seule connexion suffit : ensuite, l'application vous ouvre directement votre espace.</p>
+
+  <h3>Installer l'application</h3>
+  <p>L'application s'installe sur un téléphone <strong>Android</strong>. Le cabinet vous indique où la télécharger. Une fois installée, elle apparaît sur votre écran d'accueil sous le nom <strong>CGA Broad Range</strong>.</p>
+
+  <h3>Recevoir votre accès</h3>
+  <p>Votre accès (votre adresse électronique et un lien pour choisir votre mot de passe) vous est envoyé par courriel <strong>dès que votre souscription est réglée</strong>. Avant cela, l'application vous montre l'offre du cabinet : vous pouvez la consulter sans compte.</p>
+
+  <h3>Se connecter</h3>
+  <ol class="etapes">
+    <li>Ouvrez l'application. Si vous voyez la page de l'offre du cabinet, touchez <strong>Se connecter</strong> en haut à droite.</li>
+    <li>Saisissez votre <strong>adresse électronique</strong> et votre <strong>mot de passe</strong>. L'icône en forme d'œil affiche ou masque le mot de passe.</li>
+    <li>Touchez <strong>Se connecter</strong>. Votre accueil s'ouvre.</li>
+  </ol>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/vitrine.png" alt=""></div></div><figcaption><b>Avant la connexion</b> : l'offre du cabinet, et le bouton « Se connecter ».</figcaption></figure>
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/connexion.png" alt=""></div></div><figcaption><b>L'écran de connexion</b> : adresse, mot de passe, « Mot de passe oublié ? ».</figcaption></figure>
+  </div>
+
+  <h3>Rester connecté</h3>
+  <p>Vous n'avez rien à cocher : l'application <strong>garde votre session</strong> sur le téléphone. Les fois suivantes, elle s'ouvre directement sur votre accueil, sans redemander vos identifiants. Si la session a expiré, l'application vous ramène simplement à l'écran de connexion.</p>
+
+  <h3>Mot de passe oublié</h3>
+  <p>Touchez <strong>Mot de passe oublié ?</strong>, indiquez votre adresse, puis <strong>Recevoir un lien</strong>. Si un compte existe à cette adresse, un lien part pour choisir un nouveau mot de passe. Pensez à regarder dans les courriers indésirables. Rien reçu ? Les boutons <strong>WhatsApp</strong> et <strong>Appeler</strong> vous mettent en relation avec votre chargé de clientèle, qui vous renvoie un lien.</p>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/mot-de-passe-oublie.png" alt=""></div></div><figcaption><b>Mot de passe oublié</b> : un lien par courriel, ou le cabinet par WhatsApp ou téléphone.</figcaption></figure>
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/deconnexion.png" alt=""></div></div><figcaption><b>Se déconnecter</b> : l'application demande confirmation.</figcaption></figure>
+  </div>
+  <div class="attention"><b>Votre mot de passe est à vous seul</b>Le cabinet ne vous demandera jamais votre mot de passe, ni par téléphone, ni par WhatsApp, ni par courriel.</div>
+
+  <h3>Se déconnecter</h3>
+  <p>Touchez l'icône de sortie en haut de l'accueil, ou <strong>Plus</strong> puis <strong>Se déconnecter</strong> en bas de la page. Confirmez. Les pièces qui n'étaient pas encore parties <strong>restent sur le téléphone</strong> : elles partiront à votre prochaine connexion.</p>
+</section>
+
+<!-- 2 -->
+<section>
+  <h2 id="ch2"><span class="no">2.</span>Découvrir l'accueil</h2>
+  <p class="chapo">L'accueil vous dit en un coup d'œil où en est votre mois, et ce que le cabinet attend de vous.</p>
+
+  <h3>La barre du bas</h3>
+  <table class="gestes">
+    <tr><th>Bouton</th><th>Ce qu'il ouvre</th></tr>
+    <tr><td>Accueil</td><td>Votre tableau de bord (ce chapitre).</td></tr>
+    <tr><td>Échéances</td><td>Vos impôts et cotisations, ce qui est en retard et ce qui vient (chapitre 5).</td></tr>
+    <tr><td>Déposer (le grand rond au milieu)</td><td>L'appareil photo, <strong>en un seul appui</strong>, pour photographier une facture (chapitre 3).</td></tr>
+    <tr><td>Documents</td><td>Les accusés de dépôt que le cabinet a obtenus pour vous (chapitre 6).</td></tr>
+    <tr><td>Plus</td><td>Honoraires, DSF, pièces envoyées, mon entreprise, ma paie, déconnexion.</td></tr>
+  </table>
+
+  <h3>Ce que montre l'accueil, de haut en bas</h3>
+  <ul>
+    <li><strong>Bonjour</strong>, votre nom, le nom de votre entreprise et son numéro de dossier.</li>
+    <li><strong>Votre mois</strong> : un anneau indique combien de justificatifs du mois le cabinet a reçus (par exemple « 1 sur 4 »), avec une phrase qui dit quoi faire.</li>
+    <li><strong>Trois chiffres</strong> : les pièces attendues, les périodes en retard, les documents déposés. Touchez un chiffre pour aller à l'écran correspondant.</li>
+    <li><strong>Déposer une pièce</strong> : la grande action violette (chapitre 3).</li>
+    <li>Si des honoraires sont à régler, une carte vous le signale et ouvre le paiement.</li>
+  </ul>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/accueil-haut.png" alt=""></div></div><figcaption><b>Le haut de l'accueil</b> : votre mois, les trois chiffres, « Déposer une pièce ».</figcaption></figure>
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/accueil-demandes.png" alt=""></div></div><figcaption><b>Plus bas</b> : honoraires à régler, puis ce que le cabinet vous demande.</figcaption></figure>
+  </div>
+
+  <h3>Ce que le cabinet vous demande</h3>
+  <p>Chaque pièce attendue a sa carte : ce qu'il faut, la date prévue, et des étiquettes comme <strong>En retard</strong>, <strong>À corriger</strong> ou <strong>Nécessaire à la clôture</strong>. Sur chaque carte, vous pouvez :</p>
+  <ul>
+    <li><strong>Déposer la pièce</strong> : ouvre les trois façons de l'envoyer (chapitre 3) ;</li>
+    <li>répondre <strong>Je l'aurai la semaine prochaine</strong> ou <strong>Je n'ai pas ce document</strong> : le cabinet est prévenu, et la carte affiche « Vous avez répondu : ... » ;</li>
+    <li>pour une pièce à corriger, <strong>Voir la pièce que vous aviez envoyée</strong>.</li>
+  </ul>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/accueil-piece-demandee.png" alt=""></div></div><figcaption><b>Une pièce demandée</b> : la déposer, ou dire où vous en êtes.</figcaption></figure>
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/plus.png" alt=""></div></div><figcaption><b>L'onglet Plus</b> : le reste de votre espace.</figcaption></figure>
+  </div>
+
+  <h3>Le bas de l'accueil</h3>
+  <ul>
+    <li><strong>Vos échéances</strong> : un résumé (périodes en retard, ou la prochaine échéance). Touchez-le pour ouvrir l'onglet Échéances.</li>
+    <li><strong>Déposés pour vous par le cabinet</strong> : les deux derniers documents, et <strong>Tout voir</strong>.</li>
+    <li><strong>Raccourcis</strong> : <strong>Mes pièces</strong> (ce que vous avez envoyé), <strong>Mon entreprise</strong>, et <strong>Écrire</strong>, qui ouvre WhatsApp vers le cabinet.</li>
+  </ul>
+  <div class="astuce"><b>Mettre à jour l'écran</b>Tirez l'écran vers le bas avec le doigt : l'accueil se recharge. Sans réseau, un message vous prévient que ce qui s'affiche peut être incomplet.</div>
+</section>
+
+<!-- 3 -->
+<section>
+  <h2 id="ch3"><span class="no">3.</span>Déposer une pièce</h2>
+  <p class="chapo">Une facture, un reçu, un relevé : prenez-le en photo ou choisissez-le dans votre téléphone. Il part au cabinet tout seul.</p>
+
+  <h3>Le plus rapide : le bouton « Déposer »</h3>
+  <p>Touchez le grand rond <strong>Déposer</strong> au milieu de la barre du bas : l'appareil photo s'ouvre directement. Photographiez la pièce bien à plat, en entier, avec assez de lumière. La première fois, Android peut vous demander d'autoriser l'accès à l'appareil photo : acceptez.</p>
+
+  <h3>Les trois choix</h3>
+  <p>La grande action <strong>Déposer une pièce</strong> de l'accueil, et le bouton <strong>Déposer la pièce</strong> d'une pièce demandée, ouvrent une feuille avec trois choix :</p>
+  <table class="gestes">
+    <tr><th>Choix</th><th>Quand l'utiliser</th></tr>
+    <tr><td>Photographier</td><td>La facture est devant vous, sur papier.</td></tr>
+    <tr><td>Choisir dans la galerie</td><td>Vous l'avez reçue en photo, par WhatsApp par exemple.</td></tr>
+    <tr><td>Importer un scan (PDF)</td><td>Vous l'avez reçue par courriel, ou scannée au bureau. Le cabinet reçoit le PDF tel quel, toutes ses pages comprises.</td></tr>
+  </table>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/feuille-trois-choix.png" alt=""></div></div><figcaption><b>La feuille des trois choix</b>.</figcaption></figure>
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/apercu-photo.png" alt=""></div></div><figcaption><b>L'aperçu avant envoi</b> : vérifiez la photo, « Agrandir » pour la voir en grand.</figcaption></figure>
+  </div>
+
+  <h3>Vérifier avant d'envoyer</h3>
+  <p>Avant de partir, la pièce s'affiche en grand (<strong>Vérifier la pièce</strong>, ou <strong>Vérifier le scan</strong> pour un PDF). Si la photo est floue, coupée ou à l'envers, touchez <strong>Reprendre la photo</strong> (ou <strong>Choisir un autre fichier</strong>). Sinon, touchez <strong>Envoyer la pièce</strong>.</p>
+
+  <h3>« Ce que vous savez de cette pièce »</h3>
+  <p>Sous l'aperçu, un petit formulaire vous permet d'aider le comptable. <strong>Tout est facultatif</strong> : vous pouvez envoyer sans rien remplir. Ce que vous dites ici, le comptable n'aura pas à le relire.</p>
+  <ul>
+    <li><strong>La nature</strong> : Facture d'achat, Facture de vente, Reçu, Relevé bancaire, Relevé mobile money, Autre ;</li>
+    <li><strong>Le fournisseur</strong> (le nom change selon la nature : Client pour une facture de vente, Banque, Opérateur) ;</li>
+    <li><strong>Le numéro</strong> et <strong>la date</strong> du document ;</li>
+    <li><strong>Le montant TTC</strong>, en F CFA : le total en bas de la facture, taxes comprises ;</li>
+    <li><strong>Un mot pour le comptable</strong>, par exemple « Payée en espèces ».</li>
+  </ul>
+  <div class="ecrans">
+    <figure class="tel"><div class="cadre"><div class="ecran"><img src="captures/apercu-formulaire.png" alt=""></div></div><figcaption><b>Le formulaire rempli</b> (facture fictive).</figcaption></figure>
+    <figure class="tel"><div class="cadre"><div class="ecran"><img src="captures/apercu-scan.png" alt=""></div></div><figcaption><b>Un scan PDF</b> : sa taille, et le même formulaire.</figcaption></figure>
+  </div>
+
+  <h3>Sans réseau : la pièce part toute seule</h3>
+  <p>Après « Envoyer la pièce », le message <strong>« Enregistrée. Elle partira toute seule. »</strong> s'affiche. La pièce est gardée sur le téléphone et part dès que le réseau le permet. Vous n'avez rien à refaire.</p>
+  <ul>
+    <li>L'écran <strong>Mes justificatifs</strong> (qui s'ouvre après un dépôt) dit « Une pièce attend » ou « 2 pièces attendent », et les liste sous <strong>En attente de remise</strong>, avec l'heure de la prise.</li>
+    <li>Un petit chiffre sur le bouton <strong>Déposer</strong> indique combien de pièces attendent de partir.</li>
+    <li>L'application réessaie régulièrement tant qu'elle est ouverte, et dès que vous y revenez. Pour forcer l'envoi, touchez l'icône de nuage en haut de <strong>Mes justificatifs</strong>.</li>
+    <li>Quand tout est parti, l'écran affiche <strong>Tout est parti</strong>.</li>
+  </ul>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/justificatifs-en-attente.png" alt=""></div></div><figcaption><b>Mes justificatifs</b> : deux pièces attendent le réseau.</figcaption></figure>
+  </div>
+  <div class="attention"><b>Une pièce « À reprendre »</b>Si le cabinet n'a pas pu prendre une pièce, elle apparaît sous <strong>À reprendre</strong>, avec la raison. Photographiez-la à nouveau.</div>
+  <div class="astuce"><b>Taille maximale : 20 Mo</b>Un fichier plus lourd n'est pas envoyé. Envoyez-le en plusieurs parties, ou photographiez la facture.</div>
+</section>
+
+<!-- 4 -->
+<section>
+  <h2 id="ch4"><span class="no">4.</span>Suivre vos pièces</h2>
+  <p class="chapo">Tout ce que vous avez remis au cabinet, et où il en est.</p>
+  <p>Ouvrez <strong>Plus</strong> puis <strong>Mes pièces envoyées</strong>, le raccourci <strong>Mes pièces</strong> de l'accueil, ou <strong>Tout ce que j'ai envoyé</strong> dans Documents. L'écran <strong>Pièces remises</strong> s'ouvre :</p>
+  <ul>
+    <li>en haut, le nombre de pièces au cabinet et combien sont déjà prises en compte ;</li>
+    <li>les pièces rangées par mois, avec le fournisseur, le montant, la date et le numéro quand ils sont connus ;</li>
+    <li>une barre en cinq étapes montre l'avancement : <strong>Reçue par le cabinet</strong>, <strong>Lue par le cabinet</strong>, <strong>Rapprochée d'une opération</strong>, <strong>Comptabilisée</strong>, <strong>Archivée</strong> ;</li>
+    <li>les pièces arrivées autrement sont signalées : reçue par courriel, par WhatsApp, déposée sur le portail, remise en main propre, relevé importé.</li>
+  </ul>
+  <p>Le champ de recherche trouve une pièce par émetteur, référence ou mois. Touchez une pièce pour revoir le document envoyé.</p>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/pieces-envoyees.png" alt=""></div></div><figcaption><b>Pièces remises</b> : l'avancement de chaque pièce.</figcaption></figure>
+  </div>
+  <div class="astuce"><b>Une pièce n'apparaît pas encore ?</b>Cette liste montre les pièces <strong>arrivées</strong> au cabinet. Une pièce encore en attente de réseau se trouve dans <strong>Mes justificatifs</strong> (chapitre 3).</div>
+</section>
+
+<!-- 5 -->
+<section>
+  <h2 id="ch5"><span class="no">5.</span>Échéances et paiements</h2>
+  <p class="chapo">Vos impôts et cotisations, période par période : ce qui est en retard, ce qui vient, et comment régler.</p>
+  <p>Ouvrez l'onglet <strong>Échéances</strong>. Un bandeau dit combien de périodes sont en retard (ou « Rien en retard »). Puis chaque obligation a sa carte : la période, la date limite, le nombre de jours de retard, et les autres périodes en retard derrière celle-ci. <strong>De quoi s'agit-il ?</strong> explique l'obligation en mots simples.</p>
+
+  <h3>Deux façons de régler</h3>
+  <table class="gestes">
+    <tr><th>Cas</th><th>Ce que vous faites</th></tr>
+    <tr><td>Le cabinet paie pour vous</td><td>Quand le cabinet a arrêté le montant, la carte affiche <strong>À verser</strong> et le bouton <strong>Régler par mobile money</strong>. Vous payez le cabinet, il paie l'administration et garde la quittance : rien à photographier. Tant que le montant n'est pas arrêté, la carte vous le dit.</td></tr>
+    <tr><td>Vous payez vous-même</td><td>Sur le portail de paiement de l'administration, ou à son guichet. Puis touchez <strong>J'ai déjà payé : envoyer la quittance</strong> : photographiez la quittance ou choisissez-la dans la galerie. Le cabinet la rattache à la déclaration.</td></tr>
+  </table>
+  <p><strong>Comment régler cette échéance ?</strong> rappelle ces deux voies pour l'obligation choisie. Si le cabinet ne paie pas encore cette obligation pour vous, <strong>Le demander au cabinet</strong> ouvre WhatsApp.</p>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/echeances.png" alt=""></div></div><figcaption><b>Mes échéances</b> : le cabinet paie la CNPS, montant pas encore arrêté.</figcaption></figure>
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/echeances-mobile-money.png" alt=""></div></div><figcaption><b>Montant arrêté</b> : « Régler par mobile money » (données d'essai).</figcaption></figure>
+  </div>
+
+  <h3>Payer par mobile money</h3>
+  <ol class="etapes">
+    <li>Touchez <strong>Régler par mobile money</strong> (ou <strong>Payer par mobile money</strong> pour les honoraires).</li>
+    <li>Saisissez le <strong>numéro à débiter</strong> (MTN Mobile Money ou Orange Money), neuf chiffres au moins.</li>
+    <li>Touchez <strong>Envoyer la demande</strong>.</li>
+    <li>Un message de votre opérateur arrive sur le téléphone : <strong>composez votre code secret</strong> pour valider.</li>
+  </ol>
+  <div class="ecrans">
+    <figure class="tel"><div class="cadre"><div class="ecran"><img src="captures/paiement-mobile-money.png" alt=""></div></div><figcaption><b>Payer par mobile money</b> : le numéro, puis la demande.</figcaption></figure>
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/echeances-comment-regler.png" alt=""></div></div><figcaption><b>Comment régler cette échéance ?</b></figcaption></figure>
+  </div>
+  <div class="astuce"><b>Après la quittance</b>« Preuve envoyée » : le cabinet la vérifie, et la carte passe à la période suivante. Réglez toujours la période la plus ancienne d'abord.</div>
+</section>
+
+<!-- 6 -->
+<section>
+  <h2 id="ch6"><span class="no">6.</span>Les documents du cabinet</h2>
+  <p class="chapo">Les accusés de dépôt des déclarations que le cabinet a faites en votre nom.</p>
+  <p>Ouvrez l'onglet <strong>Documents</strong>. Chaque accusé indique la déclaration, la période, le guichet (Impôts, CNPS...), la date de dépôt, le montant et le <strong>numéro d'accusé</strong>. Les accusés sont rangés par année ; le champ de recherche trouve un numéro, une déclaration ou une période.</p>
+  <ul>
+    <li><strong>Copier le numéro</strong> : touchez le numéro (ou l'icône à côté). Il est copié : vous pouvez le coller dans un message. Citez-le si l'administration vous demande la preuve d'un dépôt.</li>
+    <li><strong>Voir le reçu</strong> : ouvre le reçu de dépôt en PDF dans l'application.</li>
+    <li><strong>Partager</strong> : l'icône en haut à droite du reçu l'envoie par WhatsApp, courriel ou toute autre application de votre téléphone.</li>
+  </ul>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/documents-carte.png" alt=""></div></div><figcaption><b>Mes documents</b> : numéro à copier, « Voir le reçu ».</figcaption></figure>
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/document-recu.png" alt=""></div></div><figcaption><b>Le reçu de dépôt</b>, avec « Partager » en haut à droite.</figcaption></figure>
+  </div>
+</section>
+
+<!-- 7 -->
+<section>
+  <h2 id="ch7"><span class="no">7.</span>Vos honoraires</h2>
+  <p class="chapo">Ce que vous devez au cabinet, et le moyen de le régler.</p>
+  <p>Ouvrez <strong>Plus</strong> puis <strong>Mes honoraires</strong> (ou la carte des honoraires sur l'accueil). En haut, le montant à régler et votre situation (en règle, en retard, délai accordé, dossier suspendu). Puis les périodes :</p>
+  <ul>
+    <li><strong>À régler</strong> : chaque période avec sa date, son montant, <strong>Payer par mobile money</strong> et <strong>Voir la note d'honoraires</strong> ;</li>
+    <li><strong>Réglées</strong> : les périodes payées, avec leur reçu et leur facture ;</li>
+    <li><strong>À venir</strong> : les prochaines périodes.</li>
+  </ul>
+  <p>Après un paiement mobile money, la période passe à <strong>Réglée</strong> dès que l'opérateur l'a confirmé. Vous pouvez aussi régler au cabinet, en espèces ou par virement : la période passe à « Réglée » d'elle-même.</p>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/honoraires.png" alt=""></div></div><figcaption><b>Mes honoraires</b> : deux périodes à régler.</figcaption></figure>
+  </div>
+  <div class="attention"><b>Un retard d'honoraires</b>Réglez la période en retard pour que le traitement de votre dossier continue sans interruption.</div>
+</section>
+
+<!-- 8 -->
+<section>
+  <h2 id="ch8"><span class="no">8.</span>Votre déclaration annuelle (DSF)</h2>
+  <p class="chapo">Après la clôture de l'exercice, le cabinet établit votre déclaration statistique et fiscale et la dépose sur le portail de la DGI.</p>
+  <p>Ouvrez <strong>Plus</strong> puis <strong>Ma déclaration annuelle (DSF)</strong>. Chaque exercice montre son avancement en quatre étapes : <strong>Préparation</strong>, <strong>Relecture</strong>, <strong>Validée</strong>, <strong>Déposée</strong>.</p>
+  <ul>
+    <li><strong>Vos pièces</strong> : le cabinet a besoin de quelques pièces que vous seul détenez. Pour chacune « à fournir », touchez <strong>Envoyer la pièce</strong> (photo ou galerie). Une pièce déjà reçue peut être remplacée tant que le cabinet ne l'a pas traitée (<strong>Remplacer</strong>).</li>
+    <li>Une pièce ne concerne pas votre entreprise ? Ne la cherchez pas : dites-le au cabinet, qui la marque sans objet.</li>
+    <li>Une fois déposée : le <strong>numéro d'accusé de la DGI</strong>, la date de dépôt, et <strong>Voir la copie déposée</strong>.</li>
+  </ul>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/dsf-a-fournir.png" alt=""></div></div><figcaption><b>En préparation</b> : deux pièces à fournir (données d'essai).</figcaption></figure>
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/dsf.png" alt=""></div></div><figcaption><b>Déposée à la DGI</b> : le numéro d'accusé.</figcaption></figure>
+  </div>
+  <div class="astuce"><b>Photo trop lourde</b>Pour la DSF, une photo de plus de 15 Mo est refusée : reprenez-la d'un peu plus loin.</div>
+</section>
+
+<!-- 9 -->
+<section>
+  <h2 id="ch9"><span class="no">9.</span>Votre paie</h2>
+  <p class="chapo">Pour les entreprises qui ont des salariés : ce que le cabinet a calculé, mois par mois.</p>
+  <p>Ouvrez <strong>Plus</strong> puis <strong>Ma paie</strong>. Les flèches en haut font passer au <strong>mois précédent</strong> ou au <strong>mois suivant</strong>. Pour le mois choisi :</p>
+  <ul>
+    <li>le <strong>total à verser</strong> (retenues sur salaires et charges patronales) et la date limite de la déclaration ;</li>
+    <li>le nombre de <strong>salariés</strong>, la <strong>masse brute</strong> et la part <strong>CNPS</strong> ;</li>
+    <li>les <strong>bulletins</strong> : pour chaque salarié, le brut et le net à payer.</li>
+  </ul>
+  <p>Les montants sont calculés par le cabinet, selon le référentiel en vigueur ce mois-là. Si vous avez embauché et que personne n'apparaît, signalez-le au cabinet (chapitre 10).</p>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/paie.png" alt=""></div></div><figcaption><b>Ma paie</b> : le mois, les chiffres, les bulletins.</figcaption></figure>
+  </div>
+</section>
+
+<!-- 10 -->
+<section>
+  <h2 id="ch10"><span class="no">10.</span>Mon entreprise</h2>
+  <p class="chapo">Votre fiche au cabinet, votre interlocuteur, et le moyen de signaler un changement.</p>
+  <p>Ouvrez <strong>Plus</strong> puis <strong>Mon entreprise</strong>, ou le raccourci de l'accueil. Vous y trouvez :</p>
+  <ul>
+    <li><strong>Votre régime</strong> : régime fiscal, depuis quand, et votre situation pour la TVA, expliquée simplement ;</li>
+    <li><strong>Votre dossier</strong> : activité, RCCM, siège, centre des impôts, numéro et date d'adhésion, gérant ;</li>
+    <li><strong>Votre interlocuteur</strong> au cabinet, avec les boutons <strong>Appeler</strong> et <strong>WhatsApp</strong> (quand son numéro est connu) et <strong>Écrire</strong> (un courriel déjà intitulé avec le nom de votre dossier).</li>
+  </ul>
+  <div class="ecrans">
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/entreprise-interlocuteur.png" alt=""></div></div><figcaption><b>Votre interlocuteur</b>, « Signaler un changement ».</figcaption></figure>
+    <figure class="tel court"><div class="cadre"><div class="ecran"><img src="captures/entreprise-signaler.png" alt=""></div></div><figcaption><b>Que voulez-vous signaler ?</b></figcaption></figure>
+  </div>
+  <h3>Signaler un changement</h3>
+  <ol class="etapes">
+    <li>Touchez <strong>Signaler un changement</strong>.</li>
+    <li>Choisissez : adresse, gérant ou dirigeant, activité, numéro de téléphone, ou autre changement.</li>
+    <li>Décrivez le changement en quelques mots, puis <strong>Envoyer</strong>.</li>
+  </ol>
+  <p>Le cabinet est prévenu et vous rappelle. <strong>Votre dossier ne change pas tant qu'il n'a pas instruit le signalement.</strong> Vos signalements passés sont listés sous « Ce que vous avez déjà signalé ».</p>
+</section>
+
+<!-- 11 -->
+<section class="faq">
+  <h2 id="ch11"><span class="no">11.</span>Questions fréquentes</h2>
+
+  <h3>Le cabinet a refusé ma pièce. Que faire ?</h3>
+  <p>Elle apparaît dans <strong>Mes justificatifs</strong>, sous <strong>À reprendre</strong>, avec la raison du refus. Photographiez-la à nouveau. Si le cabinet vous demande une pièce corrigée, une carte <strong>À corriger</strong> s'affiche sur l'accueil : <strong>Voir la pièce que vous aviez envoyée</strong> vous montre l'ancienne, <strong>Déposer la pièce</strong> envoie la nouvelle.</p>
+
+  <h3>Je n'ai pas de réseau.</h3>
+  <p>Déposez quand même : la pièce est enregistrée sur le téléphone et part toute seule quand le réseau revient, tant que l'application est ouverte ou dès que vous la rouvrez. Les autres écrans (échéances, documents, honoraires...) se lisent sur le serveur : sans réseau, ils affichent « Pas de réseau » et reviennent dès que la connexion est rétablie. Tirez l'écran vers le bas ou touchez <strong>Réessayer</strong>. L'envoi d'une quittance ou d'une pièce de DSF, et les paiements, demandent du réseau.</p>
+
+  <h3>« Session expirée » : que se passe-t-il ?</h3>
+  <p>Pour votre sécurité, une session finit par expirer. L'application vous ramène à l'écran de connexion : reconnectez-vous avec votre adresse et votre mot de passe. Les pièces en attente ne sont pas perdues : elles restent sur le téléphone et repartent après la connexion. Si un paiement était en cours, recommencez-le.</p>
+
+  <h3>« Ce fichier dépasse 20 Mo ».</h3>
+  <p>Le fichier est trop lourd pour être envoyé. Envoyez-le en plusieurs parties, ou photographiez directement la facture.</p>
+
+  <h3>J'ai payé par mobile money, mais rien ne change.</h3>
+  <p>Vérifiez que vous avez bien validé la demande avec votre code secret sur le message de l'opérateur. La période passe à « Réglée » dès que l'opérateur a confirmé le paiement. Si l'application indique qu'une demande est déjà en cours, validez-la sur votre téléphone.</p>
+
+  <h3>J'ai plusieurs entreprises.</h3>
+  <p>Au moment de déposer, l'application vous demande <strong>Pour quelle entreprise ?</strong> Sur les autres écrans, une icône en haut permet de <strong>changer de dossier</strong>.</p>
+
+  <h3>« Aucun dossier à votre nom ».</h3>
+  <p>Le cabinet n'a pas encore ouvert votre espace. Appelez votre chargé de clientèle.</p>
+
+  <h3>Un lien (WhatsApp, appel, courriel) ne s'ouvre pas.</h3>
+  <p>L'application copie alors le numéro ou l'adresse : collez-le où vous voulez.</p>
+</section>
+
+<!-- 12 -->
+<section>
+  <h2 id="ch12"><span class="no">12.</span>Contacts</h2>
+  <p class="chapo">Pour toute question sur votre dossier, commencez par votre interlocuteur, indiqué dans <strong>Mon entreprise</strong>. Le cabinet est aussi joignable ici :</p>
+  <div class="contacts">
+    <div><b>WhatsApp</b><span>699 902 184</span></div>
+    <div><b>Téléphone</b><span>+237 233 42 48 47</span></div>
+    <div><b>Courriel</b><span>contact@cga-brcgroup.com</span></div>
+    <div><b>Adresse</b><span>Douala</span></div>
+  </div>
+  <p style="margin-top:8mm">CGA Broad Range Consulting Group. Agréé par le ministre des Finances, arrêté n° 00000048 du 28 janvier 2020.</p>
+  <div class="attention"><b>Rappel de sécurité</b>Le cabinet ne vous demandera jamais votre mot de passe, ni par téléphone, ni par WhatsApp, ni par courriel. Ne le communiquez à personne.</div>
+  <p style="margin-top:8mm; font-size:9pt; color:var(--douce)">Les écrans de ce guide montrent un dossier de démonstration (SARL BATIMENT PLUS). Les montants, noms et numéros sont fictifs. Certaines vues ont été rendues avec des données d'essai, signalées dans leur légende.</p>
+</section>
+
+</main>
+</body>
+</html>

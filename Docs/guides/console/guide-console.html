@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Guide d'utilisation de la console du cabinet</title>
+<style>
+@font-face { font-family: "Poppins"; font-weight: 400; src: url("polices/Poppins-Regular.ttf"); }
+@font-face { font-family: "Poppins"; font-weight: 500; src: url("polices/Poppins-Medium.ttf"); }
+@font-face { font-family: "Poppins"; font-weight: 600; src: url("polices/Poppins-SemiBold.ttf"); }
+@font-face { font-family: "Poppins"; font-weight: 700; src: url("polices/Poppins-Bold.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 400; src: url("polices/Inter-Regular.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 500; src: url("polices/Inter-Medium.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 600; src: url("polices/Inter-SemiBold.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 700; src: url("polices/Inter-Bold.ttf"); }
+
+:root {
+  --indigo: #2E1B4D;
+  --magenta: #8C2D86;
+  --fond: #F4F2F9;
+  --encre: #1f1a2b;
+  --gris: #5d5770;
+  --ligne: #ddd7ea;
+  --alerte: #a8432a;
+  --alerte-fond: #fbefe9;
+  --ok: #2f6b4a;
+}
+@page { size: A4; margin: 17mm 16mm 19mm 16mm; }
+@page couverture { margin: 0; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font: 400 10pt/1.5 "Inter", sans-serif; color: var(--encre); background: #fff; }
+h1, h2, h3, h4 { font-family: "Poppins", sans-serif; color: var(--indigo); line-height: 1.25; }
+h2 { font-size: 19pt; font-weight: 700; margin: 0 0 4mm; break-before: page; padding-bottom: 3mm; border-bottom: 2.5px solid var(--magenta); }
+h2 .num { color: var(--magenta); margin-right: 3mm; }
+h3 { font-size: 13pt; font-weight: 600; margin: 7mm 0 2mm; break-after: avoid; }
+h4 { font-size: 10.5pt; font-weight: 600; margin: 4mm 0 1.5mm; break-after: avoid; color: var(--magenta); }
+p { margin: 0 0 2.4mm; }
+ol, ul { margin: 0 0 3mm; padding-left: 6mm; }
+li { margin-bottom: 1.1mm; }
+strong { font-weight: 600; }
+.chapo { font-size: 10.5pt; color: var(--gris); margin-bottom: 4mm; }
+.fiche { display: grid; grid-template-columns: 30mm 1fr; gap: 1mm 4mm; background: var(--fond); border-radius: 3mm; padding: 3mm 4mm; margin: 2mm 0 3mm; break-inside: avoid; font-size: 9.5pt; }
+.fiche dt { font-weight: 600; color: var(--indigo); }
+.fiche dd { margin: 0; }
+figure { margin: 3mm 0 4mm; break-inside: avoid; }
+figure img { width: 100%; border: 1px solid var(--ligne); border-radius: 2mm; display: block; }
+figure.demi img { width: 78%; margin: 0 auto; }
+figcaption { font-size: 8.6pt; color: var(--gris); margin-top: 1.5mm; }
+figcaption .rep { display: inline-block; width: 4.2mm; height: 4.2mm; line-height: 4.2mm; border-radius: 50%; background: var(--magenta); color: #fff; text-align: center; font-weight: 700; font-size: 7.4pt; margin-right: 1mm; }
+.piege, .note, .partiel { border-radius: 2.5mm; padding: 2.5mm 4mm; margin: 2.5mm 0 3.5mm; break-inside: avoid; font-size: 9.4pt; }
+.piege { background: var(--alerte-fond); border-left: 3px solid var(--alerte); }
+.piege::before { content: "Piège à éviter"; display: block; font: 600 8.5pt "Poppins", sans-serif; color: var(--alerte); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .8mm; }
+.note { background: var(--fond); border-left: 3px solid var(--indigo); }
+.note::before { content: "Bon à savoir"; display: block; font: 600 8.5pt "Poppins", sans-serif; color: var(--indigo); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .8mm; }
+.partiel { background: #fff7e3; border-left: 3px solid #b98a12; }
+.partiel::before { content: "Fonction partielle"; display: block; font: 600 8.5pt "Poppins", sans-serif; color: #8a6508; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .8mm; }
+.piege p:last-child, .note p:last-child, .partiel p:last-child { margin-bottom: 0; }
+table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 8.8pt; break-inside: auto; }
+th { background: var(--indigo); color: #fff; font: 600 8.4pt "Poppins", sans-serif; text-align: left; padding: 1.6mm 2mm; }
+td { border-bottom: 1px solid var(--ligne); padding: 1.4mm 2mm; vertical-align: top; }
+tr { break-inside: avoid; }
+tr:nth-child(even) td { background: #faf9fc; }
+.btn { font-weight: 600; color: var(--magenta); white-space: nowrap; }
+.menu { font-weight: 600; color: var(--indigo); }
+kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-width: 2px; border-radius: 1mm; padding: 0 1.2mm; background: #fff; }
+
+/* Couverture */
+.couverture { page: couverture; height: 297mm; width: 210mm; position: relative; background: var(--indigo); color: #fff; overflow: hidden; }
+.couverture .bande { position: absolute; right: -40mm; top: -30mm; width: 150mm; height: 150mm; border-radius: 50%; background: var(--magenta); opacity: .55; }
+.couverture .bande2 { position: absolute; left: -50mm; bottom: -60mm; width: 160mm; height: 160mm; border-radius: 50%; background: #3f2866; }
+.couverture .logo { position: absolute; left: 22mm; top: 26mm; width: 58mm; }
+.couverture .bloc { position: absolute; left: 22mm; right: 22mm; top: 112mm; }
+.couverture .sur { font: 600 10pt "Poppins"; letter-spacing: .2em; text-transform: uppercase; color: #e7b9e2; }
+.couverture h1 { color: #fff; font-size: 34pt; font-weight: 700; margin: 4mm 0 2mm; line-height: 1.1; }
+.couverture .sous { font: 500 18pt "Poppins"; color: #f0e4f6; margin: 0 0 10mm; }
+.couverture .meta { font-size: 10.5pt; color: #ddd0ea; line-height: 1.7; }
+.couverture .pied { position: absolute; left: 22mm; right: 22mm; bottom: 18mm; font-size: 8.5pt; color: #cbbedd; border-top: 1px solid rgba(255,255,255,.25); padding-top: 3mm; }
+
+/* Sommaire */
+.sommaire h2 { break-before: auto; }
+.sommaire ol { list-style: none; padding: 0; margin: 0; }
+.sommaire li { display: flex; align-items: baseline; margin: 0; padding: 1.25mm 0; border-bottom: 1px dotted var(--ligne); font-size: 10pt; }
+.sommaire li.sec { padding-left: 8mm; font-size: 8.9pt; color: var(--gris); padding-top: .55mm; padding-bottom: .55mm; border-bottom: none; }
+.sommaire li .t { flex: 1; }
+.sommaire li .p { min-width: 9mm; text-align: right; font-weight: 600; color: var(--magenta); }
+.sommaire li.chap { font-weight: 600; color: var(--indigo); }
+.sommaire li.chap .n { color: var(--magenta); width: 9mm; display: inline-block; }
+.roles td:first-child { font-weight: 600; white-space: nowrap; }
+.deux { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+.court { break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<section class="couverture">
+  <div class="bande"></div><div class="bande2"></div>
+  <img class="logo" src="cga-logo-blanc.png" alt="CGA Broad Range Consulting Group">
+  <div class="bloc">
+    <div class="sur">CGA Broad Range Consulting Group · Douala</div>
+    <h1>Guide d'utilisation</h1>
+    <p class="sous">Console du cabinet</p>
+    <div class="meta">
+      Pour le personnel du centre de gestion agréé : accueil et formalités, comptabilité, révision, fiscalité, paie, caisse, direction et administration.<br>
+      Version 1.0 · 19 octobre 2026
+    </div>
+  </div>
+  <div class="pied">Les écrans reproduits ici ont été photographiés sur la plateforme réelle, avec des données de démonstration fictives. Les noms de personnes et d'entreprises sont inventés.</div>
+</section>
+
+<section class="sommaire">
+  <h2>Sommaire</h2>
+  <ol id="sommaire"><!-- rempli par construire.py --></ol>
+</section>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-avant"><span class="num">1</span>Avant de commencer</h2>
+<p class="chapo">Ce guide décrit la console du cabinet, l'application que le personnel utilise chaque jour pour tenir les dossiers des adhérents. Il est rangé par tâche : cherchez ce que vous avez à faire, pas l'écran où le faire.</p>
+
+<h3 id="s-lire">Comment lire ce guide</h3>
+<p>Chaque tâche est présentée de la même manière :</p>
+<ul>
+  <li><strong>À quoi ça sert</strong> et <strong>qui peut le faire</strong>, dans un encadré gris ;</li>
+  <li>les <strong>étapes numérotées</strong>, dans l'ordre où vous les ferez ;</li>
+  <li>une <strong>capture d'écran</strong> quand elle aide. Les pastilles numérotées de couleur magenta sur l'image renvoient à la légende placée dessous ;</li>
+  <li>les <strong>pièges à éviter</strong>, en rouge, et les <strong>fonctions partielles</strong>, en jaune : ce que la plateforme ne fait pas encore et qu'il faut faire à la main.</li>
+</ul>
+<p>Les libellés de boutons sont écrits en <span class="btn">magenta gras</span> et les entrées de menu en <span class="menu">indigo gras</span>, tels qu'ils apparaissent à l'écran.</p>
+
+<h3 id="s-profils">Votre profil décide de ce que vous voyez</h3>
+<p>Chaque compte porte un ou plusieurs <strong>rôles</strong>, et chaque rôle ouvre un ensemble de <strong>droits</strong>. Le menu de gauche ne montre que les entrées auxquelles votre rôle donne accès. Le tableau suivant résume la répartition retenue par le cabinet ; la matrice complète se lit dans <span class="menu">Matrice des rôles</span> (chapitre 19).</p>
+<table class="roles">
+  <tr><th>Rôle</th><th>Ce qu'il fait dans la console</th></tr>
+  <tr><td>Chargé de clientèle</td><td>Lit les dossiers de son portefeuille, relance les adhérents et les pièces manquantes, dépose des pièces.</td></tr>
+  <tr><td>Chargé de formalités</td><td>Traite les demandes entrantes, qualifie, chiffre et émet la proforma, suit les créations d'entreprise, traite les prestations ponctuelles (rôle « juriste »).</td></tr>
+  <tr><td>Comptable</td><td>Identifie et contrôle les pièces, saisit, valide et contre-passe les écritures, tient la paie, prépare la DSF, vérifie les quittances. Il ne voit que les dossiers qui lui sont confiés.</td></tr>
+  <tr><td>Réviseur</td><td>Tout ce que fait le comptable, sur tout le cabinet, plus : écarter un constat, réviser un mois, déposer une déclaration, clôturer un exercice, valider la fiche DSF, valider une prestation ponctuelle.</td></tr>
+  <tr><td>Fiscaliste</td><td>Valide et fait évoluer le référentiel : taux, seuils, règles de contrôle.</td></tr>
+  <tr><td>Responsable de caisse</td><td>Constate les règlements reçus au guichet et lit le journal de caisse. Elle ne voit ni les comptes ni les dossiers des adhérents.</td></tr>
+  <tr><td>Direction</td><td>Pilote le cabinet : dossiers à risque, charge des collaborateurs, rapport mensuel, tarifs, offres de poste, validation des prestations, clôture d'exercice.</td></tr>
+  <tr><td>Administrateur</td><td>Crée et suspend les comptes, confie les dossiers, encaisse, lit le journal d'audit et l'exploitation.</td></tr>
+  <tr><td>Super administrateur</td><td>Règle la matrice des rôles et accorde les faveurs (grâce de règlement, mandat « le cabinet paie pour moi »). Aucun acte métier.</td></tr>
+  <tr><td>Inspecteur</td><td>Externe, en mission datée sur un dossier : lecture et avis, jamais d'écriture.</td></tr>
+</table>
+
+<h3 id="s-refus">Quand un écran vous est refusé</h3>
+<p>Si vous ouvrez un écran que votre rôle n'autorise pas (par un lien reçu, par exemple), la console affiche <strong>« Accès réservé »</strong>. Rien n'a échoué : votre session est valide. Le message indique quel profil peut ouvrir l'écran. Si vous en avez besoin, demandez l'habilitation à l'administrateur : elle sera datée et tracée au journal d'audit.</p>
+<figure><img src="captures/45-acces-reserve.png" alt="Accès réservé"><figcaption>La direction devant le pipeline de création : l'écran est réservé au chargé de formalités, et le message le dit.</figcaption></figure>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-connexion"><span class="num">2</span>Se connecter et sécuriser son compte</h2>
+<p class="chapo">Une seule porte d'entrée pour tous : le personnel du cabinet et les adhérents se connectent sur le même écran, et la console ouvre l'espace qui correspond au compte.</p>
+
+<h3 id="s-premiere">Activer son compte la première fois</h3>
+<div class="fiche"><dt>À quoi ça sert</dt><dd>Choisir votre mot de passe après la création de votre compte par l'administrateur.</dd><dt>Qui</dt><dd>Tout nouveau collaborateur.</dd></div>
+<ol>
+  <li>Ouvrez le courriel d'invitation reçu à votre adresse professionnelle et cliquez sur le lien d'activation.</li>
+  <li>Choisissez votre mot de passe, confirmez-le, puis validez.</li>
+  <li>Vous arrivez sur votre espace de travail.</li>
+</ol>
+<div class="note"><p>Tant que le lien n'a pas été suivi, l'écran <span class="menu">Comptes et habilitations</span> affiche le compte comme <strong>« Jamais activé »</strong>. Si le courriel s'est perdu, demandez à l'administrateur de renvoyer une invitation.</p></div>
+
+<h3 id="s-seconnecter">Se connecter</h3>
+<div class="fiche"><dt>Qui</dt><dd>Tous les comptes actifs.</dd></div>
+<figure><img src="captures/01-connexion.png" alt="Écran de connexion"><figcaption><span class="rep">1</span>Adresse électronique <span class="rep">2</span>Mot de passe <span class="rep">3</span>Se connecter <span class="rep">4</span>Mot de passe oublié</figcaption></figure>
+<ol>
+  <li>Ouvrez l'adresse de la console communiquée par le cabinet.</li>
+  <li>Saisissez votre <strong>adresse électronique</strong> et votre <strong>mot de passe</strong>.</li>
+  <li>Cliquez sur <span class="btn">Se connecter</span>. Vous arrivez sur votre écran d'accueil : le tableau de bord pour la plupart des rôles, la caisse pour la responsable de caisse, les comptes pour l'administrateur.</li>
+</ol>
+<div class="piege"><p>Le cabinet ne vous demandera jamais votre mot de passe, ni par téléphone, ni par WhatsApp, ni par courriel. Après plusieurs tentatives infructueuses en peu de temps, la plateforme refuse provisoirement les connexions : attendez quelques minutes avant de réessayer plutôt que d'insister.</p></div>
+
+<h3 id="s-oubli">Mot de passe oublié</h3>
+<ol>
+  <li>Sur l'écran de connexion, cliquez sur <span class="btn">Mot de passe oublié ?</span></li>
+  <li>Saisissez l'adresse de votre compte puis <span class="btn">Recevoir un lien</span>.</li>
+  <li>Ouvrez le courriel reçu et choisissez un nouveau mot de passe.</li>
+</ol>
+<figure class="demi"><img src="captures/02-mot-de-passe-oublie.png" alt="Mot de passe oublié"><figcaption>La demande de lien de réinitialisation.</figcaption></figure>
+<p>Pour fermer votre session, cliquez sur la flèche à droite de votre nom, en bas de la barre latérale (« Se déconnecter »). Fermez toujours votre session sur un poste partagé.</p>
+
+<h3 id="s-2fa">Le second facteur : quand il est exigé</h3>
+<div class="fiche"><dt>À quoi ça sert</dt><dd>Protéger les gestes les plus sensibles par un code à six chiffres affiché sur votre téléphone, en plus du mot de passe.</dd><dt>Qui</dt><dd>Le réviseur (consigner un dépôt de déclaration, déposer la TVA, consigner l'accusé de la DSF) et le super administrateur (régler la matrice des rôles, accorder une faveur).</dd></div>
+<p>Le second facteur n'est <strong>pas demandé à la connexion</strong>. Il l'est au moment du geste sensible : l'écran affiche alors « … exige le second facteur ». Une fois le code saisi, la session reste <strong>renforcée quinze minutes</strong> : vous enchaînez les gestes sans retaper de code.</p>
+
+<h4>Associer votre application d'authentification (une seule fois)</h4>
+<p>Il vous faut sur votre téléphone une application d'authentification (Google Authenticator, Microsoft Authenticator, FreeOTP ou équivalent).</p>
+<ol>
+  <li>Ouvrez un écran qui exige le second facteur (par exemple <span class="menu">Obligations fiscales</span>, bloc « Constater un dépôt »). Cliquez sur <span class="btn">Associer une application d'authentification</span>.</li>
+  <li>La console répond : « Un lien vient d'être envoyé à l'adresse de votre compte ». Ouvrez ce courriel <strong>dans le même navigateur</strong>, où vous êtes connecté. Le lien est valable trente minutes.</li>
+  <li>Sur la page « Associer une application d'authentification », <strong>préparez d'abord votre téléphone</strong>, puis cliquez sur <span class="btn">Afficher ma clé</span>.</li>
+  <li>Saisissez la clé dans l'application (ou touchez « Ouvrir dans l'application d'authentification » depuis le téléphone).</li>
+  <li>Tapez le premier code à six chiffres affiché par l'application, puis <span class="btn">Renforcer la session</span>. Le message « Session renforcée pour quinze minutes » confirme l'association.</li>
+</ol>
+<div class="deux">
+<figure><img src="captures/26a-associer.png" alt="Associer"><figcaption><span class="rep">1</span>Le bouton d'association, sous le geste qui l'exige.</figcaption></figure>
+<figure><img src="captures/26b-lien-envoye.png" alt="Lien envoyé"><figcaption><span class="rep">1</span>Le lien part à l'adresse du compte.</figcaption></figure>
+<figure><img src="captures/26c-afficher-la-cle.png" alt="Afficher ma clé"><figcaption><span class="rep">1</span>La clé ne s'affiche qu'une fois.</figcaption></figure>
+<figure><img src="captures/26d-cle-et-code.png" alt="Clé et code"><figcaption><span class="rep">1</span>La clé (masquée sur cette capture) <span class="rep">2</span>Premier code <span class="rep">3</span>Renforcer la session</figcaption></figure>
+</div>
+<div class="piege"><p>Le clic sur <span class="btn">Afficher ma clé</span> consomme le lien et associe déjà la clé à votre compte. Si vous fermez la page avant de l'avoir saisie dans votre téléphone, le lien ne sert plus (« Ce lien n'est plus valable ») et vous ne pourrez plus produire de code : il faudra demander à l'administrateur de retirer votre second facteur, puis recommencer. Ne conservez la clé nulle part ailleurs que dans l'application.</p></div>
+
+<h4>Saisir le code au moment du geste</h4>
+<ol>
+  <li>Sous le geste, tapez le code du moment dans <strong>Code à six chiffres</strong>.</li>
+  <li>Cliquez sur <span class="btn">Renforcer la session</span>. Le formulaire du geste apparaît.</li>
+</ol>
+<figure><img src="captures/28b-code-du-second-facteur.png" alt="Saisie du code"><figcaption><span class="rep">1</span>Code à six chiffres <span class="rep">2</span>Renforcer la session. Le geste (ici, consigner un dépôt) s'ouvre ensuite.</figcaption></figure>
+<div class="note"><p>Si tous vos codes sont refusés, vérifiez l'heure de votre téléphone : un décalage de plus d'une minute invalide les codes. Téléphone perdu ou changé : voir chapitre 19, « Retirer le second facteur d'un collègue ».</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-reperes"><span class="num">3</span>Se repérer dans la console</h2>
+<p class="chapo">La console se lit de haut en bas comme la vie d'un dossier : la pièce arrive, on la contrôle, on la comptabilise, on déclare, on clôture.</p>
+
+<h3 id="s-ecran">L'écran de travail</h3>
+<figure><img src="captures/03-tableau-de-bord.png" alt="Tableau de bord"><figcaption><span class="rep">1</span>Sélecteur de dossier <span class="rep">2</span>Menu, selon votre rôle <span class="rep">3</span>Recherche globale (<kbd>Ctrl</kbd> <kbd>K</kbd>) <span class="rep">4</span>Notifications <span class="rep">5</span>Indicateurs du jour</figcaption></figure>
+<ul>
+  <li><strong>La barre latérale</strong> porte le menu. Les pastilles chiffrées signalent ce qui attend (pièces en attente, anomalies bloquantes). <span class="btn">Replier le menu</span> libère de la place sur un petit écran.</li>
+  <li><strong>Le sélecteur de dossier</strong>, en haut du menu, choisit l'entreprise sur laquelle vous travaillez. Les écrans de comptabilité, de paie, d'obligations et de clôture s'ouvrent sur ce dossier ; leur sous-titre rappelle « changez de dossier dans la barre latérale ».</li>
+  <li><strong>La recherche globale</strong> trouve un dossier par son NIU ou sa dénomination, une pièce par son numéro ou son émetteur.</li>
+  <li><strong>Les notifications</strong> (la cloche) disent ce que le cabinet a fait et qui vous concerne : un écart à trancher, un dossier confié, une réponse d'adhérent.</li>
+</ul>
+
+<h3 id="s-selecteur">Changer de dossier</h3>
+<ol>
+  <li>Cliquez sur le sélecteur (« Tous les dossiers » ou le nom du dossier courant).</li>
+  <li>Tapez quelques lettres de la dénomination ou du NIU, ou choisissez dans « Dossiers récents ».</li>
+  <li>« Tous les dossiers » revient à la vue consolidée de votre portefeuille.</li>
+</ol>
+<figure><img src="captures/04-selecteur-de-dossier.png" alt="Sélecteur de dossier"><figcaption>Le sélecteur ouvert : recherche, vue consolidée, dossiers récents puis tout le portefeuille.</figcaption></figure>
+<div class="piege"><p>Avant de saisir ou d'arrêter quoi que ce soit, relisez le nom du dossier dans le fil d'Ariane en haut de l'écran (par exemple « Comptabilité / AGRO-NKOLO SA / Saisie »). C'est le dossier sur lequel le geste portera.</p></div>
+
+<h3 id="s-tdb">Le tableau de bord</h3>
+<div class="fiche"><dt>À quoi ça sert</dt><dd>Voir d'un coup d'œil votre périmètre : dossiers suivis, échéances sous sept jours et en retard, pièces en attente, anomalies bloquantes.</dd><dt>Qui</dt><dd>Tous les rôles du cabinet sauf l'administrateur et la caisse. Le comptable voit son portefeuille et lui seul ; la direction et le réviseur voient tout le cabinet.</dd></div>
+<p>Sous les indicateurs : les <strong>échéances à venir</strong> (en retard d'abord), les <strong>anomalies à traiter</strong> et les <strong>pièces attendues</strong> par dossier. Chaque ligne mène à l'écran qui la traite.</p>
+
+<h3 id="s-plan">Mon plan de travail</h3>
+<div class="fiche"><dt>À quoi ça sert</dt><dd>Répondre à « par quoi je commence ? ». La console range vos tâches du jour par échéance puis par gravité.</dd><dt>Qui</dt><dd>Comptable et réviseur.</dd></div>
+<figure><img src="captures/05-plan-de-travail.png" alt="Plan de travail"><figcaption>« Votre journée » : les tâches urgentes en tête, les passages de relais avec le réviseur, et vos dossiers les plus chargés.</figcaption></figure>
+<ol>
+  <li>Ouvrez <span class="menu">Mon plan de travail</span>.</li>
+  <li>Traitez les tâches dans l'ordre : chaque ligne (« Traiter les pièces reçues », « Régulariser les déclarations en retard », « Relancer les pièces manquantes ») ouvre directement l'écran concerné.</li>
+  <li>Le bloc <strong>Passages de relais</strong> indique les dossiers qui attendent le réviseur et ceux qui vous reviennent avec des remarques.</li>
+</ol>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-portefeuille"><span class="num">4</span>Le portefeuille d'adhérents</h2>
+<p class="chapo">Le portefeuille liste les entreprises suivies. La fiche d'un dossier réunit son identité, ses statuts datés, sa collecte du mois, sa fiche signalétique pour la DSF, ses honoraires et la liste de ceux qui y ont accès.</p>
+
+<h3 id="s-liste">Consulter le portefeuille</h3>
+<div class="fiche"><dt>Qui</dt><dd>Tous les rôles qui lisent les dossiers. Le comptable ne voit que les dossiers qui lui sont confiés.</dd></div>
+<figure><img src="captures/06-portefeuille-comptable.png" alt="Portefeuille"><figcaption><span class="rep">1</span>Le bandeau « Règlement des honoraires » signale les dossiers hors règle avant tout le reste.</figcaption></figure>
+<p>Pour chaque dossier : NIU, forme, régime (réel, IGS…), centre des impôts, assujettissement à la TVA, adhésion et exercice. Ces statuts sont <strong>résolus à la date du jour</strong> : ils ont pu être différents l'an dernier. Cliquez sur la dénomination pour ouvrir la fiche.</p>
+
+<h3 id="s-fiche">La fiche du dossier</h3>
+<figure><img src="captures/27-fiche-du-dossier.png" alt="Fiche du dossier"><figcaption>En tête : la collecte du mois. Ici, deux pièces indispensables manquent et le dépôt est impossible en l'état.</figcaption></figure>
+<ul>
+  <li><strong>Statuts au …</strong> : choisissez une autre date dans <strong>Résoudre au</strong> puis <span class="btn">Résoudre</span> pour savoir quel était le régime d'une pièce ancienne.</li>
+  <li><strong>Collecte du mois</strong> : pièces reçues, traitées, demandes ouvertes et celles qui bloquent le dépôt.</li>
+  <li><strong>Histoire des statuts</strong> : chaque statut avec sa date de début, sa fin et son motif.</li>
+  <li><strong>Exercices</strong> : un exercice clos n'accepte plus aucune écriture.</li>
+  <li><strong>Dirigeants, associés et tiers</strong>, <strong>Honoraires</strong>, <strong>Qui a accès au dossier</strong>.</li>
+</ul>
+
+<h3 id="s-signaletique">Valider la fiche signalétique de la DSF</h3>
+<div class="fiche"><dt>À quoi ça sert</dt><dd>Les fiches R1 à R3 du modèle de la DGI (coordonnées, signataire, banque, activités NACAM…) que la DSF reprend.</dd><dt>Qui</dt><dd>L'adhérent la renseigne dans son espace ; le comptable ou le réviseur peut la compléter ; le réviseur la valide.</dd></div>
+<ol>
+  <li>Dans la fiche du dossier, descendez jusqu'à <strong>Fiche signalétique de la DSF</strong>. La liste « Il manque encore » dit ce qui reste à renseigner.</li>
+  <li>Complétez les champs manquants (téléphone, ville du siège, signataire, banque, au moins une activité avec son code NACAM).</li>
+  <li><span class="btn">Enregistrer</span>, puis <span class="btn">Soumettre à la validation</span>.</li>
+</ol>
+<figure><img src="captures/27b-fiche-signaletique.png" alt="Fiche signalétique"><figcaption>La fiche signalétique, fiches R1 et R2.</figcaption></figure>
+
+<h3 id="s-acces">Honoraires et accès au dossier</h3>
+<figure><img src="captures/27c-honoraires-et-acces.png" alt="Honoraires et accès"><figcaption>Le contrat d'honoraires (45 000 FCFA par mois), ce qui reste dû et la date d'arrêt du traitement ; puis qui a accès au dossier, avec la date et l'auteur de chaque habilitation.</figcaption></figure>
+<p>La règle de dépassement et la grâce de règlement sont décrites au chapitre 14. La <strong>résiliation</strong> d'une adhésion est un bouton <span class="btn">Résilier</span> réservé à la direction, dans la liste du portefeuille.</p>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-creation"><span class="num">5</span>Demandes entrantes et création d'entreprise</h2>
+<p class="chapo">Un visiteur dépose une demande sur le site du cabinet. Elle arrive dans la console déjà affectée à un responsable, et sa qualification s'ouvre remplie par les réponses du client. Le responsable confirme, chiffre, émet la proforma ; une fois réglée, le dossier de création s'ouvre seul.</p>
+
+<h3 id="s-entrantes">Traiter une demande entrante</h3>
+<div class="fiche"><dt>Qui</dt><dd>Chargé de formalités et direction (lecture et qualification). L'administrateur lit les demandes.</dd></div>
+<figure><img src="captures/32-demandes-entrantes.png" alt="Demandes entrantes"><figcaption><span class="rep">1</span>La demande, déjà affectée. Plus bas : les créations payées et les canaux de contact réellement exploités.</figcaption></figure>
+<ol>
+  <li>Ouvrez <span class="menu">Demandes entrantes</span>. Traitez d'abord les <strong>Rappels à passer</strong> (un client à qui l'on a promis un appel), puis <strong>Ce qui dort</strong>, puis les dossiers en cours, du plus ancien au plus récent.</li>
+  <li>Cliquez sur le nom du prospect. En haut, « La demande » montre ce que le visiteur a écrit, tel quel.</li>
+  <li>Appelez le client. Dans <strong>Premier échange</strong>, notez ce qui a été dit et validez <span class="btn">J'ai joint le client</span>. Déclarez-le même sans réponse : c'est ce qui arrête le compte à rebours de la réaffectation.</li>
+</ol>
+<figure><img src="captures/33-demande-et-premier-echange.png" alt="Demande et qualification"><figcaption><span class="rep">1</span>Ce que le visiteur a écrit. Dessous, la qualification ouverte.</figcaption></figure>
+
+<h3 id="s-qualif">Qualifier, puis chiffrer</h3>
+<ol>
+  <li>Dans <strong>Qualification</strong>, chaque réponse donnée sur le site porte la mention <em>« dit par le client sur le site »</em>. <strong>Confirmez-les avec lui, ne les redemandez pas.</strong> Corrigez ce qu'il précise au téléphone.</li>
+  <li>Cliquez sur <span class="btn">Enregistrer les réponses</span>.</li>
+  <li>Dans <strong>Chiffrage</strong>, déclarez le score de charge puis <span class="btn">Calculer l'intervalle</span> : le barème rend une fourchette de prix calculée sur les réponses enregistrées.</li>
+</ol>
+<figure><img src="captures/33b-qualification-preremplie.png" alt="Qualification préremplie"><figcaption><span class="rep">1</span>Une réponse reprise du site, à confirmer.</figcaption></figure>
+<div class="partiel"><p>Le score de charge n'est pas encore mesuré pour un prospect : il est <strong>déclaré</strong> par le responsable et conservé avec la proforma.</p></div>
+
+<h3 id="s-proforma">Établir et émettre la proforma</h3>
+<ol>
+  <li>Dans <strong>Proforma</strong>, le document est proposé d'après la forme juridique (par exemple « Proforma de formalisation pour une SARL »). Vous pouvez en choisir un autre.</li>
+  <li>L'<strong>aperçu avant émission</strong> reproduit le document que recevra le client. Retouchez une ligne directement dans l'aperçu, supprimez-la (×) ou <span class="btn">+ Ajouter une ligne</span>. Le total général est la somme des lignes : il ne se tape pas.</li>
+  <li>Si le montant sort de l'intervalle calculé, un <strong>motif</strong> est obligatoire.</li>
+  <li>Laissez cochée la case d'envoi par courriel, puis <span class="btn">Émettre la proforma</span>. Elle est numérotée et le courriel part avec le lien d'acceptation et le PDF.</li>
+</ol>
+<div class="deux">
+<figure><img src="captures/34-proforma-apercu.png" alt="Aperçu proforma"><figcaption><span class="rep">1</span>Aperçu avant émission <span class="rep">2</span>Ajouter une ligne</figcaption></figure>
+<figure><img src="captures/34b-proforma-emission.png" alt="Émission proforma"><figcaption><span class="rep">1</span>Total général <span class="rep">2</span>Émettre la proforma</figcaption></figure>
+</div>
+<div class="partiel"><p>Les modèles de proforma portent la mention « transcrit, non confirmé par la direction » tant que la direction n'a pas validé leurs lignes. Si le client a accepté d'être contacté sur WhatsApp, un bouton ouvre WhatsApp avec le message prêt ; l'envoi automatique par WhatsApp, lui, n'est pas actif (compte de la plateforme d'envoi non ouvert).</p></div>
+<p>Le client accepte la proforma en ligne et règle soit par mobile money (opérateur Tara), soit au guichet du cabinet, où la caisse constate le versement (chapitre 14). Le règlement constaté ouvre automatiquement le dossier de création et le compte du client.</p>
+
+<h3 id="s-pipeline">Suivre une création d'entreprise</h3>
+<div class="fiche"><dt>Qui</dt><dd>Chargé de formalités.</dd></div>
+<figure><img src="captures/47-pipeline-de-creation.png" alt="Pipeline de création"><figcaption><span class="rep">1</span>Ouvrir un dossier de création à la main. Les colonnes suivent les étapes : qualification, constitution, au guichet, immatriculation, à livrer.</figcaption></figure>
+<ol>
+  <li>Ouvrez <span class="menu">Création d'entreprise</span>. Chaque carte dit depuis quand le dossier est immobile et ce qui manque (« Elle attend votre réponse », « Délai du guichet dépassé »).</li>
+  <li>Ouvrez un dossier. <strong>Ce qui bloque</strong> donne le diagnostic du jour.</li>
+  <li>Dans <strong>Pièces de constitution</strong>, pour chaque pièce reçue : joignez le document, indiquez comment il est arrivé (par WhatsApp, au guichet, par courriel), puis <span class="btn">Marquer reçue</span>. Une pièce réclamée par le guichet et absente de la liste s'ajoute par <span class="btn">Ajouter une pièce hors liste</span>.</li>
+  <li>Quand l'étape est remplie, <span class="btn">Passer à « … »</span> (un cran à la fois). L'abandon reste toujours possible, avec son motif.</li>
+  <li>À l'immatriculation, saisissez dans <strong>Identifiants délivrés</strong> le RCCM, le NIU, la patente et le numéro CNPS, <strong>chacun avec sa date d'obtention</strong>, puis <span class="btn">Enregistrer les identifiants</span>.</li>
+</ol>
+<figure><img src="captures/48-dossier-de-creation.png" alt="Dossier de création"><figcaption><span class="rep">1</span>Ce qui bloque <span class="rep">2</span>Étape suivante <span class="rep">3</span>Copier le lien de suivi de la cliente</figcaption></figure>
+<div class="deux">
+<figure><img src="captures/48b-pieces-de-constitution.png" alt="Pièces de constitution"><figcaption><span class="rep">1</span>Pièce reçue <span class="rep">2</span>Joindre le document</figcaption></figure>
+<figure><img src="captures/48c-identifiants-et-jalons.png" alt="Identifiants"><figcaption>Identifiants délivrés, avec leurs dates, et jalons du dossier.</figcaption></figure>
+</div>
+<div class="note"><p>Le <strong>lien de suivi</strong> permet à la cliente de suivre sa création sans mot de passe jusqu'à l'immatriculation. S'il l'a perdu, <span class="btn">Copier le lien</span> et redonnez-le-lui. Il est personnel : elle ne doit pas le transférer.</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-pieces"><span class="num">6</span>Pièces reçues et contrôle de conformité</h2>
+<p class="chapo">Les pièces arrivent par l'application mobile, le portail, le courriel, WhatsApp ou au cabinet. Chaque facture lue passe par le contrôle de conformité, qui dit si elle peut être comptabilisée et ce que coûte une anomalie.</p>
+
+<h3 id="s-boite">La boîte de réception</h3>
+<div class="fiche"><dt>Qui</dt><dd>Comptable et réviseur (identifier, comptabiliser) ; chargé de clientèle (déposer).</dd></div>
+<figure><img src="captures/07-boite-de-reception.png" alt="Boîte de réception"><figcaption><span class="rep">1</span>Importer des pièces <span class="rep">2</span>Compteurs par gravité <span class="rep">3</span>Filtres par entreprise, canal, statut</figcaption></figure>
+<ol>
+  <li>Ouvrez <span class="menu">Pièces justificatives</span> &gt; <span class="menu">Boîte de réception</span>. En tête : les pièces <strong>reçues à identifier</strong> et les pièces <strong>lues à comptabiliser ou classer</strong>.</li>
+  <li>Filtrez par entreprise, canal ou statut (reçue, lue, comptabilisée, rectification demandée).</li>
+  <li>Au clavier : <kbd>↑</kbd> <kbd>↓</kbd> pour parcourir, <kbd>Entrée</kbd> pour ouvrir le rapport, <kbd>Espace</kbd> pour sélectionner.</li>
+  <li>Une pièce déposée au cabinet s'ajoute par <span class="btn">Importer des pièces</span>.</li>
+</ol>
+
+<h3 id="s-rapport">Lire le rapport de conformité d'une pièce</h3>
+<figure><img src="captures/08-rapport-de-conformite.png" alt="Rapport de conformité"><figcaption><span class="rep">1</span>Verdict : anomalie bloquante, comptabilisation interdite <span class="rep">2</span>Données extraites, modifiables <span class="rep">3</span>Constat majeur, avec son fondement légal</figcaption></figure>
+<ol>
+  <li>Ouvrez la pièce. À gauche, le document reçu (<span class="btn">Aperçu</span>, <span class="btn">Télécharger</span>) ; à droite, le verdict et les données extraites.</li>
+  <li>Vérifiez les <strong>données extraites</strong> (fournisseur, NIU, montants, mode de règlement) contre le document et corrigez-les si besoin.</li>
+  <li>Lisez chaque <strong>constat</strong> : sa règle (par exemple FAC-ACH-007), sa référence légale, sa conséquence (TVA non déductible), la <strong>consigne</strong> à suivre et la source consultée.</li>
+  <li>Dépliez <strong>Trace du contrôle</strong> pour voir les paramètres du référentiel employés, avec leur valeur à la date du contrôle.</li>
+</ol>
+<figure><img src="captures/08b-trace-du-controle.png" alt="Trace du contrôle"><figcaption><span class="rep">1</span>Trace du contrôle : les paramètres employés. En bas, la rectificative demandée et suivie dans les pièces attendues.</figcaption></figure>
+<div class="piege"><p>Tant qu'une anomalie <strong>bloquante</strong> subsiste (par exemple « NIU du fournisseur présent, valide et actif »), la pièce ne peut pas être comptabilisée. Il faut obtenir la pièce rectifiée, ou faire écarter le constat par le réviseur, avec un motif.</p></div>
+<div class="partiel"><p>La <strong>lecture automatique par Claude</strong> (l'agent qui préremplit les données d'une facture) est une option. Sans clé d'API configurée par le cabinet, l'écran le dit et la saisie se fait à la main, dans les mêmes champs : rien n'est bloqué. Quand elle est active, l'agent propose et le collaborateur décide. Le bandeau « ce rapport s'appuie sur des règles ou des paramètres qui n'ont pas encore été confirmés » rappelle qu'une partie du référentiel attend la validation du fiscaliste.</p></div>
+
+<h3 id="s-ecarter">Écarter un constat</h3>
+<div class="fiche"><dt>Qui</dt><dd>Réviseur uniquement. Un motif est exigé avant l'acte.</dd></div>
+<ol>
+  <li>Dans le rapport, cliquez sur <span class="btn">Écarter un constat</span>.</li>
+  <li>Choisissez le constat, rédigez le motif et joignez si possible une pièce d'appui.</li>
+  <li>Validez. La dérogation entre au <strong>journal des dérogations</strong> (chapitre 18). Elle ne se modifie ni ne se supprime : elle se lève depuis la pièce, ce qui rétablit le constat.</li>
+</ol>
+
+<h3 id="s-attendues">Pièces attendues et relances</h3>
+<p>Une <strong>demande de pièce</strong> (référence DP-…) naît d'une anomalie (facture rectificative) ou d'un besoin (relevé bancaire, contrat de bail). Dans <span class="menu">Pièces attendues</span>, quand la pièce arrive, saisissez sa référence et cliquez sur <span class="btn">Rattacher la pièce reçue</span> : une demande satisfaite ne se relance plus.</p>
+<figure><img src="captures/09-pieces-attendues.png" alt="Pièces attendues"><figcaption><span class="rep">1</span>Rattacher la pièce reçue. La réponse de l'adhérent (« n'a pas ce document ») s'affiche sous la demande.</figcaption></figure>
+
+<h4>Relancer un adhérent</h4>
+<div class="fiche"><dt>Qui</dt><dd>Chargé de clientèle, comptable, réviseur.</dd></div>
+<ol>
+  <li>Ouvrez <span class="menu">Relancer un adhérent</span>, choisissez le dossier et le mois, puis <span class="btn">Afficher</span>.</li>
+  <li>« Ce qui manque » est déduit des relevés, des séries habituelles, des obligations et des anomalies. Cochez les pièces à demander.</li>
+  <li>Choisissez le modèle (relance amiable ou relance ferme) et <span class="btn">Mettre à jour l'aperçu</span> : la liste des pièces cochées s'insère dans le message.</li>
+  <li>Choisissez les canaux (application, courriel) et <span class="btn">Envoyer maintenant</span>. Le message part aussi en notification dans l'espace de l'adhérent.</li>
+</ol>
+<figure><img src="captures/10b-message-de-relance.png" alt="Message de relance"><figcaption><span class="rep">1</span>Canaux d'envoi <span class="rep">2</span>Envoyer maintenant</figcaption></figure>
+<div class="piege"><p>Si le dossier n'a <strong>aucun compte adhérent actif</strong>, le bouton est grisé : l'écran affiche « Aucun compte adhérent actif : relancer par téléphone, puis tracer la relance ». WhatsApp apparaît « inactif » : le compte de la plateforme d'envoi n'est pas encore ouvert.</p></div>
+
+<h3 id="s-file">La file d'anomalies</h3>
+<div class="fiche"><dt>Qui</dt><dd>Comptable, réviseur, fiscaliste. C'est l'écran de travail quotidien du réviseur.</dd></div>
+<figure><img src="captures/11-file-d-anomalies.png" alt="File d'anomalies"><figcaption>La file : gravité d'abord, puis ce qui dort, l'enjeu fiscal, l'ancienneté. « Grouper par règle » traite d'un bloc les constats d'une même règle.</figcaption></figure>
+<p>Filtrer ne fait pas disparaître le travail : les compteurs en tête restent ceux de la file entière. Un constat de plus de quinze jours « dort » et passe devant dans sa gravité.</p>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-saisie"><span class="num">7</span>Saisie et écritures</h2>
+<p class="chapo">Une écriture naît en brouillon, se valide, puis se fige. Une écriture validée ne se corrige que par son inverse, la contre-passation. Il n'y a pas de bouton « supprimer ».</p>
+
+<h3 id="s-saisir">Saisir une écriture</h3>
+<div class="fiche"><dt>Qui</dt><dd>Comptable et réviseur. Le chargé de clientèle lit la balance mais ne saisit pas.</dd></div>
+<ol>
+  <li>Choisissez le dossier dans le sélecteur, puis <span class="menu">Comptabilité</span> &gt; <span class="menu">Saisie d'écriture</span>.</li>
+  <li>Choisissez le <strong>journal</strong> (AC achats, VE ventes, BQ banque, MM mobile money, CA caisse, OD opérations diverses, AN à-nouveaux), la <strong>date de l'opération</strong>, le <strong>libellé</strong> et la <strong>pièce justificative</strong>.</li>
+  <li>Sur chaque ligne : le compte (la liste propose les comptes du plan), le libellé de ligne, le sens (débit ou crédit) et le montant. Huit lignes sont offertes.</li>
+  <li>Vérifiez le compteur « Débit / Crédit / équilibrée », puis <span class="btn">Enregistrer en brouillon</span>.</li>
+</ol>
+<figure><img src="captures/12-saisie-d-ecriture.png" alt="Saisie d'écriture"><figcaption><span class="rep">1</span>Journal <span class="rep">2</span>Compte de la ligne <span class="rep">3</span>Contrôle d'équilibre <span class="rep">4</span>Enregistrer en brouillon</figcaption></figure>
+<div class="piege"><p>Le compteur d'équilibre est une aide : il n'empêche rien. La dernière ligne n'est jamais complétée d'office, pour que chaque montant soit relu. Une écriture déséquilibrée est refusée à l'enregistrement, avec l'écart en clair (par exemple « débit 150000, crédit 140000, écart 10000 »).</p></div>
+
+<h3 id="s-valider">Valider ou contre-passer</h3>
+<figure><img src="captures/12b-dernieres-ecritures.png" alt="Dernières écritures"><figcaption><span class="rep">1</span>Contre-passer une écriture validée. Chaque écriture porte son journal, son numéro, sa pièce et son statut.</figcaption></figure>
+<ol>
+  <li>Dans <strong>Dernières écritures</strong>, relisez le brouillon et validez-le : il porte alors le nom de celui qui l'a validé et la date.</li>
+  <li>Pour corriger une écriture validée, cliquez sur <span class="btn">Contre-passer</span>. Le <strong>motif est exigé avant l'acte</strong>. L'écriture inverse est passée, visible au grand livre ; saisissez ensuite l'écriture juste.</li>
+</ol>
+
+<h3 id="s-echange">Échanger avec le logiciel du client</h3>
+<div class="fiche"><dt>À quoi ça sert</dt><dd>Exporter les écritures validées, reprendre un fichier exporté par un autre logiciel, régler le plan d'imputation propre au dossier.</dd><dt>Qui</dt><dd>Comptable et réviseur.</dd></div>
+<ol>
+  <li><span class="menu">Échange avec le logiciel du client</span> &gt; <strong>Exporter</strong> : choisissez l'exercice, le format (format pivot du centre, ou Sage 100) et éventuellement un journal. Seules les écritures validées sortent : un lot qui contient un brouillon est refusé en entier.</li>
+  <li><strong>Reprendre un fichier</strong> : chargez le fichier, choisissez exercice et format, puis <span class="btn">Contrôler</span>. Rien n'est écrit au contrôle ; les écritures appliquées entrent en brouillon.</li>
+  <li><strong>Plan d'imputation du dossier</strong> : les règles « quand le libellé contient… alors tel compte » qui proposent le compte de charge des achats.</li>
+</ol>
+<div class="partiel"><p>Le profil Sage 100 n'a pas encore été confronté à une installation réelle d'un client : fournissez au cabinet un fichier d'exemple issu du Sage du client pour l'ajuster.</p></div>
+
+<h3 id="s-rappro">Rapprocher un relevé bancaire</h3>
+<ol>
+  <li><span class="menu">Rapprochement bancaire</span> &gt; <strong>Importer un relevé</strong> : choisissez le compte (BQ banque ou MM mobile money), la période, recopiez les soldes initial et final du relevé, choisissez le format CSV et chargez le fichier.</li>
+  <li><span class="btn">Importer et rapprocher</span> : ce qui correspond sans doute possible se rapproche seul ; le reste apparaît à traiter, avec l'écart.</li>
+</ol>
+<figure><img src="captures/15-rapprochement-bancaire.png" alt="Rapprochement bancaire"><figcaption>L'import d'un relevé. Les soldes recopiés contrôlent que le fichier est complet.</figcaption></figure>
+<div class="piege"><p>Les soldes se saisissent du point de vue de l'entreprise (négatifs si le compte est à découvert). Un relevé dont les mouvements ne retombent pas sur les soldes recopiés est refusé : l'erreur est alors dans le fichier, pas dans la comptabilité.</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-livres"><span class="num">8</span>Livres légaux et balances</h2>
+<p class="chapo">La balance et le grand livre sont calculés sur les écritures validées seules. Les livres obligatoires et les annexes de la DSF se téléchargent depuis le même écran.</p>
+
+<h3 id="s-balance">Lire la balance et le grand livre</h3>
+<div class="fiche"><dt>Qui</dt><dd>Tous les rôles qui lisent la comptabilité.</dd></div>
+<ol>
+  <li>Choisissez le dossier, puis <span class="menu">Comptabilité</span> &gt; <span class="menu">Balance et grand livre</span>.</li>
+  <li>En tête, les <strong>trois contrôles d'avant dépôt</strong> : balance équilibrée, numérotation continue, résultat de l'exercice.</li>
+  <li>Filtrez par numéro ou intitulé de compte, période et journal, puis <span class="btn">Filtrer</span>.</li>
+  <li>Cliquez sur un numéro de compte pour ouvrir son <strong>grand livre</strong>.</li>
+</ol>
+<figure><img src="captures/13b-balance-generale.png" alt="Balance générale"><figcaption>La balance générale, avec ses totaux contrôlés à l'affichage.</figcaption></figure>
+<div class="note"><p>Les trois contrôles disent la cohérence formelle des écritures, pas leur sincérité. <span class="btn">Demander une relecture de la balance à l'agent</span> n'est utile que si la lecture par Claude est configurée.</p></div>
+
+<h3 id="s-pdf">Éditer les livres et les annexes</h3>
+<figure><img src="captures/13-balance-et-livres.png" alt="Livres et annexes"><figcaption><span class="rep">1</span>Livres obligatoires en PDF <span class="rep">2</span>Balances auxiliaires en Excel <span class="rep">3</span>Modèles officiels de la DGI</figcaption></figure>
+<ul>
+  <li><strong>Livres obligatoires</strong> (exercice entier) : <span class="btn">Livre-journal (PDF)</span>, <span class="btn">Grand livre (PDF)</span>, <span class="btn">Balance générale (PDF)</span>.</li>
+  <li><strong>Balances auxiliaires</strong>, tiers par tiers, en Excel : clients et fournisseurs. Elles sont aussi lisibles à l'écran (liens « clients · fournisseurs »).</li>
+  <li><strong>Déclarations par tiers de la DGI</strong> : <span class="btn">Achats par fournisseur (MODELE FOURNISSEURS)</span> et <span class="btn">Sommes versées aux tiers (MODELE TIERS)</span>, les modèles officiels remplis.</li>
+</ul>
+<div class="piege"><p>Téléversez les modèles de la DGI <strong>tels quels, sans les renommer</strong> : le portail refuse un fichier renommé.</p></div>
+<div class="partiel"><p>Les balances auxiliaires ne sont pas encore au modèle de la DGI, que le cabinet obtient à la télédéclaration.</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-immo"><span class="num">9</span>Immobilisations</h2>
+<p class="chapo">Le registre des immobilisations calcule la dotation aux amortissements, la passe en écriture et produit le tableau des amortissements, pièce n° 7 de la DSF (note 3C).</p>
+<div class="fiche"><dt>Qui</dt><dd>Comptable et réviseur.</dd></div>
+<figure><img src="captures/14-immobilisations.png" alt="Immobilisations"><figcaption><span class="rep">1</span>Saisir une immobilisation <span class="rep">2</span>Passer la dotation de l'exercice</figcaption></figure>
+<ol>
+  <li>Choisissez le dossier, puis <span class="menu">Comptabilité</span> &gt; <span class="menu">Immobilisations</span>.</li>
+  <li><span class="btn">Saisir une immobilisation</span> : un bien par fiche (désignation, compte, date de mise en service, valeur, durée).</li>
+  <li>Vérifiez le contrôle « Le registre concorde avec la balance » : il compare les comptes 21 à 24 et 28 au registre.</li>
+  <li><span class="btn">Passer la dotation</span> : la dotation est calculée au prorata des jours et proposée en écriture en brouillon, à valider comme toute écriture.</li>
+  <li><span class="btn">Tableau des amortissements (Excel)</span> pour la DSF.</li>
+</ol>
+<div class="piege"><p>Un bien cédé ou saisi par erreur <strong>se sort</strong> du registre ; il ne s'efface pas. Un achat comptabilisé en classe 2 sans fiche au registre fait échouer le contrôle de concordance : saisissez la fiche.</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-mois"><span class="num">10</span>Clôture mensuelle et revue</h2>
+<p class="chapo">Chaque mois, le comptable vérifie ses points de contrôle, puis transmet le mois au réviseur, ce qui le verrouille. Le réviseur le valide ou le renvoie avec des remarques.</p>
+
+<h3 id="s-cloturer">Clôturer et transmettre un mois</h3>
+<div class="fiche"><dt>Qui</dt><dd>Comptable (transmettre) ; réviseur (réviser).</dd></div>
+<ol>
+  <li><span class="menu">Comptabilité</span> &gt; <span class="menu">Clôture mensuelle</span> : choisissez le dossier et le mois, puis <span class="btn">Afficher</span>.</li>
+  <li>Parcourez les <strong>points de contrôle</strong> : pièces traitées, aucun brouillon, rapprochement à jour, caisse cohérente, balance équilibrée, numérotation continue, pièces attendues, écarts de constat tranchés. <span class="btn">Voir</span> ouvre l'écran du point ; <span class="btn">Relancer</span> ouvre la relance.</li>
+  <li>Rédigez le <strong>commentaire pour le réviseur</strong>.</li>
+  <li><span class="btn">Transmettre au réviseur</span>, ou <span class="btn">Enregistrer et continuer plus tard</span>.</li>
+</ol>
+<figure><img src="captures/16-cloture-mensuelle.png" alt="Clôture mensuelle"><figcaption>Les huit points de contrôle du mois. Un triangle signale ce qui n'empêche pas la transmission mais reste ouvert.</figcaption></figure>
+<figure><img src="captures/16b-transmission.png" alt="Transmission"><figcaption><span class="rep">1</span>Transmettre au réviseur : le réviseur reçoit la balance, l'échantillon des écritures atypiques et votre commentaire.</figcaption></figure>
+<div class="piege"><p>La transmission <strong>verrouille la période</strong> : plus aucune écriture n'est possible sur ce mois. Une correction ultérieure passera par une contre-passation datée d'un mois ouvert.</p></div>
+
+<h3 id="s-revue">Réviser un mois</h3>
+<p>Dans <span class="menu">Revue des dossiers</span>, le réviseur trouve « À réviser » (les plus anciens d'abord). Il valide le mois ou le renvoie avec des remarques ; le comptable répond à chaque remarque dans « Revenus avec des remarques » puis retransmet.</p>
+<figure><img src="captures/30-revue-des-dossiers.png" alt="Revue des dossiers"><figcaption>La revue : à réviser, revenus avec des remarques, validés.</figcaption></figure>
+<div class="note"><p>La déclaration de TVA d'un mois ne peut être déposée qu'une fois ce mois transmis au réviseur (chapitre 12).</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-paie"><span class="num">11</span>Paie et CNPS</h2>
+<p class="chapo">La paie propose ; le comptable corrige s'il le faut, puis arrête les charges du mois. Seuls les montants arrêtés servent aux appels de fonds et aux déclarations.</p>
+<div class="fiche"><dt>Qui</dt><dd>Comptable et réviseur (tous ceux qui lisent la comptabilité du dossier).</dd></div>
+
+<h3 id="s-arreter">Arrêter les charges du mois</h3>
+<ol>
+  <li>Choisissez le dossier, puis <span class="menu">Social et paie</span>. L'écran s'ouvre sur la paie du mois : total à verser (dont CNPS), effectif, masse salariale, retenues, charges patronales.</li>
+  <li>Si le bandeau « Groupe de risque CNPS non renseigné » apparaît, cliquez sur <span class="btn">Enregistrer le groupe</span> et saisissez celui de la notification de la CNPS (le groupe A, risque faible, est supposé en attendant).</li>
+  <li>Dans <strong>Arrêter les charges du mois</strong>, comparez la colonne « Proposé » (CNPS, IRPP sur salaires, crédit foncier, FNE, taxe de développement local, redevance audiovisuelle) et corrigez la colonne « Arrêté » si nécessaire.</li>
+  <li><span class="btn">Arrêter les charges du mois</span>.</li>
+</ol>
+<figure><img src="captures/18-paie-du-mois.png" alt="Paie du mois"><figcaption><span class="rep">1</span>Enregistrer le groupe CNPS <span class="rep">2</span>Arrêter les charges du mois</figcaption></figure>
+<div class="partiel"><p>Certaines valeurs de la paie portent « à valider par le fiscaliste ». Tant qu'une ligne l'indique, <strong>le bulletin n'est pas opposable</strong>.</p></div>
+
+<h3 id="s-bulletin">Bulletins, embauches et fichier du personnel</h3>
+<ol>
+  <li>Dans <strong>Fichier du personnel</strong>, cliquez sur <span class="btn">Bulletin</span> en face d'un salarié : le bulletin du mois s'affiche, chaque ligne avec son taux. <span class="btn">Imprimer le bulletin (PDF)</span> pour le remettre.</li>
+  <li><span class="btn">Embaucher un salarié</span> inscrit le salarié et ouvre son premier contrat. Un matricule ne se réattribue pas.</li>
+  <li><span class="btn">Nouveau contrat</span> (changement de poste ou de salaire) ou <span class="btn">Clore</span> (départ). Les sortis restent au fichier : la CNPS peut les réclamer des années après.</li>
+</ol>
+<figure><img src="captures/19-bulletin-de-paie.png" alt="Bulletin de paie"><figcaption>Un bulletin : rémunération, retenues du salarié, charges de l'employeur, net à payer. « Simuler un groupe CNPS » et <span class="btn">Recalculer</span> permettent de vérifier l'effet d'un autre groupe.</figcaption></figure>
+<div class="note"><p>Un salarié à temps partiel sous le SMIG déclenche une alerte sur le bulletin, sans le refuser. La CNPS arrêtée peut être appelée à l'adhérent qui a mandaté le cabinet pour la payer (chapitre 12, « Fonds confiés »).</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-fiscal"><span class="num">12</span>Échéances fiscales, déclarations et quittances</h2>
+<p class="chapo">L'échéancier est calculé depuis le profil du dossier, jamais ressaisi. La TVA se constitue depuis les journaux et se dépose par le réviseur. Les autres obligations (CNPS, retenues, IGS, patente) se déposent hors de la plateforme et s'y constatent.</p>
+
+<h3 id="s-echeancier">L'échéancier</h3>
+<div class="fiche"><dt>Qui</dt><dd>Tous ceux qui lisent les dossiers.</dd></div>
+<figure><img src="captures/20-echeancier.png" alt="Échéancier"><figcaption>L'échéancier de l'exercice : chaque obligation avec sa période, ce qui reste et son statut (déclarée, à faire, en retard).</figcaption></figure>
+<p>Sous l'échéancier : les <strong>relances d'échéance du jour</strong> (jalons J-15, J-7, J-2 et J+1, jour où la pénalité commence à courir), <strong>Estimer une pénalité</strong> (choisissez l'obligation en retard, le montant dû et la date de dépôt prévue, puis <span class="btn">Estimer</span>) et le <strong>catalogue des obligations</strong> (guichet, périodicité, jour limite).</p>
+
+<h3 id="s-tva">Préparer et déposer la déclaration de TVA</h3>
+<div class="fiche"><dt>Qui</dt><dd>Le comptable prépare et transmet ; le réviseur dépose, avec le second facteur.</dd></div>
+<figure><img src="captures/21-declaration-de-tva.png" alt="Déclaration de TVA"><figcaption><span class="rep">1</span>Les quatre étapes <span class="rep">2</span>Le motif qui empêche le dépôt, en clair</figcaption></figure>
+<ol>
+  <li><span class="menu">Obligations fiscales</span> &gt; <span class="menu">Déclarations de TVA</span>, sur le dossier choisi.</li>
+  <li><strong>Étape 1, pièces du mois</strong> : combien sont traitées, combien sont attendues.</li>
+  <li><strong>Étape 2, constitution</strong> : les lignes (ventes taxables, TVA collectée, TVA déductible, TVA rejetée par le contrôle, crédit reporté) viennent des journaux et ne se modifient pas ici.</li>
+  <li><strong>Étape 3, contrôles</strong> : bloquants et réserves.</li>
+  <li><strong>Étape 4, dépôt par le réviseur</strong> : fermée tant que le mois n'a pas été transmis au réviseur depuis la clôture mensuelle.</li>
+</ol>
+<p>Le bloc <strong>Ce que le contrôle a évité</strong> chiffre la TVA qui aurait été réclamée puis refusée, et la liste des rejets pièce par pièce porte le code de la règle appliquée.</p>
+<div class="partiel"><p>La plateforme <strong>ne transmet rien à la DGI</strong> : aucune interface n'est appelée. Le réviseur télédéclare sur le portail de la DGI, puis consigne le dépôt dans la plateforme. Les codes et libellés des lignes viennent du référentiel et sont à confirmer avec le formulaire de la DGI.</p></div>
+<div class="note"><p>Une période sans opération donne une déclaration <strong>à néant</strong>. Elle reste due : l'obligation naît de l'assujettissement, pas de l'activité.</p></div>
+
+<h3 id="s-constat">Constater un dépôt fait hors de la plateforme</h3>
+<div class="fiche"><dt>À quoi ça sert</dt><dd>Consigner une obligation déposée ailleurs : CNPS, retenues sur salaires, IGS, patente.</dd><dt>Qui</dt><dd>Réviseur, avec le second facteur.</dd></div>
+<ol>
+  <li>Dans l'échéancier du dossier, bloc <strong>Constater un dépôt</strong>, saisissez le code du second facteur si l'écran le demande.</li>
+  <li>Choisissez l'<strong>obligation déposée</strong> dans l'échéancier, saisissez le <strong>numéro de l'accusé</strong>, la date et l'heure de dépôt (heure de Douala), le montant constaté et, au besoin, la pièce jointe.</li>
+  <li><span class="btn">Consigner le dépôt</span>. L'échéance passe à « Déclarée ».</li>
+</ol>
+<figure><img src="captures/28c-constater-un-depot.png" alt="Constater un dépôt"><figcaption>Le formulaire de constat, une fois la session renforcée.</figcaption></figure>
+<div class="piege"><p>Aucun bordereau n'est confronté à l'accusé : le constat prouve ce que vous déclarez, pas ce que le guichet a reçu. Recopiez l'accusé avec soin.</p></div>
+
+<h3 id="s-fonds">Fonds confiés : le cabinet paie pour l'adhérent</h3>
+<div class="fiche"><dt>À quoi ça sert</dt><dd>Quand l'adhérent a mandaté le cabinet pour payer certaines obligations (par exemple CNPS et retenues sur salaires), le cabinet appelle les fonds, les reçoit à part des honoraires, paie l'administration et porte la quittance.</dd><dt>Qui</dt><dd>Réviseur ; la caisse pour la réception des fonds au guichet. Le mandat lui-même est accordé par le super administrateur.</dd></div>
+<ol>
+  <li>Dans l'échéancier du dossier, bloc <strong>Payées par le cabinet, sous mandat de paiement</strong>, saisissez le montant à appeler pour l'échéance et cliquez sur <span class="btn">Arrêter le montant</span>.</li>
+  <li>L'adhérent remet ses fonds depuis son espace (mobile money par Tara) ou au guichet, où la caisse les constate. L'échéance indique « fonds reçus ».</li>
+  <li>Payez l'administration, puis portez la quittance sur l'échéance : elle passe à « Payée ».</li>
+</ol>
+<figure><img src="captures/28-fonds-confies.png" alt="Fonds confiés"><figcaption><span class="rep">1</span>Arrêter le montant à appeler pour une échéance mandatée.</figcaption></figure>
+<div class="piege"><p>Ces fonds ne sont pas des honoraires : la caisse les tient à part, comme fonds de tiers à reverser.</p></div>
+
+<h3 id="s-quittance">Vérifier une quittance envoyée par l'adhérent</h3>
+<div class="fiche"><dt>Qui</dt><dd>Comptable et réviseur (droit « Vérifier une quittance »).</dd></div>
+<p>Quand l'adhérent paie lui-même sa TVA ou sa CNPS, il envoie la quittance depuis son espace. Elle apparaît sur l'échéance concernée dans l'échéancier du dossier.</p>
+<ol>
+  <li>Ouvrez la quittance en aperçu et comparez-la à l'échéance.</li>
+  <li>Validez-la avec son montant : l'échéance passe à « Payée » et l'écriture de paiement est proposée. Ou refusez-la en écrivant le motif, que l'adhérent lira.</li>
+</ol>
+<div class="partiel"><p>La comparaison automatique du montant de la quittance avec le montant dû n'est pas encore faite : c'est au collaborateur de la vérifier. Aucune quittance n'attendait sur la pile au moment des captures, d'où l'absence d'image.</p></div>
+
+<h3 id="s-seuils">Veille des seuils</h3>
+<p><span class="menu">Veille des seuils</span> compare le chiffre d'affaires lu dans les livres au seuil d'assujettissement à la TVA, et signale les adhérents qui sortent, ou vont sortir, du champ du centre (CGI art. 118). Cette revue ne résilie rien : la décision reste celle du cabinet.</p>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-dsf"><span class="num">13</span>Clôture annuelle et DSF</h2>
+<p class="chapo">La liasse fiscale se lit en continu. La DSF se prépare sur l'exercice clos, se relit, est validée par le réviseur, puis se dépose sur le portail de la DGI ; l'accusé est enfin consigné dans la plateforme.</p>
+
+<h3 id="s-liasse">Lire la liasse et l'impôt estimé</h3>
+<div class="fiche"><dt>Qui</dt><dd>Tous ceux qui lisent la comptabilité. Clôturer l'exercice : réviseur et direction, avec un motif.</dd></div>
+<figure><img src="captures/22-liasse-fiscale.png" alt="Liasse fiscale"><figcaption><span class="rep">1</span>Les trois contrôles d'avant dépôt <span class="rep">2</span>Du résultat comptable au résultat fiscal, puis l'IS estimé</figcaption></figure>
+<ol>
+  <li>Choisissez le dossier, puis <span class="menu">Clôture annuelle</span>. Le système de présentation (normal ou minimal de trésorerie) est constaté d'après le dossier, jamais choisi.</li>
+  <li>Lisez <strong>Du résultat comptable au résultat fiscal</strong> : les charges refusées par le contrôle de conformité y sont réintégrées, puis l'abattement CGA est appliqué ou écarté, avec son motif.</li>
+  <li>L'<strong>impôt sur les sociétés estimé</strong> compare l'IS au taux et le minimum de perception. Les acomptes versés et précomptes subis s'imputent sur le portail.</li>
+  <li>Plus bas : actif, passif, charges, produits, et le plan de la liasse (quels comptes alimentent quel poste).</li>
+</ol>
+
+<h3 id="s-preparer">Préparer la DSF et ses pièces</h3>
+<div class="fiche"><dt>Qui</dt><dd>Comptable et réviseur préparent ; le réviseur valide et dépose.</dd></div>
+<ol>
+  <li>Ouvrez la liasse de l'<strong>exercice clos</strong> (par exemple 2025). Vérifiez que la fiche signalétique est validée (chapitre 4).</li>
+  <li><span class="btn">Préparer la DSF</span> : la liasse est figée, avec son empreinte. Rien ne part à la DGI.</li>
+  <li>Relisez la version en PDF, puis faites-la valider par le réviseur.</li>
+  <li>Dans <strong>Pièces à joindre</strong>, pour chaque pièce du guide de la DGI : celles que la plateforme produit se téléchargent ; les autres se versent (<span class="btn">Verser</span>) ou se déclarent <span class="btn">Sans objet</span>. Le portail ne laissera pas soumettre sans elles.</li>
+  <li>Complétez les <strong>fiches des fournisseurs déclarés</strong> (téléphone, ville…) avec <span class="btn">Compléter la fiche</span> : le modèle « MODELE FOURNISSEURS » les reprend.</li>
+  <li>Pour le système normal, <span class="btn">Télécharger la DSF au format DGI (Excel)</span> : le modèle officiel, bilan et compte de résultat remplis, à téléverser tel quel, sous son nom.</li>
+</ol>
+<figure><img src="captures/29-dsf-a-preparer.png" alt="DSF à préparer"><figcaption>Une DSF 2025 à préparer : le bouton, puis les pièces à joindre, produites par la plateforme ou à fournir.</figcaption></figure>
+<figure><img src="captures/22b-dsf.png" alt="DSF format DGI"><figcaption><span class="rep">1</span>Préparer la DSF <span class="rep">2</span>Télécharger au format DGI <span class="rep">3</span>Pièces à joindre. Sur un exercice en cours, l'écran rappelle que la DSF se tire de comptes arrêtés.</figcaption></figure>
+
+<h3 id="s-deposer">Déposer et consigner l'accusé</h3>
+<ol>
+  <li>Le réviseur dépose la DSF <strong>sur le portail de la DGI</strong>, hors de la plateforme.</li>
+  <li>De retour dans la plateforme, il consigne le dépôt avec l'accusé de la DGI, sous second facteur.</li>
+  <li>L'échéancier affiche « Déclarée ». L'adhérent voit « Déposée à la DGI », l'accusé, et peut télécharger sa copie.</li>
+</ol>
+<div class="partiel"><p>Le dépôt de la DSF reste <strong>manuel sur le portail de la DGI</strong> : la plateforme produit les fichiers et garde la trace, elle ne transmet pas. Les fiches R1 à R3 reprennent la fiche signalétique validée ; les notes annexes se complètent sur le portail.</p></div>
+<div class="note"><p><span class="btn">Demander une relecture à l'agent</span> propose un second regard (codes NACAM, pièces probables, fiche signalétique) quand la lecture par Claude est configurée. L'agent propose ; il ne touche à aucun chiffre.</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-caisse"><span class="num">14</span>Honoraires, caisse et règlements</h2>
+<p class="chapo">L'adhérent règle ses honoraires dans son espace par mobile money (opérateur Tara) ou au guichet du cabinet. La caisse constate les versements du guichet ; ceux de Tara se rapprochent seuls.</p>
+
+<h3 id="s-encaisser">Encaisser un règlement au guichet</h3>
+<div class="fiche"><dt>Qui</dt><dd>Responsable de caisse et administrateur.</dd></div>
+<ol>
+  <li>Ouvrez <span class="menu">Caisse</span>.</li>
+  <li><strong>À encaisser</strong> liste les clients qui ont accepté leur proposition (création, prestation). <strong>Honoraires des adhérents</strong> liste ce qui est exigible, le retard d'abord.</li>
+  <li>Sur la ligne du versement reçu, saisissez la <strong>référence du reçu</strong>, cochez « J'ai constaté le versement de … FCFA », puis <span class="btn">Encaisser</span>.</li>
+  <li>Pour une création ou une prestation, le dossier s'ouvre aussitôt, sans autre geste. Pour des honoraires, la ligne de l'adhérent change d'état et il reçoit son reçu.</li>
+</ol>
+<figure><img src="captures/50b-encaisser-des-honoraires.png" alt="Encaisser des honoraires"><figcaption><span class="rep">1</span>Référence du reçu <span class="rep">2</span>Encaisser, après avoir coché le constat du versement</figcaption></figure>
+<div class="piege"><p>Ne cochez « J'ai constaté le versement » qu'une fois l'argent réellement reçu et compté. Un paiement Tara notifié par l'opérateur ne s'encaisse pas au guichet : il se rapproche seul.</p></div>
+
+<h3 id="s-journal">Le journal de caisse</h3>
+<figure><img src="captures/50-caisse.png" alt="Caisse"><figcaption>Le journal de caisse par période : encaissé par le cabinet, fonds de tiers reçus (à reverser), totaux par axe, mobile money et guichet séparés.</figcaption></figure>
+<ul>
+  <li>Choisissez la période (<strong>Du</strong>, <strong>Au</strong>) puis <span class="btn">Afficher</span> ; <span class="btn">Exporter en Excel</span> pour la comptabilité du cabinet.</li>
+  <li><strong>Paiements Tara non rattachés</strong> : des notifications de l'opérateur qu'aucun paiement attendu n'explique. À traiter à la main : appeler le numéro, retrouver ce qui est réglé, le constater au guichet sous la référence de l'opérateur.</li>
+  <li>La direction lit le même journal, sans encaisser.</li>
+</ul>
+<div class="partiel"><p>Sur la pile de démonstration, le paiement mobile money est <strong>simulé</strong> : la plateforme n'a pas encore d'identifiants marchands Tara réels.</p></div>
+
+<h3 id="s-depassement">Retard de règlement : règle, blocage et grâce</h3>
+<div class="fiche"><dt>À quoi ça sert</dt><dd>Un dossier dont les honoraires ne sont pas réglés se lit, reçoit ses pièces et se règle ; passé le retard toléré, il ne se traite plus (saisie, déclarations et DSF refusées), sauf grâce.</dd><dt>Qui</dt><dd>Super administrateur, avec motif et second facteur.</dd></div>
+<ol>
+  <li><strong>Fixer la règle</strong> : dans <span class="menu">Portefeuille</span>, bandeau « Règlement des honoraires », dépliez <span class="btn">Changer la règle de dépassement</span>, saisissez les jours de retard tolérés et le motif, puis <span class="btn">Enregistrer la règle</span>.</li>
+  <li><strong>Accorder une grâce</strong> : dans la fiche du dossier, bloc <strong>Faveurs</strong>, dépliez <span class="btn">Accorder une grâce</span>, choisissez la date jusqu'à laquelle le dossier se traite et le motif, puis <span class="btn">Accorder</span>. Le dossier passe « Sous grâce ».</li>
+  <li>Le même bloc accorde ou retire le mandat <strong>« le cabinet paie pour moi »</strong> (fonds confiés, chapitre 12).</li>
+</ol>
+<div class="deux">
+<figure><img src="captures/55-regle-de-depassement.png" alt="Règle de dépassement"><figcaption><span class="rep">1</span>Jours de retard tolérés.</figcaption></figure>
+<figure><img src="captures/55b-accorder-une-grace.png" alt="Accorder une grâce"><figcaption><span class="rep">1</span>Jusqu'au <span class="rep">2</span>Motif, conservé au journal d'audit.</figcaption></figure>
+</div>
+
+<h3 id="s-tarifs">Fixer les tarifs de l'offre</h3>
+<div class="fiche"><dt>Qui</dt><dd>Direction seule.</dd></div>
+<ol>
+  <li><span class="menu">Tarifs de l'offre</span> : chaque prestation avec son prix du jour et son statut.</li>
+  <li><span class="btn">Fixer ce prix</span> : le prix s'applique à tout devis établi à partir de sa date ; un devis déjà remis garde son prix. La décision est tracée dans « Les décisions ».</li>
+  <li>Renseignez l'<strong>identité fiscale du cabinet</strong> (NIU, RCCM, régime de TVA) que porte la facture définitive.</li>
+</ol>
+<figure><img src="captures/40-tarifs.png" alt="Tarifs"><figcaption><span class="rep">1</span>Fixer ce prix. Les créations d'entreprise et prestations ponctuelles sont arrêtées sur la proposition de chaque client.</figcaption></figure>
+<div class="piege"><p>Tant qu'un prix n'est pas fixé, il s'affiche comme <strong>indicatif</strong> sur le site et l'application, et <strong>aucun client ne peut le payer en ligne</strong>.</p></div>
+
+<h3 id="s-souscriptions">Souscriptions en ligne</h3>
+<p><span class="menu">Souscriptions en ligne</span> liste les souscriptions payées dont l'accès reste à ouvrir (geste de l'administration des comptes), et permet de relancer à la main deux travaux normalement planifiés : <span class="btn">Rapprocher les paiements</span> (interroge l'opérateur sur les paiements restés en attente) et <span class="btn">Appeler les mensualités</span>. « Services à suspendre » est une décision, pas une exécution : l'adhérent garde la lecture de ses documents.</p>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-missions"><span class="num">15</span>Prestations ponctuelles</h2>
+<p class="chapo">Analyse de contrat, rédaction de contrat, DSF ciblée : ce qui suit la vente d'une prestation ponctuelle. Le juriste décide chaque point, un second valide, et rien ne part au client sans eux.</p>
+<div class="fiche"><dt>Qui</dt><dd>Traiter : chargé de formalités (juriste) et réviseur. Valider : réviseur ou direction, jamais celui qui a soumis.</dd></div>
+
+<h3 id="s-ouvrir">Ouvrir une mission</h3>
+<ol>
+  <li><span class="menu">Prestations ponctuelles</span> &gt; <strong>Ouvrir une mission</strong>.</li>
+  <li>Choisissez la <strong>prestation</strong>, saisissez l'<strong>objet</strong>, le client et son courriel. Si la demande a été payée en ligne, indiquez le dossier commercial payé (DC-…) : la mission s'y rattache sans recopier de référence.</li>
+  <li>Joignez le document (PDF ou photo) puis <span class="btn">Ouvrir la mission</span>.</li>
+</ol>
+<figure><img src="captures/49-ouvrir-une-mission.png" alt="Ouvrir une mission"><figcaption><span class="rep">1</span>Prestation <span class="rep">2</span>Objet <span class="rep">3</span>Ouvrir la mission</figcaption></figure>
+
+<h3 id="s-traiter">Traiter, soumettre, valider</h3>
+<ol>
+  <li>La mission s'ouvre avec le document en aperçu. Ajoutez les points d'analyse (<span class="btn">+ Ajouter un point à la main</span>) : rubrique, gravité, titre, texte, citation du contrat.</li>
+  <li>Décidez chaque point : <span class="btn">Retenir</span>, <span class="btn">Reformuler</span> (puis <span class="btn">Retenir ainsi</span>) ou écarter.</li>
+  <li><span class="btn">Soumettre au second regard</span> quand tous les points sont décidés. Rien d'inachevé ne passe.</li>
+  <li>Le valideur relit et clique sur <span class="btn">Valider et livrer</span>. Le livrable (PDF, et Word pour un contrat rédigé) ne porte que ce qui a été retenu.</li>
+</ol>
+<figure><img src="captures/49b-mission-ouverte.png" alt="Mission ouverte"><figcaption>Une analyse de contrat ouverte : le contrat (spécimen) à gauche, les points à droite.</figcaption></figure>
+<div class="partiel"><p>Sans clé d'API, l'écran indique « Lecture par l'agent non configurée (clé d'API du cabinet absente) : ajoutez les points à la main, dans la même structure ». Le travail se fait entièrement à la main ; un contrat à rédiger peut partir d'un <strong>modèle du cabinet</strong>. Pour une DSF ciblée, la DSF se prépare dans le parcours habituel (chapitre 13).</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-recrutement"><span class="num">16</span>Recrutement : les offres de poste</h2>
+<p class="chapo">Les offres se rédigent dans la console, se publient sur le site du cabinet, et les candidatures reviennent avec le CV.</p>
+<div class="fiche"><dt>Qui</dt><dd>Direction et administrateur (offres) ; direction ou rôle « ressources humaines » créé par le cabinet (candidatures).</dd></div>
+<ol>
+  <li><span class="menu">Offres de poste</span> &gt; <span class="btn">Rédiger une offre</span>.</li>
+  <li>Saisissez l'intitulé, le lieu, le contrat et la date limite éventuelle.</li>
+  <li>Rédigez « Le poste » et « Qualifications attendues » au mini-éditeur (G gras, I italique, T titre, puce liste). <span class="btn">Aperçu</span> montre ce que lira le candidat.</li>
+  <li><span class="btn">Rédiger en brouillon</span>. L'offre reste invisible du site.</li>
+  <li><span class="btn">Publier sur le site</span> quand elle est prête. Elle se clôt ensuite.</li>
+  <li>Le bouton du nombre de candidatures ouvre la liste : lisez, téléchargez le CV (PDF), décidez, puis préparez la réponse depuis le texte type de la décision et envoyez-la au candidat.</li>
+</ol>
+<div class="deux">
+<figure><img src="captures/41-rediger-une-offre.png" alt="Rédiger une offre"><figcaption><span class="rep">1</span>Intitulé <span class="rep">2</span>Aperçu <span class="rep">3</span>Rédiger en brouillon</figcaption></figure>
+<figure><img src="captures/41b-offres-du-cabinet.png" alt="Offres du cabinet"><figcaption><span class="rep">1</span>Publier sur le site. Le compteur de candidatures est à côté.</figcaption></figure>
+</div>
+<div class="piege"><p>Une réponse au candidat qui contient encore « [à compléter] » est refusée : complétez le texte type avant l'envoi.</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-documents"><span class="num">17</span>Documents remis à l'adhérent</h2>
+<p class="chapo">Ce que la console produit et que le client retrouve dans son espace ou reçoit par courriel. Aucun de ces documents ne se refait à la main.</p>
+<table>
+  <tr><th>Document</th><th>Produit par</th><th>Comment il arrive au client</th></tr>
+  <tr><td>Proforma numérotée (PDF)</td><td>Émission de la proforma (chapitre 5)</td><td>Courriel avec le lien d'acceptation et le PDF ; retrouvée ensuite dans son espace, sans dépendre du lien du courriel.</td></tr>
+  <tr><td>Reçu de règlement</td><td>Encaissement en caisse ou paiement Tara</td><td>Dans son espace et par courriel.</td></tr>
+  <tr><td>Avis par courriel</td><td>Chaque geste du cabinet : honoraires réglés, quittance vérifiée ou refusée (avec le motif)</td><td>Courriel et notification dans l'espace.</td></tr>
+  <tr><td>Lien de suivi de création</td><td>Ouverture du dossier de création</td><td>Courriel d'ouverture ; à redonner depuis le dossier (chapitre 5).</td></tr>
+  <tr><td>Documents du dossier de création</td><td>Pièces versées par la juriste (statuts, attestations…)</td><td>Dans l'espace de la cliente, en aperçu ou en téléchargement, avec leur provenance.</td></tr>
+  <tr><td>Bulletin de paie (PDF)</td><td>Social et paie, <span class="btn">Imprimer le bulletin (PDF)</span></td><td>Remis par le comptable.</td></tr>
+  <tr><td>Relance de pièces</td><td>Relancer un adhérent (chapitre 6)</td><td>Notification dans l'espace et courriel.</td></tr>
+  <tr><td>Copie de la DSF déposée</td><td>Consignation de l'accusé (chapitre 13)</td><td>Dans « Ma DSF » : « Déposée à la DGI », l'accusé et la copie à télécharger.</td></tr>
+  <tr><td>Livrable de prestation ponctuelle</td><td>Validation de la mission (chapitre 15)</td><td>PDF, et Word pour un contrat rédigé.</td></tr>
+</table>
+<div class="note"><p>L'espace de l'adhérent (site et application mobile) fait l'objet de son propre guide.</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-pilotage"><span class="num">18</span>Pilotage de la direction</h2>
+<p class="chapo">Les dossiers rangés par risque, jamais par nom ; la charge de chaque collaborateur ; un rapport mensuel archivé, exigible en cas de contrôle de l'agrément.</p>
+<div class="fiche"><dt>Qui</dt><dd>Direction seule. Le réviseur voit tous les dossiers mais n'accède pas au pilotage : voir les dossiers n'est pas piloter le cabinet.</dd></div>
+
+<h3 id="s-risque">Les dossiers à risque</h3>
+<figure><img src="captures/36-pilotage-dossiers-a-risque.png" alt="Pilotage"><figcaption>Du plus risqué au moins risqué. Chaque score se décompose : obligations échues, pièces non traitées, demandes sans réponse, anomalies bloquantes, avec leur poids.</figcaption></figure>
+<ol>
+  <li>Ouvrez <span class="menu">Pilotage</span> &gt; <span class="menu">Dossiers à risque</span>. Traitez ce qui est en haut.</li>
+  <li>Cliquez sur un dossier : le détail descend du score jusqu'aux pièces et obligations qui le causent.</li>
+  <li>Dans <strong>Décider</strong>, choisissez une mesure (renforcer le suivi, exiger une régularisation datée, convoquer un rendez-vous de cadrage) et cliquez sur <span class="btn">Décider</span>, avec un motif.</li>
+</ol>
+<figure><img src="captures/37-pilotage-detail.png" alt="Détail du score"><figcaption>Le détail d'un dossier « À traiter » et les mesures proposées.</figcaption></figure>
+<div class="note"><p>Les poids du score ne relèvent d'aucun texte : ce sont des réglages de la direction, portés au référentiel comme politique du cabinet.</p></div>
+
+<h3 id="s-charge">Charge et production</h3>
+<figure><img src="captures/38-charge-et-production.png" alt="Charge et production"><figcaption>Charge pondérée de chaque collaborateur, dossiers sans comptable et réaffectations proposées.</figcaption></figure>
+<p>Au-delà de 90 % un collaborateur est saturé ; la console propose alors de réaffecter un dossier vers un collègue du même rôle, sans dépasser 85 %. Une réaffectation prévient les deux collaborateurs et le chargé de clientèle ; l'adhérent n'est pas notifié. Un dossier « sans comptable » doit être confié depuis <span class="menu">Comptes et habilitations</span> (chapitre 19).</p>
+
+<h3 id="s-rapport-mensuel">Le rapport mensuel</h3>
+<ol>
+  <li><span class="menu">Pilotage</span> &gt; <span class="menu">Rapport mensuel</span>, choisissez le mois.</li>
+  <li><span class="btn">Générer le rapport mensuel</span>. Il reprend les chiffres des écrans à la date du rapport, et s'archive. Une regénération crée une version suivante.</li>
+</ol>
+<figure class="demi"><img src="captures/39-rapport-mensuel.png" alt="Rapport mensuel"><figcaption>La génération et les rapports archivés.</figcaption></figure>
+
+<h3 id="s-derogations">Journal des dérogations et qualité des règles</h3>
+<p><span class="menu">Conformité</span> &gt; <span class="menu">Journal des dérogations</span> liste chaque constat écarté : date, règle, dossier, pièce, motif, pièce d'appui, enjeu levé et statut. <span class="btn">Exporter pour contrôle</span> le remet à un vérificateur. <span class="menu">Qualité des règles</span> mesure, règle par règle, le taux de constats écartés : une règle souvent écartée est mal calibrée et se corrige au référentiel.</p>
+<figure><img src="captures/31-qualite-des-regles.png" alt="Qualité des règles"><figcaption>Statistiques par règle sur une période. Aucune règle n'est jugée sur moins de cinq constats.</figcaption></figure>
+
+<h3 id="s-exploitation">Exploitation de la plateforme</h3>
+<p><span class="menu">Exploitation</span> (direction et administrateur) montre l'état des services, les travaux périodiques (relais, rapprochement des paiements, relances) et la boîte d'envoi. <span class="btn">Faire un tour</span> relance un travail périodique. Un élément en quarantaine (refusé dix fois) n'est jamais supprimé : on corrige la cause, puis on le remet en circulation.</p>
+<figure><img src="captures/53-exploitation.png" alt="Exploitation"><figcaption>Les services et les travaux périodiques.</figcaption></figure>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-admin"><span class="num">19</span>Administration</h2>
+<p class="chapo">Les comptes, les habilitations, la matrice des rôles et le référentiel. Un compte n'est jamais supprimé : son identifiant figure dans les écritures qu'il a validées et dans le journal d'audit.</p>
+
+<h3 id="s-inviter">Inviter un collaborateur</h3>
+<div class="fiche"><dt>Qui</dt><dd>Administrateur (et super administrateur).</dd></div>
+<ol>
+  <li><span class="menu">Comptes et habilitations</span> &gt; <span class="btn">Inviter un collaborateur</span>.</li>
+  <li>Saisissez l'adresse, le prénom, le nom, le téléphone, le <strong>rôle</strong> et la date à partir de laquelle il est habilité.</li>
+  <li>Choisissez le <strong>périmètre</strong> : des dossiers (un NIU par ligne) ou tout le cabinet.</li>
+  <li><span class="btn">Envoyer l'invitation</span>. Le lien d'activation part à l'adresse du collaborateur ; il ne s'affiche pas à l'écran.</li>
+</ol>
+<figure><img src="captures/51d-inviter.png" alt="Inviter"><figcaption>Le formulaire d'invitation.</figcaption></figure>
+<div class="piege"><p>Sans dossier désigné, un comptable n'en voit aucun tant qu'un dossier ne lui est pas confié.</p></div>
+
+<h3 id="s-habilitations">Confier un dossier, fermer un rôle</h3>
+<figure><img src="captures/51c-habilitations.png" alt="Habilitations du jour"><figcaption><span class="rep">1</span>Un rôle, un périmètre, un intervalle <span class="rep">2</span>Fermer ce rôle</figcaption></figure>
+<ul>
+  <li><span class="btn">Confier un dossier</span> : ajoute un dossier au périmètre, à compter d'aujourd'hui. L'historique antérieur n'est pas réécrit.</li>
+  <li><span class="btn">Fermer ce rôle</span> : met fin à l'habilitation (changement de poste, départ).</li>
+  <li>Le bandeau <strong>Dossiers sans comptable</strong> signale ce que personne ne tient.</li>
+</ul>
+
+<h3 id="s-suspendre">Suspendre un compte, fermer ses sessions</h3>
+<figure><img src="captures/51b-liste-des-comptes.png" alt="Comptes"><figcaption><span class="rep">1</span>Suspendre. La colonne « 2ᵉ facteur » indique qui est enrôlé.</figcaption></figure>
+<ul>
+  <li><span class="btn">Suspendre</span> un collaborateur qui part ; <span class="btn">Rétablir</span> un compte suspendu.</li>
+  <li><span class="btn">Fermer ses sessions</span> en cas d'appareil perdu ou de session douteuse : le titulaire se reconnecte, l'intrus non.</li>
+</ul>
+
+<h3 id="s-reinit">Retirer le second facteur d'un collègue</h3>
+<div class="fiche"><dt>Quand</dt><dd>Téléphone perdu ou changé, clé non enregistrée.</dd><dt>Qui</dt><dd>Administrateur, jamais pour son propre compte.</dd></div>
+<ol>
+  <li>Vérifiez la demande auprès du titulaire, par un appel.</li>
+  <li>Dans la liste des comptes, colonne « 2ᵉ facteur », cliquez sur <span class="btn">Réinitialiser</span>.</li>
+  <li>Rédigez le motif (au moins trente caractères : comment la perte a été signalée et vérifiée), cochez la confirmation, puis <span class="btn">Retirer le second facteur</span>.</li>
+  <li>Les sessions du titulaire sont fermées ; il associe un nouvel appareil (chapitre 2).</li>
+</ol>
+<figure><img src="captures/51e-reinitialiser-second-facteur.png" alt="Réinitialiser le second facteur"><figcaption><span class="rep">1</span>Motif <span class="rep">2</span>Retirer le second facteur</figcaption></figure>
+
+<h3 id="s-matrice">La matrice des rôles</h3>
+<div class="fiche"><dt>Qui</dt><dd>Lecture : administrateur. Réglage : super administrateur, sous second facteur, avec un motif.</dd></div>
+<figure><img src="captures/54-matrice-des-roles.png" alt="Matrice des rôles"><figcaption>Chaque rôle, chaque droit, d'un coup d'œil. Cliquez sur l'en-tête d'un rôle pour le régler.</figcaption></figure>
+<ol>
+  <li>Ouvrez <span class="menu">Matrice des rôles</span> et renforcez la session (code du second facteur).</li>
+  <li>Pour modifier un rôle existant : cliquez sur son nom, cochez ou décochez les droits, saisissez le motif, puis <span class="btn">Enregistrer les droits</span>.</li>
+  <li>Pour un poste nouveau : <span class="btn">+ Créer un rôle du cabinet</span>, nommez-le, cochez les droits (par exemple, pour les ressources humaines : « Éditer le site et les offres de poste » et « Traiter les candidatures »), le motif, puis <span class="btn">Créer le rôle</span>.</li>
+  <li>Le rôle s'attribue ensuite depuis <span class="menu">Comptes et habilitations</span>.</li>
+</ol>
+<figure><img src="captures/54b-creer-un-role.png" alt="Créer un rôle"><figcaption><span class="rep">1</span>Nom du rôle <span class="rep">2</span>Créer le rôle. Les gestes réservés au client et à l'administration ne se cochent pas.</figcaption></figure>
+
+<h3 id="s-referentiel">Le référentiel et les règles</h3>
+<div class="fiche"><dt>À quoi ça sert</dt><dd>Toutes les valeurs légales (taux, seuils, délais) et les règles de contrôle, chacune datée, sourcée et signée. Aucune n'est écrite dans le logiciel : une loi de finances se répercute ici.</dd><dt>Qui</dt><dd>Lecture : tous. Proposer et valider : fiscaliste.</dd></div>
+<figure><img src="captures/23-referentiel.png" alt="Référentiel"><figcaption>Le référentiel : chaque paramètre avec sa valeur, sa date d'application et son statut (validé ou à valider).</figcaption></figure>
+<ol>
+  <li><span class="btn">Valider cette version</span> : le fiscaliste confirme une valeur sur le Code général des impôts en vigueur, la loi de finances et la circulaire d'application.</li>
+  <li><span class="btn">Proposer une nouvelle version</span> : nouvelle valeur, date d'effet, fondement et source. L'ancienne valeur reste applicable aux opérations antérieures.</li>
+  <li><strong>Règles construites par le cabinet</strong> : <span class="btn">Construire une règle</span> en conditions, l'éprouver sur les factures (<span class="btn">Éprouver sur les factures</span>), puis la faire valider par une autre personne. Validée, elle contrôle les factures dès le contrôle suivant.</li>
+</ol>
+<div class="deux">
+<figure><img src="captures/56-valider-une-valeur.png" alt="Valider une valeur"><figcaption><span class="rep">1</span>Valider cette version (vue du fiscaliste).</figcaption></figure>
+<figure><img src="captures/56c-construire-une-regle.png" alt="Construire une règle"><figcaption>Le catalogue des règles, la construction d'une règle et l'essai sur une facture.</figcaption></figure>
+</div>
+<div class="partiel"><p>Au 19 octobre 2026, <strong>17 des 67 paramètres</strong> portent le statut « à valider ». L'écran le rappelle : aucun chiffre produit par la plateforme n'est opposable tant qu'un fiscaliste nommé ne les a pas confirmés.</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-faq"><span class="num">20</span>Questions fréquentes</h2>
+<div class="court"><h4>Je ne vois pas un dossier que je suis censé tenir.</h4><p>Le dossier ne vous a pas été confié, ou pas encore à la date du jour. Demandez à l'administrateur de vous le confier (<span class="btn">Confier un dossier</span>).</p></div>
+<div class="court"><h4>Une entrée de menu a disparu ou un écran affiche « Accès réservé ».</h4><p>Votre rôle ne l'ouvre pas. Le message dit quel profil y a droit ; l'habilitation se demande à l'administrateur.</p></div>
+<div class="court"><h4>Je me suis trompé dans une écriture validée.</h4><p>Contre-passez-la avec un motif, puis saisissez l'écriture juste. Il n'existe pas de suppression. Si le mois est déjà transmis, datez la correction dans un mois ouvert.</p></div>
+<div class="court"><h4>La déclaration de TVA reste « fermée jusqu'à transmission ».</h4><p>Le mois n'a pas été transmis au réviseur. Passez par <span class="menu">Clôture mensuelle</span>, puis <span class="btn">Transmettre au réviseur</span>.</p></div>
+<div class="court"><h4>Une facture ne veut pas se comptabiliser.</h4><p>Elle porte une anomalie bloquante. Demandez la facture rectificative (pièces attendues) ou faites écarter le constat par le réviseur, avec un motif.</p></div>
+<div class="court"><h4>Mes codes du second facteur sont refusés.</h4><p>Réglez l'heure du téléphone en automatique. Si l'application a été perdue, l'administrateur retire votre second facteur et vous en associez un nouveau.</p></div>
+<div class="court"><h4>La saisie, la déclaration ou la DSF d'un dossier sont refusées alors que tout est prêt.</h4><p>Le dossier est probablement « Bloqué » pour retard d'honoraires. Le bandeau du portefeuille le dit. Il faut un règlement, ou une grâce accordée par le super administrateur.</p></div>
+<div class="court"><h4>La plateforme envoie-t-elle les déclarations à la DGI ou à la CNPS ?</h4><p>Non. Elle prépare les montants et les fichiers au format attendu ; le dépôt se fait sur les portails officiels, puis se consigne dans la plateforme avec l'accusé.</p></div>
+<div class="court"><h4>Sans la lecture automatique par Claude, puis-je travailler ?</h4><p>Oui. Toutes les tâches se font à la main, dans les mêmes écrans. L'agent, quand il est configuré, ne fait que proposer.</p></div>
+<div class="court"><h4>Un client dit avoir payé par mobile money mais rien n'apparaît.</h4><p>Regardez <strong>Paiements Tara non rattachés</strong> dans la caisse. S'il y figure, retrouvez le règlement et constatez-le sous la référence de l'opérateur. Sinon, demandez au client sa référence de transaction.</p></div>
+<div class="court"><h4>Le lien « Retour au site » ne mène pas au site.</h4><p>Signalez-le à l'administrateur : l'adresse du site est un réglage de la plateforme (voir l'annexe).</p></div>
+
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+<h2 id="c-glossaire"><span class="num">21</span>Glossaire</h2>
+<table>
+  <tr><th style="width:34mm">Terme</th><th>Définition</th></tr>
+  <tr><td>Accusé</td><td>Preuve de dépôt délivrée par la DGI ou la CNPS, à consigner dans la plateforme.</td></tr>
+  <tr><td>Adhérent</td><td>Entreprise suivie par le centre de gestion agréé, et le compte de son dirigeant.</td></tr>
+  <tr><td>Anomalie bloquante</td><td>Constat qui interdit la comptabilisation de la pièce en l'état.</td></tr>
+  <tr><td>Brouillon</td><td>Écriture enregistrée mais non validée. Elle n'entre pas dans la balance.</td></tr>
+  <tr><td>CGA</td><td>Centre de gestion agréé. L'adhésion ouvre droit à un abattement sur le bénéfice déclaré.</td></tr>
+  <tr><td>CNPS</td><td>Caisse nationale de prévoyance sociale. Le groupe de risque (A, B, C) fixe le taux accidents du travail.</td></tr>
+  <tr><td>Constat</td><td>Résultat d'une règle de conformité sur une pièce : bloquant, majeur ou avertissement.</td></tr>
+  <tr><td>Contre-passation</td><td>Écriture inverse qui annule une écriture validée, avec un motif.</td></tr>
+  <tr><td>Dérogation</td><td>Constat écarté par le réviseur, avec motif ; elle se lève, elle ne se supprime pas.</td></tr>
+  <tr><td>DP</td><td>Demande de pièce : ce que le cabinet attend de l'adhérent.</td></tr>
+  <tr><td>DSF</td><td>Déclaration statistique et fiscale annuelle, déposée sur le portail de la DGI.</td></tr>
+  <tr><td>Faveur</td><td>Écart à la règle commune accordé par le super administrateur : grâce de règlement, mandat « le cabinet paie pour moi ».</td></tr>
+  <tr><td>Fonds de tiers</td><td>Sommes confiées par l'adhérent pour payer l'administration (TVA, CNPS) ; jamais des honoraires.</td></tr>
+  <tr><td>Grâce</td><td>Autorisation datée de traiter un dossier en retard d'honoraires.</td></tr>
+  <tr><td>Guichet</td><td>Le comptoir du cabinet où les règlements en espèces ou par chèque sont constatés par la caisse.</td></tr>
+  <tr><td>IGS</td><td>Impôt général synthétique, régime des petites entreprises.</td></tr>
+  <tr><td>IRPP</td><td>Impôt sur le revenu des personnes physiques : retenues sur salaires et acomptes mensuels.</td></tr>
+  <tr><td>Liasse</td><td>Ensemble des états (bilan, compte de résultat, notes) qui forme la DSF.</td></tr>
+  <tr><td>NACAM</td><td>Nomenclature des activités du Cameroun (INS), exigée pour chaque activité dans la DSF.</td></tr>
+  <tr><td>NIU</td><td>Numéro d'identifiant unique du contribuable.</td></tr>
+  <tr><td>Proforma</td><td>Proposition de prix détaillée, numérotée, que le client accepte en ligne.</td></tr>
+  <tr><td>Quittance</td><td>Preuve de paiement d'une obligation à l'administration.</td></tr>
+  <tr><td>RCCM</td><td>Registre du commerce et du crédit mobilier.</td></tr>
+  <tr><td>Référentiel</td><td>Base des valeurs légales et des règles, datées et sourcées.</td></tr>
+  <tr><td>Second facteur</td><td>Code à six chiffres de l'application d'authentification, exigé pour les gestes sensibles.</td></tr>
+  <tr><td>Session renforcée</td><td>Session pendant quinze minutes après la saisie du code du second facteur.</td></tr>
+  <tr><td>Tara</td><td>Opérateur de paiement par mobile money utilisé par le cabinet.</td></tr>
+  <tr><td>TVA</td><td>Taxe sur la valeur ajoutée, 19,25 % centimes additionnels compris.</td></tr>
+</table>
+
+<h3 id="s-limites">Annexe : ce qui reste manuel ou partiel</h3>
+<p>Ce récapitulatif reprend les encadrés jaunes du guide, pour que le personnel sache d'emblée ce qui se fait hors de la plateforme.</p>
+<table>
+  <tr><th style="width:52mm">Sujet</th><th>État au 19 octobre 2026</th></tr>
+  <tr><td>Dépôt TVA, CNPS, DSF</td><td>Manuel sur les portails officiels ; la plateforme prépare et consigne l'accusé, elle ne transmet pas.</td></tr>
+  <tr><td>Référentiel</td><td>17 paramètres sur 67 à valider par le fiscaliste ; paie et rapports signalent les lignes concernées.</td></tr>
+  <tr><td>Lecture automatique par Claude</td><td>Optionnelle ; sans clé d'API, saisie et analyse à la main.</td></tr>
+  <tr><td>WhatsApp</td><td>Envoi automatique inactif (compte de la plateforme d'envoi non ouvert) ; bouton d'ouverture manuelle seulement.</td></tr>
+  <tr><td>Paiement Tara</td><td>Simulé sur la pile de démonstration (pas d'identifiants marchands réels).</td></tr>
+  <tr><td>Quittances</td><td>Comparaison automatique du montant non faite : vérification humaine.</td></tr>
+  <tr><td>Balances auxiliaires</td><td>Pas encore au modèle de la DGI.</td></tr>
+  <tr><td>Export Sage 100</td><td>Profil non confronté à une installation réelle.</td></tr>
+  <tr><td>Tarifs</td><td>Six prix restent à fixer par la direction ; non payables en ligne d'ici là.</td></tr>
+  <tr><td>Score de charge (proforma)</td><td>Déclaré par le responsable, pas mesuré.</td></tr>
+  <tr><td>Lien « Retour au site »</td><td>Sur la pile de démonstration, il pointe une adresse de site qui ne répond pas (réglage de l'adresse du site à corriger par l'exploitant).</td></tr>
+</table>
+
+</body>
+</html>

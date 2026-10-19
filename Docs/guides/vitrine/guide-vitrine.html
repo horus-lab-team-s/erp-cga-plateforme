@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide du site et de l'espace adhérent</title>
+<style>
+  @font-face { font-family: "Poppins"; font-weight: 500; src: url("polices/Poppins-Medium.ttf"); }
+  @font-face { font-family: "Poppins"; font-weight: 600; src: url("polices/Poppins-SemiBold.ttf"); }
+  @font-face { font-family: "Poppins"; font-weight: 700; src: url("polices/Poppins-Bold.ttf"); }
+  @font-face { font-family: "Inter"; font-weight: 400; src: url("polices/Inter-Regular.ttf"); }
+  @font-face { font-family: "Inter"; font-weight: 500; src: url("polices/Inter-Medium.ttf"); }
+  @font-face { font-family: "Inter"; font-weight: 600; src: url("polices/Inter-SemiBold.ttf"); }
+  @font-face { font-family: "Inter"; font-weight: 700; src: url("polices/Inter-Bold.ttf"); }
+
+  :root {
+    --indigo: #2E1B4D;
+    --magenta: #8C2D86;
+    --fond: #F4F2F9;
+    --texte: #24202e;
+    --doux: #5d5770;
+    --trait: #ddd8ea;
+    --vert: #1f7a4d;
+    --ambre: #9a5b00;
+  }
+  @page {
+    size: A4;
+    margin: 18mm 17mm 20mm 17mm;
+    @bottom-left { content: "CGA Broad Range Consulting Group · Guide du site et de l'espace adhérent · v1.0"; font: 400 7.5pt "Inter", sans-serif; color: #8a849a; }
+    @bottom-right { content: "Page " counter(page) " sur " counter(pages); font: 600 7.5pt "Inter", sans-serif; color: #2E1B4D; }
+  }
+  @page couverture { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; background: #fff; color: var(--texte); font: 400 10pt/1.5 "Inter", sans-serif; }
+  h1, h2, h3, h4 { font-family: "Poppins", sans-serif; color: var(--indigo); line-height: 1.25; }
+  h1 { font-size: 21pt; font-weight: 700; margin: 0 0 4mm; }
+  h2 { font-size: 15pt; font-weight: 600; margin: 8mm 0 3mm; break-after: avoid; }
+  h3 { font-size: 11pt; font-weight: 600; margin: 5mm 0 1.5mm; break-after: avoid; }
+  p { margin: 0 0 2.4mm; }
+  a { color: var(--magenta); text-decoration: none; }
+  strong { font-weight: 600; }
+  ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+  li { margin-bottom: 1.2mm; }
+
+  /* Couverture */
+  .couverture { page: couverture; height: 297mm; position: relative; background: var(--indigo); color: #fff; overflow: hidden; }
+  .couverture__bande { position: absolute; left: 0; right: 0; top: 0; height: 120mm; background: var(--fond); }
+  .couverture__logo { position: absolute; top: 30mm; left: 22mm; width: 64mm; background: #fff; padding: 4mm 6mm; border-radius: 4mm; box-shadow: 0 2mm 6mm rgba(46,27,77,.12); }
+  .couverture__arc { position: absolute; right: -75mm; top: 55mm; width: 150mm; height: 150mm; border-radius: 50%; background: var(--magenta); opacity: .9; }
+  .couverture__arc2 { position: absolute; right: 12mm; top: 205mm; width: 70mm; height: 70mm; border-radius: 50%; border: 3mm solid rgba(255,255,255,.18); }
+  .couverture__texte { position: absolute; left: 22mm; right: 22mm; top: 140mm; }
+  .couverture__sur { font: 600 10pt "Inter"; letter-spacing: .14em; text-transform: uppercase; color: #e7c6e4; margin-bottom: 5mm; }
+  .couverture h1 { color: #fff; font-size: 34pt; margin: 0 0 3mm; }
+  .couverture__titre2 { font: 600 20pt "Poppins"; color: #fff; margin-bottom: 10mm; }
+  .couverture__sous { font: 400 11pt/1.55 "Inter"; color: #e9e4f4; max-width: 120mm; }
+  .couverture__pied { position: absolute; left: 22mm; right: 22mm; bottom: 20mm; display: flex; justify-content: space-between; font: 500 9.5pt "Inter"; color: #d9d2ea; border-top: 1px solid rgba(255,255,255,.25); padding-top: 5mm; }
+  .couverture__pied b { color: #fff; font-weight: 600; }
+
+  .saut { break-before: page; }
+
+  /* Sommaire */
+  .sommaire h1 { margin-bottom: 6mm; }
+  .sommaire ol { list-style: none; padding: 0; margin: 0; }
+  .sommaire li { display: flex; align-items: baseline; gap: 2mm; margin: 0; padding: 1.3mm 0; border-bottom: 1px dotted var(--trait); font-size: 10pt; }
+  .sommaire li.partie { border-bottom: none; padding-top: 4mm; font: 600 11pt "Poppins"; color: var(--magenta); }
+  .sommaire li .num { width: 9mm; color: var(--magenta); font-weight: 600; }
+  .sommaire li .lib { flex: 1; }
+  .sommaire li .page { font-weight: 600; color: var(--indigo); min-width: 8mm; text-align: right; }
+
+  /* Ouvertures de partie */
+  .partie-ouverture { break-before: page; background: var(--fond); border-left: 3mm solid var(--magenta); padding: 14mm 12mm; margin-top: 30mm; border-radius: 0 4mm 4mm 0; }
+  .partie-ouverture .sur { font: 600 9pt "Inter"; letter-spacing: .14em; text-transform: uppercase; color: var(--magenta); }
+  .partie-ouverture h1 { font-size: 26pt; margin: 2mm 0 5mm; }
+  .partie-ouverture p { font-size: 11pt; color: var(--doux); }
+
+  /* Chapitres */
+  .chapitre { break-before: page; }
+  .chapitre__tete { display: flex; align-items: center; gap: 4mm; margin-bottom: 4mm; padding-bottom: 3mm; border-bottom: 2px solid var(--fond); }
+  .chapitre__num { flex: 0 0 auto; width: 11mm; height: 11mm; border-radius: 3mm; background: var(--indigo); color: #fff; font: 700 13pt "Poppins"; display: flex; align-items: center; justify-content: center; }
+  .chapitre__tete h1 { font-size: 17pt; margin: 0; }
+  .suite { break-before: auto; }
+
+  .sert { background: var(--fond); border-radius: 3mm; padding: 3.2mm 4.5mm; margin: 0 0 4mm; }
+  .sert b { display: block; font: 600 8.5pt "Inter"; letter-spacing: .1em; text-transform: uppercase; color: var(--magenta); margin-bottom: 1mm; }
+  .sert p:last-child { margin-bottom: 0; }
+
+  ol.etapes { counter-reset: e; list-style: none; padding-left: 0; }
+  ol.etapes > li { counter-increment: e; position: relative; padding-left: 9mm; margin-bottom: 2mm; }
+  ol.etapes > li::before { content: counter(e); position: absolute; left: 0; top: .2mm; width: 6mm; height: 6mm; border-radius: 50%; background: var(--magenta); color: #fff; font: 700 8.5pt/6mm "Inter"; text-align: center; }
+
+  .ensuite { border: 1px solid var(--trait); border-left: 1.5mm solid var(--indigo); border-radius: 2mm; padding: 3mm 4.5mm; margin: 3mm 0 4mm; break-inside: avoid; }
+  .ensuite b { color: var(--indigo); }
+  .note { border-left: 1.5mm solid var(--ambre); background: #fff7e8; border-radius: 2mm; padding: 3mm 4.5mm; margin: 3mm 0 4mm; break-inside: avoid; }
+  .note b { color: var(--ambre); }
+
+  figure { margin: 3mm 0 5mm; break-inside: avoid; text-align: center; }
+  figure img { display: block; margin: 0 auto; border: 1px solid var(--trait); border-radius: 2mm; box-shadow: 0 1mm 3mm rgba(46,27,77,.10); max-width: 100%; }
+  figure.ecran img { width: auto; max-width: 100%; max-height: 128mm; }
+  figure.moyen img { width: auto; max-width: 82%; max-height: 120mm; }
+  figure.colonne img { width: auto; max-width: 105mm; max-height: 135mm; }
+  figure.etroit img { width: 120mm; }
+  figure.tel img { width: auto; max-width: 58mm; max-height: 125mm; }
+  figcaption { font: 400 8.5pt/1.4 "Inter"; color: var(--doux); margin-top: 2mm; }
+  figcaption b { color: var(--indigo); font-weight: 600; }
+  .duo { display: flex; justify-content: center; gap: 8mm; align-items: flex-start; }
+  .duo figure { margin: 3mm 0 5mm; }
+  .duo figure img { width: auto; max-width: 58mm; max-height: 125mm; }
+  .duo.colonnes figure img { width: auto; max-width: 78mm; max-height: 120mm; }
+  .duo.colonnes figure { flex: 0 0 80mm; }
+
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 5mm; font-size: 9.3pt; }
+  th { text-align: left; font: 600 8.5pt "Inter"; text-transform: uppercase; letter-spacing: .06em; color: var(--magenta); border-bottom: 2px solid var(--fond); padding: 2mm 2.5mm; }
+  td { border-bottom: 1px solid var(--trait); padding: 2.2mm 2.5mm; vertical-align: top; }
+  tr { break-inside: avoid; }
+  td:first-child { font-weight: 600; color: var(--indigo); width: 36%; }
+
+  .faq h3 { margin-top: 4mm; }
+  .faq p { color: var(--texte); }
+  .contacts { display: flex; gap: 5mm; flex-wrap: wrap; margin: 3mm 0 5mm; }
+  .contact { flex: 1 1 45%; border: 1px solid var(--trait); border-radius: 3mm; padding: 4mm 5mm; break-inside: avoid; }
+  .contact b { display: block; font: 600 8.5pt "Inter"; text-transform: uppercase; letter-spacing: .1em; color: var(--magenta); margin-bottom: 1mm; }
+  .contact span { font: 600 12pt "Poppins"; color: var(--indigo); }
+  .contact p { font-size: 9pt; color: var(--doux); margin: 1mm 0 0; }
+  dl.glossaire { margin: 0; }
+  dl.glossaire div { display: flex; gap: 4mm; padding: 2mm 0; border-bottom: 1px solid var(--trait); break-inside: avoid; }
+  dl.glossaire dt { flex: 0 0 40mm; font-weight: 600; color: var(--indigo); }
+  dl.glossaire dd { margin: 0; flex: 1; }
+  .chips { display: flex; flex-wrap: wrap; gap: 2mm; margin: 2mm 0 4mm; }
+  .chip { background: var(--fond); color: var(--indigo); border-radius: 10mm; padding: 1mm 3.5mm; font: 600 8.5pt "Inter"; }
+</style>
+</head>
+<body>
+
+<!-- ═════════════════════════ COUVERTURE ═════════════════════════ -->
+<section class="couverture">
+  <div class="couverture__bande"></div>
+  <img class="couverture__logo" src="cga-logo-couleur.jpg" alt="CGA Broad Range Consulting Group">
+  <div class="couverture__arc"></div>
+  <div class="couverture__arc2"></div>
+  <div class="couverture__texte">
+    <div class="couverture__sur">Guide d'utilisation</div>
+    <h1>Site et espace adhérent</h1>
+    <div class="couverture__titre2">Créer, adhérer, suivre son dossier en ligne</div>
+    <div class="couverture__sous">Pour les porteurs de projet, les commerçants et les PME accompagnés par le centre de gestion agréé : découvrir les offres, demander une création d'entreprise, régler, puis suivre ses pièces, ses échéances et ses honoraires depuis son espace.</div>
+  </div>
+  <div class="couverture__pied">
+    <span><b>CGA Broad Range Consulting Group</b> · Douala, Cameroun</span>
+    <span>Version 1.0 · 19 octobre 2026</span>
+  </div>
+</section>
+
+<!-- ═════════════════════════ SOMMAIRE ═════════════════════════ -->
+<section class="sommaire saut">
+  <h1>Sommaire</h1>
+  <ol>
+    <li><span class="num"></span><span class="lib"><a href="#avant">Avant de commencer</a></span><span class="page" data-cible="avant"></span></li>
+    <li class="partie">Partie 1 · Le site public</li>
+    <li><span class="num">1</span><span class="lib"><a href="#c1">Découvrir le site</a></span><span class="page" data-cible="c1"></span></li>
+    <li><span class="num">2</span><span class="lib"><a href="#c2">Les offres et les tarifs</a></span><span class="page" data-cible="c2"></span></li>
+    <li><span class="num">3</span><span class="lib"><a href="#c3">Estimer le coût de sa création</a></span><span class="page" data-cible="c3"></span></li>
+    <li><span class="num">4</span><span class="lib"><a href="#c4">Demander la création de son entreprise</a></span><span class="page" data-cible="c4"></span></li>
+    <li><span class="num">5</span><span class="lib"><a href="#c5">Accepter sa proposition et la régler</a></span><span class="page" data-cible="c5"></span></li>
+    <li><span class="num">6</span><span class="lib"><a href="#c6">Suivre sa création par son lien personnel</a></span><span class="page" data-cible="c6"></span></li>
+    <li><span class="num">7</span><span class="lib"><a href="#c7">Souscrire une offre en ligne</a></span><span class="page" data-cible="c7"></span></li>
+    <li><span class="num">8</span><span class="lib"><a href="#c8">Le blog et les formations</a></span><span class="page" data-cible="c8"></span></li>
+    <li><span class="num">9</span><span class="lib"><a href="#c9">Contacter le cabinet</a></span><span class="page" data-cible="c9"></span></li>
+    <li class="partie">Partie 2 · L'espace client</li>
+    <li><span class="num">10</span><span class="lib"><a href="#c10">Choisir son mot de passe et se connecter</a></span><span class="page" data-cible="c10"></span></li>
+    <li><span class="num">11</span><span class="lib"><a href="#c11">Ma création : suivre et envoyer ses pièces</a></span><span class="page" data-cible="c11"></span></li>
+    <li><span class="num">12</span><span class="lib"><a href="#c12">L'accueil de l'espace adhérent</a></span><span class="page" data-cible="c12"></span></li>
+    <li><span class="num">13</span><span class="lib"><a href="#c13">Répondre aux demandes du cabinet</a></span><span class="page" data-cible="c13"></span></li>
+    <li><span class="num">14</span><span class="lib"><a href="#c14">Envoyer et retrouver ses justificatifs</a></span><span class="page" data-cible="c14"></span></li>
+    <li><span class="num">15</span><span class="lib"><a href="#c15">Ses échéances, TVA et CNPS : quittance ou paiement par le cabinet</a></span><span class="page" data-cible="c15"></span></li>
+    <li><span class="num">16</span><span class="lib"><a href="#c16">Régler ses honoraires</a></span><span class="page" data-cible="c16"></span></li>
+    <li><span class="num">17</span><span class="lib"><a href="#c17">Les documents remis par le cabinet</a></span><span class="page" data-cible="c17"></span></li>
+    <li><span class="num">18</span><span class="lib"><a href="#c18">Sa déclaration annuelle (DSF)</a></span><span class="page" data-cible="c18"></span></li>
+    <li><span class="num">19</span><span class="lib"><a href="#c19">Sa paie</a></span><span class="page" data-cible="c19"></span></li>
+    <li><span class="num">20</span><span class="lib"><a href="#c20">Son entreprise et ses réglages</a></span><span class="page" data-cible="c20"></span></li>
+    <li class="partie">Pour aller plus loin</li>
+    <li><span class="num"></span><span class="lib"><a href="#faq">Questions fréquentes</a></span><span class="page" data-cible="faq"></span></li>
+    <li><span class="num"></span><span class="lib"><a href="#contacts">Nous joindre</a></span><span class="page" data-cible="contacts"></span></li>
+    <li><span class="num"></span><span class="lib"><a href="#glossaire">Petit glossaire</a></span><span class="page" data-cible="glossaire"></span></li>
+  </ol>
+</section>
+
+<!-- ═════════════════════════ AVANT DE COMMENCER ═════════════════════════ -->
+<section class="chapitre" id="avant">
+  <div class="chapitre__tete"><h1>Avant de commencer</h1></div>
+  <p>Bienvenue. Ce guide vous accompagne pas à pas sur les deux portes d'entrée en ligne du cabinet CGA Broad Range Consulting Group, centre de gestion agréé installé à Douala.</p>
+
+  <h2>Deux portes, un seul cabinet</h2>
+  <table>
+    <tr><th>La porte</th><th>Pour qui, et pour quoi faire</th></tr>
+    <tr><td>Le site public</td><td>Ouvert à tous, sans compte. Vous y découvrez les services et les prix, vous estimez le coût d'une création, vous déposez une demande, vous acceptez et réglez une proposition, vous suivez votre dossier par un lien personnel, et vous contactez le cabinet.</td></tr>
+    <tr><td>L'espace client</td><td>Réservé aux clients, avec une adresse électronique et un mot de passe. On y entre par le bouton <strong>Espace client</strong> en haut du site. Selon votre situation, il s'ouvre sur <strong>Ma création</strong> (société en cours de création) ou sur l'<strong>espace adhérent</strong> (entreprise suivie par le cabinet).</td></tr>
+  </table>
+
+  <h2>Ce dont vous avez besoin</h2>
+  <ul>
+    <li>Un téléphone ou un ordinateur avec un navigateur récent (Chrome, Firefox, Safari, Edge). Le site et l'espace client s'adaptent à l'écran d'un téléphone : les captures marquées « téléphone » le montrent.</li>
+    <li>Un numéro de téléphone où le cabinet peut vous joindre, idéalement avec WhatsApp.</li>
+    <li>Une adresse électronique : c'est là que vous recevez votre proposition, votre lien de suivi et le lien pour choisir votre mot de passe.</li>
+    <li>Pour régler en ligne : un compte mobile money. Vous pouvez toujours régler au guichet du cabinet à la place.</li>
+  </ul>
+
+  <h2>Comment lire ce guide</h2>
+  <p>Chaque chapitre suit le même plan :</p>
+  <div class="chips"><span class="chip">À quoi ça sert</span><span class="chip">Les étapes, numérotées</span><span class="chip">Une capture de l'écran réel</span><span class="chip">Et ensuite ?</span></div>
+  <p>Les captures ont été prises sur la plateforme de démonstration du cabinet, le 19 octobre 2026. Les noms (par exemple « EXEMPLE Awa », « EXEMPLE BOUTIQUE SARL » ou « SARL BATIMENT PLUS ») et les montants sont fictifs. Sur votre écran, vous verrez vos propres informations.</p>
+  <div class="note"><b>Votre sécurité.</b> Le cabinet ne vous demandera jamais votre mot de passe, ni par téléphone, ni par WhatsApp, ni par courriel. Un lien d'accès ne vous parvient qu'à l'adresse que le cabinet connaît.</div>
+</section>
+
+<!-- ═════════════════════════ PARTIE 1 ═════════════════════════ -->
+<section class="partie-ouverture">
+  <div class="sur">Partie 1</div>
+  <h1>Le site public</h1>
+  <p>Tout ce que vous pouvez faire sans compte : vous informer, estimer, demander, accepter, régler et suivre. La plupart des démarches tiennent en quelques minutes, depuis votre téléphone.</p>
+</section>
+
+<section class="chapitre" id="c1">
+  <div class="chapitre__tete"><div class="chapitre__num">1</div><h1>Découvrir le site</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>La page d'accueil résume ce que fait le cabinet : création d'entreprise, tenue des comptes et des déclarations, paie, prestations ponctuelles, domiciliation, formations. Elle vous permet aussi de demander à être rappelé en deux champs.</p></div>
+  <ol class="etapes">
+    <li>Ouvrez le site du cabinet. En haut, le bandeau donne les numéros de téléphone, l'adresse <strong>contact@cga-brcgroup.com</strong> et l'agrément du ministère des Finances.</li>
+    <li>Le menu donne accès à <strong>Nos services</strong>, <strong>Devenir adhérent</strong>, <strong>Formations</strong>, <strong>Le CGA</strong>, <strong>Blog</strong>, <strong>Estimation</strong> et <strong>Contactez-nous</strong>. Le sélecteur <strong>FR / EN</strong> change la langue ; le bouton en forme de lune passe en affichage sombre.</li>
+    <li>Pour être rappelé tout de suite, utilisez l'encadré <strong>Lancer une démarche</strong> : choisissez votre démarche, indiquez votre nom et votre téléphone (ou WhatsApp), puis cliquez sur <strong>Être rappelé</strong>.</li>
+  </ol>
+  <figure class="ecran"><img src="captures/p01-accueil.png" alt=""><figcaption><b>L'accueil.</b> Le menu en haut, l'encadré « Lancer une démarche » à droite, les repères du cabinet en bas.</figcaption></figure>
+  <p>En descendant, vous trouvez les services avec leur prix de départ (« dès 165 000 FCFA » pour une création, « dès 12 500 FCFA par mois » pour l'adhésion et le suivi comptable, etc.), ce que l'adhésion à un centre agréé change pour vous, et les trois étapes d'une démarche.</p>
+  <figure class="ecran"><img src="captures/p02-services.png" alt=""><figcaption><b>Les services.</b> Chaque carte donne un prix de départ et un bouton (Estimer, Adhérer, Demander un devis...).</figcaption></figure>
+  <figure class="ecran"><img src="captures/p03-trois-etapes.png" alt=""><figcaption><b>Comment ça se passe.</b> Vous remplissez le formulaire, un expert prend votre démarche en charge, vous suivez l'avancement en ligne.</figcaption></figure>
+  <h3>Sur téléphone</h3>
+  <p>Sur un téléphone, le menu se replie derrière le bouton à trois traits, en haut à droite. Touchez-le pour l'ouvrir ; le bouton <strong>Espace client</strong> et le numéro du standard sont en bas du menu.</p>
+  <div class="duo">
+    <figure><img src="captures/m01-accueil.png" alt=""><figcaption><b>Téléphone.</b> L'accueil.</figcaption></figure>
+    <figure><img src="captures/m02-menu.png" alt=""><figcaption><b>Téléphone.</b> Le menu ouvert.</figcaption></figure>
+  </div>
+  <div class="ensuite"><b>Et ensuite ?</b> Si vous avez demandé à être rappelé, un responsable du cabinet vous appelle au numéro indiqué. Vous pouvez aussi écrire directement sur WhatsApp au 699 902 184.</div>
+</section>
+
+<section class="chapitre" id="c2">
+  <div class="chapitre__tete"><div class="chapitre__num">2</div><h1>Les offres et les tarifs</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Comparer les formules avant d'appeler. Les prix sont affichés sur le site : vous savez à quoi vous attendre.</p></div>
+  <h3>Créer son entreprise</h3>
+  <p>Menu <strong>Nos services</strong>, puis <strong>Créer mon entreprise</strong> (ou l'un des liens « Créer une SARL », « Créer une SAS »... en bas de page). La page présente la prestation (statuts, enregistrement, RCCM, NIU, publication, dépôt au guichet unique), la liste des pièces à prévoir, deux exemples de proformas à télécharger en PDF et les questions fréquentes.</p>
+  <figure class="ecran"><img src="captures/p04-creer-entete.png" alt=""><figcaption><b>Créer mon entreprise.</b> Les boutons « Estimer mon projet » et « Être rappelé » sont en tête de page.</figcaption></figure>
+  <figure class="ecran"><img src="captures/p05-pieces-a-fournir.png" alt=""><figcaption><b>Les pièces du dossier.</b> Inutile de les préparer avant de souscrire : vous les photographierez depuis votre téléphone une fois votre dossier ouvert (chapitre 11).</figcaption></figure>
+  <h3>Devenir adhérent</h3>
+  <p>Menu <strong>Devenir adhérent</strong>. La page explique les avantages de l'adhésion à un centre de gestion agréé (abattement de 50 % sur le bénéfice déclaré, exonération de patente deux ans, contrôle de vos pièces avant dépôt), puis présente les formules :</p>
+  <table>
+    <tr><th>Formule</th><th>Pour qui</th><th>Prix affiché</th></tr>
+    <tr><td>Impôt libératoire</td><td>Chiffre d'affaires jusqu'à 50 millions FCFA</td><td>12 500 FCFA par mois</td></tr>
+    <tr><td>Réel simplifié (« le plus choisi »)</td><td>Chiffre d'affaires de 50 à 100 millions FCFA</td><td>35 000 FCFA par mois</td></tr>
+    <tr><td>Régime du réel</td><td>Au-delà de 100 millions FCFA, hors régime du centre agréé</td><td>Sur devis, selon le volume de pièces</td></tr>
+  </table>
+  <figure class="ecran"><img src="captures/p07-formules.png" alt=""><figcaption><b>Les formules d'adhésion.</b> Chaque carte dit ce qu'elle comprend ; le bouton « Demander mon bulletin d'adhésion » ouvre le formulaire de demande.</figcaption></figure>
+  <div class="ensuite"><b>Et ensuite ?</b> Pour une création, passez à l'estimation (chapitre 3) ou déposez directement votre demande (chapitre 4). Pour une adhésion, demandez votre bulletin ou souscrivez en ligne (chapitre 7).</div>
+</section>
+
+<section class="chapitre" id="c3">
+  <div class="chapitre__tete"><div class="chapitre__num">3</div><h1>Estimer le coût de sa création</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>L'estimateur calcule en direct ce que coûtera votre création, en séparant les frais officiels (avancés par le cabinet) de ses honoraires. Rien n'est enregistré : vous pouvez essayer autant que vous voulez.</p></div>
+  <ol class="etapes">
+    <li>Cliquez sur <strong>Estimation</strong> dans le menu (ou « Estimer ma création » sur l'accueil).</li>
+    <li>Choisissez la <strong>forme juridique</strong> (Établissement, SARL unipersonnelle, SARL, SAS, SCI, Société anonyme).</li>
+    <li>Indiquez le <strong>capital social</strong> (minimum légal 100 000 FCFA), le <strong>nombre d'associés</strong> et la <strong>ville d'immatriculation</strong>.</li>
+    <li>Cochez si vous le souhaitez les options « Suivi comptable et fiscal, 12 mois » et « Domiciliation commerciale, 12 mois ».</li>
+    <li>Le cadre <strong>Votre estimation</strong> se met à jour à chaque changement : frais officiels, honoraires, total à régler et délai annoncé.</li>
+    <li>Choisissez ensuite : <strong>Souscrire en ligne</strong>, <strong>Télécharger le devis (PDF)</strong> ou <strong>Recevoir ce devis par WhatsApp</strong>.</li>
+  </ol>
+  <figure class="ecran"><img src="captures/p08-estimation.png" alt=""><figcaption><b>L'estimateur.</b> Les questions à gauche, le détail et le total à droite.</figcaption></figure>
+  <figure class="moyen"><img src="captures/p09-devis-estimatif.png" alt=""><figcaption><b>Le devis estimatif.</b> Le bouton « Imprimer ou enregistrer en PDF » le garde sur votre téléphone ou votre ordinateur.</figcaption></figure>
+  <div class="note"><b>Bon à savoir.</b> Il s'agit d'une estimation fondée sur les tarifs officiels en vigueur, pas d'une facture. Le devis définitif vous est confirmé après examen de votre projet, sans frais de dossier.</div>
+  <figure class="tel"><img src="captures/m03-estimation.png" alt=""><figcaption><b>Téléphone.</b> L'estimateur se remplit aussi au doigt.</figcaption></figure>
+</section>
+
+<section class="chapitre" id="c4">
+  <div class="chapitre__tete"><div class="chapitre__num">4</div><h1>Demander la création de son entreprise</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Confier votre projet au cabinet. Il vous suffit de votre nom et de votre téléphone ; tout le reste est facultatif. Ce que vous ajoutez ne vous sera pas redemandé au téléphone : votre dossier s'ouvre déjà rempli.</p></div>
+  <ol class="etapes">
+    <li>Sur la page <strong>Créer mon entreprise</strong>, descendez jusqu'au formulaire <strong>Demander ce service</strong>. Le service est déjà rempli.</li>
+    <li>Indiquez votre <strong>nom et prénom</strong> et votre <strong>téléphone</strong>. L'adresse électronique est facultative, mais recommandée : c'est là que vous recevrez votre proposition et votre lien de suivi.</li>
+    <li>Si vous le souhaitez, répondez aux questions de <strong>Votre projet, en quelques réponses</strong> : forme de société, nom souhaité, nombre d'associés, capital envisagé, apports en nature, chiffre d'affaires visé, salariés prévus, région et adresse du siège, activité, statuts déjà rédigés, pièces déjà réunies. Si vous hésitez, laissez vide.</li>
+    <li>Cochez <strong>J'accepte que le cabinet utilise ces informations pour traiter ma demande</strong>. La case WhatsApp est facultative.</li>
+    <li>Cliquez sur <strong>Envoyer ma demande</strong> (ou sur <strong>Envoyer sur WhatsApp</strong> si vous préférez ce canal).</li>
+  </ol>
+  <div class="duo colonnes">
+    <figure><img src="captures/c01-demande-coordonnees.png" alt=""><figcaption><b>Vos coordonnées.</b> Seuls le nom et le téléphone sont obligatoires.</figcaption></figure>
+    <figure><img src="captures/c02-demande-projet.png" alt=""><figcaption><b>Votre projet.</b> Douze questions, toutes facultatives.</figcaption></figure>
+  </div>
+  <figure class="etroit"><img src="captures/c03-demande-envoi.png" alt=""><figcaption><b>Le consentement et l'envoi.</b></figcaption></figure>
+  <figure class="etroit"><img src="captures/c04-demande-confirmee.png" alt=""><figcaption><b>La confirmation.</b> « Votre demande est enregistrée : un responsable du cabinet vous rappelle au numéro indiqué. »</figcaption></figure>
+  <div class="note"><b>Pourquoi votre messagerie s'ouvre-t-elle ?</b> En même temps que la demande est enregistrée, le site prépare un courriel avec votre demande et ouvre votre messagerie. C'est une copie de sécurité : vous pouvez l'envoyer, mais votre demande est déjà arrivée au cabinet dès que le message « Votre demande est enregistrée » s'affiche.</div>
+  <div class="ensuite"><b>Et ensuite ?</b> Vous recevez un accusé de réception par courriel. La demande est confiée automatiquement à un responsable du cabinet, qui vous appelle sous 48 heures ouvrées pour faire le point. Il vous envoie ensuite votre <strong>proposition</strong> chiffrée par courriel (chapitre 5).</div>
+  <figure class="tel"><img src="captures/m04-demande.png" alt=""><figcaption><b>Téléphone.</b> Le même formulaire, sur un écran de 390 points.</figcaption></figure>
+</section>
+
+<section class="chapitre" id="c5">
+  <div class="chapitre__tete"><div class="chapitre__num">5</div><h1>Accepter sa proposition et la régler</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Après votre échange avec le cabinet, vous recevez par courriel un lien vers votre proposition (proforma). Vous y lisez le prix ligne par ligne, vous donnez votre accord, puis vous réglez : par mobile money ou au guichet du cabinet.</p></div>
+  <ol class="etapes">
+    <li>Ouvrez le lien reçu par courriel (objet « Votre proposition... »). Aucun compte n'est nécessaire. Le lien a une date de validité, indiquée en haut de la page.</li>
+    <li>Lisez <strong>Ce qui compose le prix</strong> : les rubriques (procédure au CFCE, aux impôts, à la CNPS, suivi, DSF...) avec leurs sous-totaux. Le bouton <strong>Lire la proforma détaillée</strong> ouvre le document complet.</li>
+    <li>Pour accepter, saisissez <strong>votre nom et votre qualité</strong> (par exemple « EXEMPLE Awa, gérante »), cochez <strong>J'accepte cette proposition au montant indiqué</strong>, puis cliquez sur <strong>J'accepte la proposition</strong>.</li>
+    <li>La page affiche alors comment régler :
+      <ul>
+        <li><strong>Par mobile money</strong> : le bouton « Payer ... FCFA par mobile money » envoie une demande de paiement sur votre téléphone ; vous la validez avec votre code secret. La page se met à jour toute seule.</li>
+        <li><strong>Au cabinet</strong>, en espèces ou par virement : les coordonnées figurent sur la proforma détaillée. La responsable de caisse constate votre règlement et la page se met à jour.</li>
+      </ul>
+    </li>
+  </ol>
+  <figure class="ecran"><img src="captures/c05-proposition.png" alt=""><figcaption><b>La proposition.</b> Le montant, sa validité, puis le détail par rubrique.</figcaption></figure>
+  <div class="duo colonnes">
+    <figure><img src="captures/c07-accord.png" alt=""><figcaption><b>Votre accord.</b> Votre nom, votre qualité, la case à cocher.</figcaption></figure>
+    <figure><img src="captures/c08-regler-proposition.png" alt=""><figcaption><b>Régler.</b> Mobile money, ou au cabinet.</figcaption></figure>
+  </div>
+  <figure class="etroit"><img src="captures/c08b-proposition-reglee.png" alt=""><figcaption><b>Règlement constaté.</b> « Votre règlement de 505 000 FCFA est enregistré, et votre dossier est ouvert. »</figcaption></figure>
+  <div class="note"><b>Démonstration.</b> Sur la plateforme de démonstration, le paiement mobile money n'est pas encore relié à un compte marchand : aucun débit réel n'est demandé. Le règlement de la capture a été constaté au guichet.</div>
+  <div class="ensuite"><b>Et ensuite ?</b> Dès que le règlement est constaté, sans autre démarche de votre part : votre dossier de création s'ouvre, vous recevez un courriel avec votre <strong>lien de suivi personnel</strong> (chapitre 6) et un bouton <strong>Choisir mon mot de passe</strong> pour ouvrir votre espace client (chapitre 10).</div>
+</section>
+
+<section class="chapitre" id="c6">
+  <div class="chapitre__tete"><div class="chapitre__num">6</div><h1>Suivre sa création par son lien personnel</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Voir où en est votre création et envoyer vos pièces, sans mot de passe. Le lien reçu par courriel à l'ouverture du dossier vaut pour toute la durée de la formalité : gardez-le.</p></div>
+  <ol class="etapes">
+    <li>Ouvrez le lien de suivi reçu par courriel.</li>
+    <li>La <strong>frise</strong> montre les six étapes : Règlement, Vos pièces, Statuts, Dépôt, Immatriculation, Remise. L'étape en cours est entourée.</li>
+    <li>L'encadré dit <strong>En ce moment</strong> ce que fait le cabinet, et <strong>De votre côté</strong> ce qu'il attend de vous.</li>
+    <li>Sous <strong>Vos documents</strong>, envoyez chaque pièce demandée : choisissez le fichier (photo ou PDF), puis cliquez sur <strong>Envoyer</strong>. Le compteur « x sur y documents nécessaires reçus » avance.</li>
+  </ol>
+  <figure class="ecran"><img src="captures/c09-suivi-sans-compte.png" alt=""><figcaption><b>Le suivi par lien personnel.</b> La même page que « Ma création » dans l'espace client.</figcaption></figure>
+  <figure class="tel"><img src="captures/m09-suivi-telephone.png" alt=""><figcaption><b>Téléphone.</b> Le suivi, tel qu'il s'ouvre le plus souvent.</figcaption></figure>
+  <div class="note"><b>Petit défaut d'affichage connu.</b> Sur un écran de téléphone étroit, les noms des dernières étapes de la frise se chevauchent (« Dépôt », « Immatriculation », « Remise »). Les étapes restent dans l'ordre indiqué ci-dessus.</div>
+  <div class="ensuite"><b>Et ensuite ?</b> Le cabinet voit chaque pièce dès son envoi, et vous dit si l'une d'elles doit être reprise. Le jour où votre société est immatriculée et que vous prenez le suivi, l'espace adhérent s'ajoute à votre compte, sans en créer un second.</div>
+</section>
+
+<section class="chapitre" id="c7">
+  <div class="chapitre__tete"><div class="chapitre__num">7</div><h1>Souscrire une offre en ligne</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Établir vous-même un devis au barème du jour, valable trente jours, pour une entreprise qui existe déjà : suivi comptable et fiscal avec adhésion au centre agréé, paie déléguée, domiciliation commerciale ou formation. La création d'entreprise et les prestations ponctuelles se font sur étude (chapitres 4 et 9).</p></div>
+  <ol class="etapes">
+    <li>Ouvrez <strong>Souscrire en ligne</strong> (bouton de la page « Devenir adhérent » ou de l'estimateur).</li>
+    <li>Sous <strong>Votre devis</strong>, choisissez le <strong>service</strong> et la <strong>formule</strong> (par exemple « Selon mon chiffre d'affaires »).</li>
+    <li>Renseignez prénom, nom, adresse électronique, <strong>téléphone mobile money</strong>, dénomination de l'entreprise, <strong>NIU</strong> et chiffre d'affaires annuel.</li>
+    <li>Cliquez sur <strong>Établir mon devis</strong>.</li>
+  </ol>
+  <figure class="ecran"><img src="captures/s02-souscrire-formulaire.png" alt=""><figcaption><b>Le formulaire de souscription.</b></figcaption></figure>
+  <figure class="ecran"><img src="captures/s03-devis-en-ligne.png" alt=""><figcaption><b>Votre devis.</b> Sa référence, sa date de validité, chaque ligne et le montant.</figcaption></figure>
+  <div class="note"><b>Tarif indicatif : le cabinet confirme avant tout paiement.</b> Tant que le cabinet n'a pas arrêté votre prix, le devis affiche « Tarif indicatif » et propose <strong>Faire confirmer mon prix</strong> au lieu du paiement. Un responsable vous appelle, arrête le prix avec vous, puis vous envoie votre proposition par courriel ou WhatsApp. Une fois le prix arrêté, le même devis propose le paiement par mobile money.</div>
+  <div class="ensuite"><b>Et ensuite ?</b> Votre paiement réserve votre adhésion. L'accès au dossier de l'entreprise s'ouvre après vérification de votre identité par le cabinet, qui vous contacte : un NIU figure sur chaque facture, il ne suffit donc pas à prouver que vous représentez l'entreprise. Vous recevez alors le lien pour choisir votre mot de passe.</div>
+  <div class="note"><b>Remarque d'affichage.</b> Sur ordinateur, le titre « Souscrire en ligne » de cette page passe sous l'en-tête du site : la page commence directement par les cartes des services.</div>
+</section>
+
+<section class="chapitre" id="c8">
+  <div class="chapitre__tete"><div class="chapitre__num">8</div><h1>Le blog et les formations</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Comprendre ce qui change en fiscalité et en gestion, et vous former avec le cabinet.</p></div>
+  <ol class="etapes">
+    <li>Cliquez sur <strong>Blog</strong>. Les articles sont classés par thème ; touchez un thème pour filtrer.</li>
+    <li>Cliquez sur un article pour le lire. Sa date de publication est indiquée ; les boutons de partage (Facebook, WhatsApp, copier le lien) sont en tête d'article.</li>
+    <li>Cliquez sur <strong>Formations</strong> pour voir le calendrier des prochaines sessions (TVA, liasse fiscale, paie et cotisations sociales...), leur lieu, leur durée et leur programme.</li>
+  </ol>
+  <div class="duo colonnes">
+    <figure><img src="captures/p10-blog.png" alt=""><figcaption><b>Le blog.</b></figcaption></figure>
+    <figure><img src="captures/p11-article.png" alt=""><figcaption><b>Un article.</b></figcaption></figure>
+  </div>
+  <figure class="ecran"><img src="captures/p14-formations.png" alt=""><figcaption><b>Les formations.</b> Le calendrier des sessions, en agence ou dans vos locaux.</figcaption></figure>
+  <div class="ensuite"><b>Et ensuite ?</b> Pour vous inscrire à une formation, utilisez le formulaire de contact en choisissant « Formation », ou appelez le cabinet. Pour recevoir les nouveautés, inscrivez votre adresse dans le champ <strong>S'inscrire</strong> en bas de chaque page.</div>
+</section>
+
+<section class="chapitre" id="c9">
+  <div class="chapitre__tete"><div class="chapitre__num">9</div><h1>Contacter le cabinet</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Poser une question, demander une prestation ponctuelle (DSF, régularisation, assistance en cas de contrôle, business plan), une domiciliation ou une formation.</p></div>
+  <ol class="etapes">
+    <li>Cliquez sur <strong>Contactez-nous</strong>. Trois façons de joindre le cabinet s'affichent : WhatsApp, téléphone, courriel.</li>
+    <li>Pour laisser une trace écrite, remplissez le formulaire <strong>Dites-nous ce dont vous avez besoin</strong> : objet de la demande, nom et prénom, téléphone ou WhatsApp, adresse électronique (facultative), votre message.</li>
+    <li>Cochez l'accord sur l'utilisation de vos informations, puis cliquez sur <strong>Envoyer ma demande</strong>.</li>
+  </ol>
+  <figure class="ecran"><img src="captures/p12-contact.png" alt=""><figcaption><b>Les trois façons de nous joindre.</b></figcaption></figure>
+  <figure class="ecran"><img src="captures/p13-contact-formulaire.png" alt=""><figcaption><b>Le formulaire de contact.</b> À droite, « Vous êtes déjà client ? » mène à votre espace client.</figcaption></figure>
+  <div class="ensuite"><b>Et ensuite ?</b> Un responsable vous recontacte au numéro indiqué. Si vous êtes déjà client, passez plutôt par votre espace : votre chargé de clientèle y voit vos échanges, vos pièces et vos échéances.</div>
+</section>
+
+<!-- ═════════════════════════ PARTIE 2 ═════════════════════════ -->
+<section class="partie-ouverture">
+  <div class="sur">Partie 2</div>
+  <h1>L'espace client</h1>
+  <p>Votre espace personnel, avec mot de passe. Il s'ouvre sur « Ma création » tant que votre société est en cours de création, puis sur l'espace adhérent quand le cabinet suit votre entreprise : pièces, échéances, honoraires, documents, DSF, paie.</p>
+</section>
+
+<section class="chapitre" id="c10">
+  <div class="chapitre__tete"><div class="chapitre__num">10</div><h1>Choisir son mot de passe et se connecter</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Ouvrir votre espace la première fois, puis vous y reconnecter. Votre compte est créé par le cabinet (à votre règlement, ou à votre adhésion) : vous n'avez pas à vous inscrire.</p></div>
+  <h3>La première fois : choisir son mot de passe</h3>
+  <ol class="etapes">
+    <li>Ouvrez le courriel du cabinet et cliquez sur <strong>Choisir mon mot de passe</strong>.</li>
+    <li>Saisissez votre <strong>nouveau mot de passe</strong>, puis répétez-le dans <strong>Confirmer</strong>.</li>
+    <li>Cliquez sur <strong>Créer mon espace</strong>. Vous arrivez sur la page de connexion.</li>
+  </ol>
+  <figure class="ecran"><img src="captures/c10-choisir-mot-de-passe.png" alt=""><figcaption><b>Choisir son mot de passe.</b> Personne au cabinet ne connaîtra ce mot de passe. Le lien ne fonctionne qu'une fois.</figcaption></figure>
+  <h3>Les fois suivantes : se connecter</h3>
+  <ol class="etapes">
+    <li>Sur le site, cliquez sur <strong>Espace client</strong> (en haut à droite).</li>
+    <li>Saisissez votre <strong>adresse électronique</strong> et votre <strong>mot de passe</strong>, puis cliquez sur <strong>Se connecter</strong>.</li>
+    <li>Vous arrivez directement dans votre espace : « Ma création » ou l'espace adhérent, selon votre situation.</li>
+  </ol>
+  <figure class="ecran"><img src="captures/a01-connexion.png" alt=""><figcaption><b>La connexion.</b> La même porte pour tous ; votre espace est choisi après la connexion.</figcaption></figure>
+  <h3>Mot de passe oublié</h3>
+  <ol class="etapes">
+    <li>Sur la page de connexion, cliquez sur <strong>Mot de passe oublié ?</strong></li>
+    <li>Saisissez l'adresse de votre compte, puis cliquez sur <strong>Recevoir un lien</strong>.</li>
+    <li>Ouvrez le courriel reçu et choisissez un nouveau mot de passe. Ce lien est valable deux heures.</li>
+  </ol>
+  <div class="duo colonnes">
+    <figure><img src="captures/a02-mot-de-passe-oublie.png" alt=""><figcaption><b>Mot de passe oublié.</b></figcaption></figure>
+    <figure><img src="captures/m05-connexion.png" alt="" style="width:46mm"><figcaption><b>Téléphone.</b> La connexion.</figcaption></figure>
+  </div>
+  <div class="ensuite"><b>Pas reçu de lien ?</b> Votre lien de connexion vous est envoyé par courriel dès votre souscription réglée. Si vous ne l'avez pas reçu, appelez votre chargé de clientèle : il vous le renvoie à l'adresse connue du cabinet. Pour vous déconnecter, utilisez le bouton <strong>Se déconnecter</strong> en haut de votre espace.</div>
+</section>
+
+<section class="chapitre" id="c11">
+  <div class="chapitre__tete"><div class="chapitre__num">11</div><h1>Ma création : suivre et envoyer ses pièces</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Tant que votre société est en cours de création, votre espace s'ouvre sur « Ma création ». Vous y voyez l'avancement et vous y envoyez les documents demandés, comme par votre lien personnel (chapitre 6).</p></div>
+  <ol class="etapes">
+    <li>Connectez-vous. La page « Ma création » s'ouvre avec le nom de votre future société et sa forme.</li>
+    <li>Lisez la frise des six étapes et l'encadré <strong>En ce moment / De votre côté</strong>.</li>
+    <li>Sous <strong>Vos documents</strong>, pour chaque pièce : cliquez sur le champ de fichier, choisissez une photo nette ou un PDF (sur téléphone, vous pouvez prendre la photo directement). Un aperçu s'affiche, avec un bouton <strong>Retirer</strong> si vous vous êtes trompé.</li>
+    <li>Cliquez sur <strong>Envoyer</strong>. La pièce passe dans les documents reçus et le compteur avance (« 2 sur 8 documents nécessaires reçus »). Une pièce marquée « facultatif » ne compte pas.</li>
+  </ol>
+  <figure class="ecran"><img src="captures/c11-ma-creation.png" alt=""><figcaption><b>Ma création.</b> La frise, l'encadré, puis la liste des documents à envoyer.</figcaption></figure>
+  <div class="duo colonnes">
+    <figure><img src="captures/c12-envoyer-piece.png" alt=""><figcaption><b>Avant l'envoi.</b> Le fichier choisi et son aperçu.</figcaption></figure>
+    <figure><img src="captures/c13-piece-recue.png" alt=""><figcaption><b>Après l'envoi.</b> Le compteur a avancé.</figcaption></figure>
+  </div>
+  <div class="ensuite"><b>Et ensuite ?</b> La juriste du cabinet reçoit vos pièces au dossier (y compris celles que vous lui envoyez par WhatsApp, qu'elle y verse elle-même). Elle rédige les statuts, dépose le dossier, suit l'immatriculation et vous remet les documents de votre société. À l'immatriculation, l'espace adhérent s'ajoute à votre compte.</div>
+</section>
+
+<section class="chapitre" id="c12">
+  <div class="chapitre__tete"><div class="chapitre__num">12</div><h1>L'accueil de l'espace adhérent</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>En un coup d'oeil : ce que le cabinet attend de vous, vos échéances, vos derniers envois, la fiche de votre entreprise.</p></div>
+  <p>L'accueil se lit de haut en bas :</p>
+  <ul>
+    <li>une <strong>alerte</strong> en tête quand il manque des justificatifs (avec le bouton <strong>Envoyer un justificatif</strong>) ;</li>
+    <li><strong>Ce qu'on attend de vous</strong> : les demandes du cabinet (chapitre 13) ;</li>
+    <li><strong>Envoyer un justificatif</strong> (chapitre 14) ;</li>
+    <li><strong>Votre mois</strong> : le nombre de justificatifs envoyés ; les montants s'affichent une fois le mois revu par le cabinet ;</li>
+    <li><strong>Mes échéances</strong> (chapitre 15) et <strong>Mes derniers envois</strong> ;</li>
+    <li>la fiche de votre <strong>entreprise</strong> : NIU, régime fiscal, centre de rattachement, TVA, adhésion, exercice en cours.</li>
+  </ul>
+  <p>En bas de l'écran, une barre d'onglets reste toujours visible : <strong>Accueil</strong>, <strong>Justificatifs</strong>, <strong>Échéances</strong>, <strong>Honoraires</strong>, <strong>Ma paie</strong>, <strong>Documents</strong>, <strong>Entreprise</strong>. Les <strong>Réglages</strong> sont en haut, à côté de <strong>Se déconnecter</strong>.</p>
+  <div class="duo colonnes">
+    <figure><img src="captures/a03-accueil-espace.png" alt=""><figcaption><b>L'accueil, sur ordinateur.</b></figcaption></figure>
+    <figure><img src="captures/m06-espace.png" alt="" style="width:50mm"><figcaption><b>Téléphone.</b> Sur un écran étroit, faites glisser la barre d'onglets pour voir les derniers.</figcaption></figure>
+  </div>
+</section>
+
+<section class="chapitre" id="c13">
+  <div class="chapitre__tete"><div class="chapitre__num">13</div><h1>Répondre aux demandes du cabinet</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Quand le cabinet a besoin d'une pièce (une facture à corriger, un relevé bancaire...), la demande apparaît dans <strong>Ce qu'on attend de vous</strong>, avec la date attendue et ce que vous devez faire. Vous répondez en un geste, sans passer par WhatsApp.</p></div>
+  <ol class="etapes">
+    <li>Lisez la demande : son objet, la date attendue (en rouge si elle est passée) et, dans l'encadré, <strong>Ce que vous devez faire</strong>.</li>
+    <li>Si vous avez la pièce, envoyez-la (chapitre 14).</li>
+    <li>Sinon, répondez par un bouton : <strong>Je l'aurai la semaine prochaine</strong> ou <strong>Je n'ai pas ce document</strong>. Votre réponse s'affiche en vert sous la demande, avec sa date.</li>
+    <li>Pour préciser quelque chose, cliquez sur <strong>Écrire un message au cabinet</strong>.</li>
+  </ol>
+  <figure class="colonne"><img src="captures/a04-attendu.png" alt=""><figcaption><b>Ce qu'on attend de vous.</b> Ici, deux factures à faire corriger par le fournisseur et un relevé bancaire.</figcaption></figure>
+  <div class="ensuite"><b>Et ensuite ?</b> Votre réponse arrive directement dans le dossier. La demande disparaît quand la pièce est reçue ou que le cabinet la clôt.</div>
+</section>
+
+<section class="chapitre" id="c14">
+  <div class="chapitre__tete"><div class="chapitre__num">14</div><h1>Envoyer et retrouver ses justificatifs</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Transmettre au cabinet vos factures d'achat et de vente, relevés et autres pièces, chaque mois, en photo ou en PDF. C'est ce qui permet de tenir vos comptes et de préparer vos déclarations.</p></div>
+  <ol class="etapes">
+    <li>Sur l'accueil, allez à <strong>Envoyer un justificatif</strong> (ou touchez le bouton de l'alerte).</li>
+    <li>Dans <strong>Le document</strong>, choisissez un fichier : photo ou PDF, 20 Mo au plus. Sur téléphone, le second champ <strong>Prendre une photo avec le téléphone</strong> ouvre directement l'appareil photo.</li>
+    <li>Si besoin, cliquez sur <strong>Préciser (facultatif)</strong> pour ajouter un mot.</li>
+    <li>Cliquez sur <strong>Envoyer au cabinet</strong>.</li>
+  </ol>
+  <figure class="colonne"><img src="captures/a05-envoyer-justificatif.png" alt=""><figcaption><b>Envoyer un justificatif.</b></figcaption></figure>
+  <h3>Retrouver ses envois</h3>
+  <p><strong>Mes derniers envois</strong>, sur l'accueil, montre vos dernières pièces avec leur état : <strong>REÇUE</strong> (arrivée au cabinet), <strong>LUE</strong> (lue par le cabinet, avec le fournisseur, la date et le montant). Les boutons <strong>Aperçu</strong> et <strong>Télécharger</strong> ouvrent la pièce. L'onglet <strong>Justificatifs</strong> les range mois par mois : recherchez un fournisseur, choisissez le mois et le statut (à corriger, reçu, enregistré, gardé au dossier), puis cliquez sur <strong>Afficher</strong>.</p>
+  <div class="duo colonnes">
+    <figure><img src="captures/a06-derniers-envois.png" alt=""><figcaption><b>Mes derniers envois.</b></figcaption></figure>
+    <figure><img src="captures/a07-justificatifs.png" alt=""><figcaption><b>L'onglet Justificatifs.</b></figcaption></figure>
+  </div>
+  <div class="ensuite"><b>Et ensuite ?</b> Le cabinet lit la pièce, contrôle sa conformité et l'enregistre dans vos comptes. Si elle doit être corrigée, une demande apparaît dans « Ce qu'on attend de vous ». Les envois faits sans réseau depuis l'application mobile restent sur votre téléphone jusqu'au retour du réseau.</div>
+</section>
+
+<section class="chapitre" id="c15">
+  <div class="chapitre__tete"><div class="chapitre__num">15</div><h1>Ses échéances, TVA et CNPS : quittance ou paiement par le cabinet</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Voir ce que votre entreprise doit à l'administration (TVA, acomptes d'impôt, retenues sur salaires, cotisations CNPS...), pour quand, et ce qui est déjà déposé. Puis, quand vous avez payé, envoyer la quittance ; ou, si vous l'avez confié au cabinet, lui remettre les fonds.</p></div>
+  <ol class="etapes">
+    <li>Touchez l'onglet <strong>Échéances</strong>. Chaque ligne donne l'obligation, la période et son état : <strong>En retard de x jours</strong> (rouge), à venir, ou <strong>Déposée le ...</strong> avec le montant (vert).</li>
+    <li>Touchez une échéance pour ouvrir sa fiche : la situation, <strong>De quoi s'agit-il ?</strong> (une explication simple et ce qu'un retard coûte), la période précédente et la prochaine échéance.</li>
+  </ol>
+  <div class="duo colonnes">
+    <figure><img src="captures/a08-echeances.png" alt=""><figcaption><b>Mes échéances.</b></figcaption></figure>
+    <figure><img src="captures/a09-echeance-detail.png" alt=""><figcaption><b>La fiche d'une échéance.</b></figcaption></figure>
+  </div>
+  <h3>Vous payez vous-même : envoyez la quittance</h3>
+  <ol class="etapes">
+    <li>Réglez au guichet de votre centre des impôts ou de la CNPS. Le paiement en ligne de l'impôt n'est pas encore ouvert dans l'espace.</li>
+    <li>Dans la fiche de l'échéance, section <strong>Vous avez réglé ?</strong> (ou « Vous avez réglé vous-même ? »), choisissez la photo ou le PDF de la quittance.</li>
+    <li>Cliquez sur <strong>J'ai déjà payé : envoyer la preuve</strong>.</li>
+  </ol>
+  <figure class="colonne"><img src="captures/a10-envoyer-quittance.png" alt=""><figcaption><b>Envoyer sa quittance.</b></figcaption></figure>
+  <h3>Vous avez confié le paiement au cabinet</h3>
+  <p>Si vous avez signé un mandat avec le cabinet pour qu'il paie une obligation à votre place, la fiche affiche <strong>Le cabinet paie pour vous</strong>. Le cabinet arrête le montant et vous l'indique ; vous lui remettez alors les fonds, par mobile money depuis la fiche, ou au guichet du cabinet. Ces fonds sont suivis à part de vos honoraires. Le cabinet paie l'administration dès réception.</p>
+  <div class="ensuite"><b>Et ensuite ?</b> Le cabinet vérifie la quittance. Validée, l'échéance passe à <strong>Payée : quittance vérifiée par le cabinet</strong>. Refusée, la fiche affiche le motif (« Quittance refusée : ... ») et vous pouvez en envoyer une autre. Sous mandat, vous lisez d'abord « Fonds reçus par le cabinet », puis « Payée » quand le cabinet a porté la quittance de l'administration. Vous êtes prévenu par courriel à chaque étape.</div>
+</section>
+
+<section class="chapitre" id="c16">
+  <div class="chapitre__tete"><div class="chapitre__num">16</div><h1>Régler ses honoraires</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Voir ce que vous devez au cabinet selon votre contrat, télécharger vos notes d'honoraires et vos reçus, et régler par mobile money ou au guichet.</p></div>
+  <ol class="etapes">
+    <li>Touchez l'onglet <strong>Honoraires</strong>. En tête, le rappel de votre contrat (par exemple « 45 000 FCFA par mois, payables en début de période ») et le montant <strong>À régler aujourd'hui</strong>, dont les périodes en retard. Un bandeau prévient si le traitement du dossier risque d'être suspendu faute de règlement.</li>
+    <li>Sous <strong>À régler</strong>, chaque période indique son montant, son état (<strong>En retard</strong>, <strong>À régler</strong>) et sa <strong>Note d'honoraires (PDF)</strong>.</li>
+    <li>Pour régler par mobile money, cliquez sur <strong>Payer ... FCFA par mobile money</strong>, vérifiez le <strong>numéro mobile money à débiter</strong>, puis cliquez sur <strong>Recevoir la demande de ... FCFA</strong>. Validez la demande sur votre téléphone avec votre code ; la page se met à jour toute seule.</li>
+    <li>Vous pouvez aussi régler au cabinet, en espèces ou par virement : la responsable de caisse le constate et la ligne passe à « Réglée ».</li>
+  </ol>
+  <div class="duo colonnes">
+    <figure><img src="captures/a11-honoraires.png" alt=""><figcaption><b>Mes honoraires.</b></figcaption></figure>
+    <figure><img src="captures/a12-payer-mobile-money.png" alt=""><figcaption><b>Le paiement mobile money.</b> Le numéro à débiter, puis la demande.</figcaption></figure>
+  </div>
+  <figure class="colonne"><img src="captures/a13-echeancier-honoraires.png" alt=""><figcaption><b>L'échéancier.</b> Les périodes à venir, puis les périodes réglées, avec le mode (guichet ou mobile money), la référence et le reçu en PDF.</figcaption></figure>
+  <div class="note"><b>Démonstration.</b> Sur la plateforme de démonstration, la demande mobile money ne débite rien : un message l'indique, faute d'identifiants marchands.</div>
+  <div class="ensuite"><b>Et ensuite ?</b> Une fois le règlement constaté, la période passe à <strong>Réglée</strong>, son <strong>Reçu (PDF)</strong> apparaît et vous recevez un courriel.</div>
+</section>
+
+<section class="chapitre" id="c17">
+  <div class="chapitre__tete"><div class="chapitre__num">17</div><h1>Les documents remis par le cabinet</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Retrouver les reçus de dépôt de vos déclarations, faites par le cabinet pour votre compte : TVA, acomptes, retenues sur salaires, cotisations CNPS, déclaration annuelle.</p></div>
+  <ol class="etapes">
+    <li>Touchez l'onglet <strong>Documents</strong>.</li>
+    <li>Chaque ligne <strong>Reçu de dépôt</strong> indique l'obligation, la période, la date de dépôt et le montant. Les plus récents sont en haut.</li>
+  </ol>
+  <figure class="colonne"><img src="captures/a14-documents.png" alt=""><figcaption><b>Mes documents.</b></figcaption></figure>
+  <div class="ensuite"><b>Et ensuite ?</b> Gardez ces reçus : ils prouvent que la déclaration a été déposée à temps. Les documents de votre création (statuts, RCCM, NIU) vous sont remis par le cabinet à la dernière étape de la formalité.</div>
+</section>
+
+<section class="chapitre" id="c18">
+  <div class="chapitre__tete"><div class="chapitre__num">18</div><h1>Sa déclaration annuelle (DSF)</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Chaque année, après la clôture de l'exercice, le cabinet établit votre déclaration statistique et fiscale et la dépose sur le portail de la DGI. Il lui faut quelques pièces que vous seul détenez : elles se versent ici.</p></div>
+  <ol class="etapes">
+    <li>Ouvrez <strong>Ma déclaration annuelle (DSF)</strong> depuis l'accueil (lien sous la fiche de l'entreprise) ou depuis l'onglet Entreprise.</li>
+    <li>Chaque exercice s'affiche avec son état. L'exercice le plus récent est ouvert : date de clôture, état du dépôt, accusé de la DGI s'il existe, et la liste des pièces.</li>
+    <li>Pour une pièce à fournir, versez le fichier demandé. Les pièces « établies par le cabinet ou sans objet » n'attendent rien de vous.</li>
+    <li>Cliquez sur un exercice plus ancien pour le déplier.</li>
+  </ol>
+  <figure class="colonne"><img src="captures/a15-dsf.png" alt=""><figcaption><b>Ma DSF.</b> Ici, l'exercice 2025 est déposé et la DGI a délivré son accusé de réception.</figcaption></figure>
+  <div class="ensuite"><b>Et ensuite ?</b> Le cabinet prépare la DSF, la fait valider, puis la dépose. Pensez aussi à compléter la <strong>fiche de votre déclaration annuelle</strong> dans l'onglet Entreprise (chapitre 20) : coordonnées, banque, signataire, codes d'activité.</div>
+</section>
+
+<section class="chapitre" id="c19">
+  <div class="chapitre__tete"><div class="chapitre__num">19</div><h1>Sa paie</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Si le cabinet tient la paie de vos salariés, l'onglet <strong>Ma paie</strong> montre, pour le mois, ce que vous devez verser et le bulletin de chaque salarié.</p></div>
+  <ol class="etapes">
+    <li>Touchez l'onglet <strong>Ma paie</strong>. Le mois affiché est le dernier calculé.</li>
+    <li><strong>Ce que vous devez verser</strong> : le total, dont la part CNPS, la date limite, l'effectif déclaré, la masse salariale brute, les retenues salariales et les charges patronales.</li>
+    <li><strong>Votre personnel</strong> : chaque salarié, son poste, son salaire ; le lien <strong>Son bulletin</strong> ouvre son bulletin de paie.</li>
+    <li>Si un encadré signale que le <strong>groupe de risque CNPS</strong> n'est pas renseigné, cliquez sur <strong>Enregistrer le groupe</strong> et indiquez celui de la notification de la CNPS.</li>
+  </ol>
+  <figure class="colonne"><img src="captures/a16-paie.png" alt=""><figcaption><b>Ma paie.</b></figcaption></figure>
+  <div class="note"><b>À lire attentivement.</b> Si un encadré indique « Les taux employés n'ont pas encore été validés sur le texte », les bulletins sont calculés avec des valeurs que le cabinet doit encore confirmer : ils ne sont pas opposables en l'état. Attendez la confirmation du cabinet avant de les remettre à vos salariés.</div>
+</section>
+
+<section class="chapitre" id="c20">
+  <div class="chapitre__tete"><div class="chapitre__num">20</div><h1>Son entreprise et ses réglages</h1></div>
+  <div class="sert"><b>À quoi ça sert</b><p>Vérifier ce que le cabinet sait de votre entreprise, joindre votre interlocuteur, signaler un changement, compléter la fiche de votre DSF, et choisir quand être prévenu de vos échéances.</p></div>
+  <h3>Mon entreprise</h3>
+  <ol class="etapes">
+    <li>Touchez l'onglet <strong>Entreprise</strong> : forme, activité, NIU, RCCM, adresse, centre des impôts, gérant, numéro d'adhésion au CGA, puis <strong>Votre régime fiscal</strong> expliqué simplement.</li>
+    <li><strong>Votre chargé(e) de clientèle</strong> : son nom et le bouton <strong>Écrire</strong>.</li>
+  </ol>
+  <figure class="colonne"><img src="captures/a17-entreprise.png" alt=""><figcaption><b>Mon entreprise.</b></figcaption></figure>
+  <h3>Signaler un changement</h3>
+  <ol class="etapes">
+    <li>Dans <strong>Signaler un changement</strong>, choisissez ce qui change : adresse, gérant ou dirigeant, activité, numéro de téléphone, autre changement.</li>
+    <li>Décrivez le changement en quelques mots, puis cliquez sur <strong>Signaler au cabinet</strong>.</li>
+  </ol>
+  <p>Vous ne modifiez rien vous-même : le cabinet fait les démarches. Une nouvelle adresse peut changer votre centre des impôts, donc vos dates limites ; le cabinet vérifie.</p>
+  <h3>Fiche de votre déclaration annuelle (DSF)</h3>
+  <p>La DSF demande des informations que le cabinet ne connaît pas toujours. La fiche liste ce qui manque (<strong>À compléter</strong>), puis propose les champs : téléphone et courriel de l'entreprise, boîte postale, ville et adresse du siège, numéro CNPS employeur, signataire des états financiers et sa qualité, banque et numéro de compte, activités avec leur code NACAM. Renseignez-les une fois : le cabinet les relit et les reprend chaque année.</p>
+  <div class="duo colonnes">
+    <figure><img src="captures/a18-signaler-changement.png" alt=""><figcaption><b>Signaler un changement.</b></figcaption></figure>
+    <figure><img src="captures/a19-fiche-dsf.png" alt=""><figcaption><b>La fiche de la DSF.</b></figcaption></figure>
+  </div>
+  <h3>Réglages : les rappels avant les échéances</h3>
+  <ol class="etapes">
+    <li>Cliquez sur <strong>Réglages</strong>, en haut de l'espace.</li>
+    <li>Laissez cochée la case <strong>Me prévenir avant mes échéances, par courriel et dans mon espace</strong>, et cochez combien de jours avant (7, 3, 2 ou 1 jour).</li>
+    <li>Cliquez sur <strong>Enregistrer mes rappels</strong>.</li>
+  </ol>
+  <figure class="colonne"><img src="captures/a20-reglages.png" alt=""><figcaption><b>Réglages.</b> La section « Aide et questions » mène à votre interlocuteur.</figcaption></figure>
+  <div class="note"><b>Pas encore disponible.</b> L'option « Recevoir aussi par WhatsApp » est affichée mais pas encore active : le compte d'envoi WhatsApp du cabinet n'est pas encore ouvert. Les rappels partent par courriel et dans votre espace.</div>
+  <div style="break-inside: avoid"><h3>Sur téléphone</h3>
+  <div class="duo">
+    <figure><img src="captures/m07-honoraires.png" alt=""><figcaption><b>Téléphone.</b> Mes honoraires.</figcaption></figure>
+    <figure><img src="captures/m08-echeances.png" alt=""><figcaption><b>Téléphone.</b> Mes échéances.</figcaption></figure>
+  </div></div>
+</section>
+
+<!-- ═════════════════════════ FAQ ═════════════════════════ -->
+<section class="chapitre faq" id="faq">
+  <div class="chapitre__tete"><h1>Questions fréquentes</h1></div>
+  <h3>Dois-je créer un compte pour demander une création d'entreprise ?</h3>
+  <p>Non. Le formulaire du site suffit, avec votre nom et votre téléphone. Votre compte est ouvert automatiquement par le cabinet après votre règlement.</p>
+  <h3>Quelles pièces dois-je préparer ?</h3>
+  <p>Une pièce d'identité pour chaque associé et pour le gérant, un justificatif de domicile du siège de moins de trois mois, trois propositions de nom, le plan de localisation ou le bail du siège, un extrait de casier judiciaire du gérant de moins de trois mois. La liste exacte de votre dossier s'affiche dans « Ma création ». Inutile de tout réunir avant de commencer.</p>
+  <h3>L'estimation est-elle un engagement ?</h3>
+  <p>Non. C'est une estimation indicative, gratuite et sans frais de dossier. Le prix définitif figure sur la proposition que le cabinet vous envoie après examen de votre projet.</p>
+  <h3>Comment régler ?</h3>
+  <p>Par mobile money, depuis la page de votre proposition ou l'onglet Honoraires : vous validez la demande sur votre téléphone. Ou au guichet du cabinet, en espèces ou par virement. Dans les deux cas, la page se met à jour quand le règlement est constaté.</p>
+  <h3>J'ai perdu mon lien de suivi.</h3>
+  <p>Connectez-vous à votre espace client : « Ma création » montre la même chose. Sinon, appelez le cabinet, qui vous le renvoie à votre adresse.</p>
+  <h3>Je n'ai pas reçu le courriel pour choisir mon mot de passe.</h3>
+  <p>Vérifiez vos courriers indésirables. Sinon, appelez votre chargé de clientèle : il vous renvoie le lien à l'adresse connue du cabinet. Le lien ne fonctionne qu'une fois ; s'il a expiré, utilisez « Mot de passe oublié ? ».</p>
+  <h3>Puis-je payer mes impôts ou la CNPS depuis l'espace ?</h3>
+  <p>Pas encore. Réglez au guichet de votre centre des impôts ou de la CNPS, puis envoyez la quittance dans la fiche de l'échéance. Si vous avez confié ce paiement au cabinet, remettez-lui les fonds : il paie pour vous.</p>
+  <h3>Ma quittance a été refusée.</h3>
+  <p>Le motif est écrit dans la fiche de l'échéance. Envoyez une nouvelle quittance lisible et complète au même endroit.</p>
+  <h3>Puis-je modifier l'adresse ou le gérant de mon entreprise ?</h3>
+  <p>Pas directement : utilisez « Signaler un changement » dans l'onglet Entreprise. Le cabinet fait les démarches et met la fiche à jour.</p>
+  <h3>Le site marche-t-il sur téléphone ?</h3>
+  <p>Oui. Le site et l'espace client s'adaptent aux écrans de téléphone. Le cabinet propose aussi une application mobile pour envoyer vos pièces, même sans réseau.</p>
+</section>
+
+<!-- ═════════════════════════ CONTACTS ═════════════════════════ -->
+<section class="suite" id="contacts">
+  <h2 style="font-size:17pt">Nous joindre</h2>
+  <div class="contacts">
+    <div class="contact"><b>WhatsApp</b><span>699 902 184</span><p>Le canal le plus utilisé par nos clients.</p></div>
+    <div class="contact"><b>Téléphone</b><span>+237 233 42 48 47</span><p>Standard du cabinet, aux heures d'ouverture. Autres lignes : +237 699 902 184, +237 676 887 686.</p></div>
+    <div class="contact"><b>Courriel</b><span>contact@cga-brcgroup.com</span><p>Pour les demandes détaillées et les pièces jointes.</p></div>
+    <div class="contact"><b>Votre interlocuteur</b><span>Dans votre espace</span><p>Onglet Entreprise, « Votre chargé(e) de clientèle », bouton Écrire.</p></div>
+  </div>
+  <p>CGA Broad Range Consulting Group, cabinet comptable, d'audit et de conseil agréé par le ministre des Finances (arrêté n° 00000048/MINFI/DGI du 28 janvier 2020). Bureau à Douala.</p>
+</section>
+
+<!-- ═════════════════════════ GLOSSAIRE ═════════════════════════ -->
+<section class="chapitre" id="glossaire">
+  <div class="chapitre__tete"><h1>Petit glossaire</h1></div>
+  <dl class="glossaire">
+    <div><dt>CGA</dt><dd>Centre de gestion agréé : structure agréée par le ministre des Finances qui assiste les petites entreprises adhérentes dans leur gestion et leurs obligations fiscales.</dd></div>
+    <div><dt>Adhérent</dt><dd>Entreprise inscrite au centre de gestion agréé et suivie par le cabinet.</dd></div>
+    <div><dt>Proposition, proforma</dt><dd>Le devis chiffré que le cabinet vous envoie avant tout engagement. Vous l'acceptez en ligne.</dd></div>
+    <div><dt>Justificatif, pièce</dt><dd>Facture, relevé, reçu ou tout document qui prouve une opération de votre entreprise.</dd></div>
+    <div><dt>Échéance</dt><dd>Date limite d'une déclaration ou d'un paiement à l'administration (impôts, CNPS).</dd></div>
+    <div><dt>Quittance</dt><dd>Reçu délivré par l'administration quand vous payez un impôt ou une cotisation.</dd></div>
+    <div><dt>Mandat de paiement</dt><dd>Accord par lequel vous confiez au cabinet le paiement d'une obligation : vous lui remettez les fonds, il paie l'administration.</dd></div>
+    <div><dt>Honoraires</dt><dd>Ce que vous payez au cabinet pour ses services, selon votre contrat.</dd></div>
+    <div><dt>Mobile money</dt><dd>Paiement depuis votre compte de téléphone mobile : vous validez la demande avec votre code secret.</dd></div>
+    <div><dt>TVA</dt><dd>Taxe sur la valeur ajoutée, facturée à vos clients et reversée chaque mois.</dd></div>
+    <div><dt>CNPS</dt><dd>Caisse nationale de prévoyance sociale : elle reçoit les cotisations sociales de vos salariés.</dd></div>
+    <div><dt>DSF</dt><dd>Déclaration statistique et fiscale : la déclaration annuelle de l'entreprise, déposée à la DGI après la clôture de l'exercice.</dd></div>
+    <div><dt>DGI</dt><dd>Direction générale des impôts.</dd></div>
+    <div><dt>NIU</dt><dd>Numéro d'identifiant unique de l'entreprise auprès de l'administration fiscale.</dd></div>
+    <div><dt>RCCM</dt><dd>Registre du commerce et du crédit mobilier : l'immatriculation de votre société.</dd></div>
+    <div><dt>CFCE</dt><dd>Centre de formalités de création d'entreprises, le guichet unique où le dossier de création est déposé.</dd></div>
+    <div><dt>Régime fiscal</dt><dd>La façon dont votre entreprise est imposée (impôt libératoire, réel simplifié, réel), selon son chiffre d'affaires.</dd></div>
+    <div><dt>Exercice</dt><dd>L'année comptable de l'entreprise, le plus souvent du 1er janvier au 31 décembre.</dd></div>
+  </dl>
+</section>
+
+</body>
+</html>
