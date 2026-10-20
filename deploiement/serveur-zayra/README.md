@@ -38,6 +38,17 @@ Depuis le poste, sur des dépôts sans modification en attente : `deployer.sh`. 
 étiquetées `AAAAMMJJ-<api>-<console>-<vitrine>` ; les deux dernières restent sur le serveur pour
 revenir en arrière (`ETIQUETTE=` dans `/opt/cga/.env`, puis `docker compose up -d`).
 
+## Le mode de présentation (séance chez la cliente)
+
+    /opt/cga/presentation.sh ouvrir     # avant la séance
+    /opt/cga/presentation.sh fermer     # JUSTE APRÈS
+
+Ouvert, l'API et l'ordonnanceur tournent sur une base à part (`cga_presentation`) remplie du jeu
+de démonstration : comptes de démonstration, paiements mobile money validés d'office, courriels
+lisibles dans la console. La production (`cga`) n'est ni lue ni écrite, mais elle n'est plus
+servie : les comptes réels ne se connectent qu'une fois la présentation fermée. Fermer détruit
+la base de présentation et ses fichiers.
+
 ## Ce qu'il faut savoir
 
 - ⚠️ **`api.env` et `.env` ne sont jamais réécrits.** La clé `CGA_CLE_CHIFFREMENT` perdue rend

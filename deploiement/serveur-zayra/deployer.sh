@@ -52,15 +52,16 @@ docker save "cga-api:$ETIQUETTE" "cga-console:$ETIQUETTE" "cga-vitrine:$ETIQUETT
 
 echo "== Fichiers de déploiement"
 ssh "$SERVEUR" "mkdir -p $DISTANT/nginx && chmod 700 $DISTANT"
-scp -q "$ICI/docker-compose.yml" "$ICI/env.modele" "$ICI/api.env.modele" \
-  "$ICI/poser-nginx.sh" "$ICI/certificats.sh" "$ICI/sauvegarde.sh" "$SERVEUR:$DISTANT/"
+scp -q "$ICI/docker-compose.yml" "$ICI/docker-compose.presentation.yml" "$ICI/env.modele" \
+  "$ICI/api.env.modele" "$ICI/poser-nginx.sh" "$ICI/certificats.sh" "$ICI/sauvegarde.sh" \
+  "$ICI/presentation.sh" "$SERVEUR:$DISTANT/"
 scp -q "$ICI/nginx/"*.conf "$SERVEUR:$DISTANT/nginx/"
 scp -q "$DEPOTS/erp-cga-backend/outils/roles-postgresql.sql" "$SERVEUR:$DISTANT/"
 
 ssh "$SERVEUR" ETIQUETTE="$ETIQUETTE" DISTANT="$DISTANT" bash -s <<'SUR_LE_SERVEUR'
 set -euo pipefail
 cd "$DISTANT"
-chmod +x poser-nginx.sh certificats.sh sauvegarde.sh
+chmod +x poser-nginx.sh certificats.sh sauvegarde.sh presentation.sh
 umask 077
 aleatoire() { head -c 24 /dev/urandom | base64 | tr -d '/+='; }
 if [ ! -f .env ]; then
