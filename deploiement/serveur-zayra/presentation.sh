@@ -30,7 +30,9 @@ case "${1:-etat}" in
     echo "== Jeu de la recette"
     verser_le_jeu
     echo "== API et ordonnanceur sur la présentation"
-    "${PRESENTATION[@]}" up -d --no-deps api ordonnanceur
+    # ⚠️ `--force-recreate` : déjà en présentation, `up` ne redémarrait rien, et la mémoire de
+    # l'API (courriels retenus, limiteur de connexions) survivait à la base remise à neuf.
+    "${PRESENTATION[@]}" up -d --no-deps --force-recreate api ordonnanceur
     echo
     echo "Mode de présentation OUVERT. Comptes de démonstration, mot de passe « cabinet brcg douala 2026 »."
     echo "⚠️ À fermer dès la séance finie : $0 fermer"
