@@ -313,21 +313,21 @@ def sombre_et_hors_ligne(f: t.Tournage):
     f.dire("traite", "Ses documents. Il les a déjà ouverts une fois : l'application les "
            "<b>garde</b> pour les relire.", 5)
     f.dire("arrive", "Et quand le réseau tombe ? En chantier, à Bonabéri, plus de données.", 2)
-    # ⚠️ Le mode avion ne coupe pas le tunnel d'adb : l'émulateur joignait encore le serveur.
-    # Le tunnel coupé, l'application voit le cabinet injoignable, et le dit.
+    # ⚠️ L'APPLICATION DE CE FILM VISE `10.0.2.2`, le poste vu par le réseau de l'émulateur.
+    # Par le tunnel d'adb (`localhost`), le mode avion ne coupait rien : le serveur refusait la
+    # connexion, et l'écran disait « Le cabinet ne répond pas » au lieu de « Hors ligne ».
+    #     flutter build apk … --dart-define=CGA_API=http://10.0.2.2:8010
     t.adb("shell", "cmd", "connectivity", "airplane-mode", "enable")
-    t.adb("reverse", "--remove", "tcp:8010")
     time.sleep(2)
     t.glisser(500, 1800, 400, 6)
-    f.dire("resultat", "Un bandeau le dit, avec <b>l'heure de la dernière mise à jour</b> : ses "
-           "documents restent lisibles, tels qu'il les a vus.", 6)
+    f.dire("resultat", "Un bandeau le dit : <b>hors ligne</b>, avec l'heure de la dernière mise à "
+           "jour. Ses documents restent lisibles, tels qu'il les a vus.", 6)
     t.onglet("Échéances", 2.5)
     t.glisser(500, 1800, 400, 5)
     f.dire("resultat", "Ses échéances aussi, datées : une copie d'hier ne se fait jamais passer "
            "pour celle du jour.", 6)
     f.dire("resultat", "Une pièce photographiée maintenant <b>attendra</b>, et partira au "
            "retour du réseau.", 4)
-    t.adb("reverse", "tcp:8010", "tcp:8010")
     t.adb("shell", "cmd", "connectivity", "airplane-mode", "disable")
     time.sleep(4)
     t.glisser(500, 1800, 400, 4)
