@@ -47,7 +47,7 @@ td.qui { width: 30mm; font-weight: 600; color: var(--indigo); }
 </section>
 
 <h2><span class="n">1</span>Avant la séance</h2>
-<p>La séance se joue sur le <strong>mode de présentation</strong> : une base à part, remplie du jeu de démonstration et du jeu de la recette. La production n'est ni lue ni écrite. Les paiements mobile money s'y valident sans argent réel, et les courriels envoyés se lisent dans la console, menu <strong>Courriels</strong>.</p>
+<p>La séance se joue sur le <strong>mode de présentation</strong> : une base à part, remplie du jeu de démonstration et du jeu de la recette. La production n'est ni lue ni écrite. Les paiements mobile money s'y valident sans argent réel, et les courriels qui partiraient sont <strong>retenus</strong> : ils se lisent à l'adresse <code>https://console.cga-brcg.horus-lab.com/courriels</code> (pas de menu, l'adresse se tape), et se vident à chaque ouverture de la présentation. Les liens qu'ils portent ne servent qu'une fois : les ouvrir consomme le lien.</p>
 <table>
   <tr><th>Moment</th><th>Commande (sur le serveur, <code>ssh zayra</code>)</th><th>Effet</th></tr>
   <tr><td>Avant la séance</td><td><code>/opt/cga/presentation.sh ouvrir</code></td><td>Base de présentation neuve : démonstration, puis l'équipe et les clients de ce cahier. À relancer avant chaque séance.</td></tr>
@@ -59,7 +59,7 @@ td.qui { width: 30mm; font-weight: 600; color: var(--indigo); }
 <div class="encadre"><strong>L'application mobile.</strong> Elle se télécharge depuis le site, page <strong>Application mobile</strong> (Android 7 ou plus récent). Pendant la présentation, elle se connecte aux comptes adhérents de ce cahier.</div>
 
 <h2 style="break-before: page"><span class="n">2</span>Les comptes</h2>
-<p>Mot de passe de <strong>tous</strong> les comptes ci-dessous : <code>cabinet brcg douala 2026</code>. Les gestes sensibles (comptes, matrice des rôles, dépôts de déclarations) demandent en plus le second facteur : à la première fois, la console propose de l'associer, le lien d'activation se lit dans <strong>Courriels</strong>.</p>
+<p>Mot de passe de <strong>tous</strong> les comptes ci-dessous : <code>cabinet brcg douala 2026</code>. Les gestes sensibles (comptes, matrice des rôles, dépôts de déclarations) demandent en plus le second facteur : à la première fois, la console propose de l'associer, le lien de confirmation se lit dans la page des courriels retenus (section 1).</p>
 <table>
   <tr><th>Rôle</th><th>Personne</th><th>Adresse de connexion</th><th>Ce qu'elle voit</th></tr>
   <tr><td>Super administrateur</td><td>Hervé KAMGA</td><td><code>h.kamga@cga-brcg.cm</code></td><td>Matrice des rôles, grâces de règlement. Aucun dossier.</td></tr>
@@ -97,8 +97,8 @@ td.qui { width: 30mm; font-weight: 600; color: var(--indigo); }
 <table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
 <tr><td class="qui">Visiteur</td><td>Site, <em>Nos services</em> › Assistance juridique : remplir la demande, l'envoyer, puis <em>Joindre un document</em> (PDF ou photo).</td><td>« Votre demande est enregistrée », puis le document « joint à votre demande ».</td><td class="c"><span class="case"></span></td></tr>
 <tr><td class="qui">P. MOUKOURI</td><td>Console › <em>Demandes entrantes</em> : ouvrir la demande.</td><td>Affectée d'elle-même en quelques secondes ; « Documents joints par le visiteur » s'ouvre.</td><td class="c"><span class="case"></span></td></tr>
-<tr><td class="qui">P. MOUKOURI</td><td>Créer une SARL depuis le site (<em>Créer mon entreprise</em>), puis ouvrir la demande : qualification, chiffrage, proforma.</td><td>Qualification déjà remplie par les réponses du client ; prix justifié ; proforma envoyée (courriel lisible dans <em>Courriels</em>).</td><td class="c"><span class="case"></span></td></tr>
-<tr><td class="qui">Client</td><td>Ouvrir le lien de la proforma (dans <em>Courriels</em>) : l'accepter, payer par mobile money.</td><td>Paiement simulé validé ; le dossier passe « payé ».</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">P. MOUKOURI</td><td>Créer une SARL depuis le site (<em>Créer mon entreprise</em>), puis ouvrir la demande : qualification, chiffrage, proforma.</td><td>Qualification déjà remplie par les réponses du client ; prix justifié ; proforma envoyée (courriel lisible dans la page des courriels retenus).</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">Client</td><td>Ouvrir le lien de la proforma (dans la page des courriels retenus) : l'accepter, payer par mobile money.</td><td>Paiement simulé validé ; le dossier passe « payé ».</td><td class="c"><span class="case"></span></td></tr>
 <tr><td class="qui">N. ESSAMA</td><td>Caisse : constater un règlement au guichet sur une autre proforma.</td><td>Le règlement entre au journal de caisse ; la proforma passe réglée.</td><td class="c"><span class="case"></span></td></tr>
 </table></div>
 
@@ -111,7 +111,7 @@ td.qui { width: 30mm; font-weight: 600; color: var(--indigo); }
 
 <div class="phase"><h3>Phase 3 · Le portefeuille et l'accès adhérent</h3>
 <table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
-<tr><td class="qui">P. MOUKOURI</td><td>Portefeuille › Tchoumba &amp; Fils : renvoyer le lien d'accès à l'adhérent.</td><td>Le courriel d'activation part (<em>Courriels</em>).</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">P. MOUKOURI</td><td>Portefeuille › Tchoumba &amp; Fils, bloc des accès adhérents : « Renvoyer le lien d'activation ».</td><td>Le courriel d'activation part (page des courriels retenus).</td><td class="c"><span class="case"></span></td></tr>
 <tr><td class="qui">É. TCHOUMBA</td><td>Ouvrir le lien, choisir son mot de passe, se connecter.</td><td>Son espace s'ouvre sur son seul dossier.</td><td class="c"><span class="case"></span></td></tr>
 <tr><td class="qui">S. NDJOCK</td><td>Espace › <em>Entreprise</em> : renseigner la fiche signalétique, la soumettre.</td><td>« Soumise au cabinet ».</td><td class="c"><span class="case"></span></td></tr>
 <tr><td class="qui">A. BOUBA</td><td>Valider la fiche, ou la renvoyer avec un motif.</td><td>L'adhérent lit « Validée », ou le motif du renvoi.</td><td class="c"><span class="case"></span></td></tr>
@@ -155,14 +155,14 @@ td.qui { width: 30mm; font-weight: 600; color: var(--indigo); }
 
 <div class="phase"><h3>Phase 8 · Les prestations ponctuelles et la DSF en ligne</h3>
 <table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
-<tr><td class="qui">J. ATEBA</td><td><em>Prestations ponctuelles</em> : ouvrir une analyse de contrat (adresse du client renseignée), ajouter et retenir des points, soumettre.</td><td>Le client reçoit son lien de suivi (<em>Courriels</em>) : « En cours ».</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">J. ATEBA</td><td><em>Prestations ponctuelles</em> : ouvrir une analyse de contrat (adresse du client renseignée), ajouter et retenir des points, soumettre.</td><td>Le client reçoit son lien de suivi (page des courriels retenus) : « En cours ».</td><td class="c"><span class="case"></span></td></tr>
 <tr><td class="qui">B. MBALLA</td><td>Valider et livrer.</td><td>Le même lien dit « C'est prêt » ; le livrable s'ouvre sur papier à en-tête.</td><td class="c"><span class="case"></span></td></tr>
 <tr><td class="qui">B. MBALLA</td><td><em>Tarifs de l'offre</em> : fixer le prix de la DSF (impôt libératoire), avec un motif.</td><td>Sur le site, <em>Souscrire en ligne</em> propose la DSF à ce prix, payable.</td><td class="c"><span class="case"></span></td></tr>
 </table></div>
 
 <div class="phase"><h3>Phase 9 · Le gouvernement du cabinet</h3>
 <table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
-<tr><td class="qui">S. ONANA</td><td><em>Comptes et habilitations</em> : associer le second facteur (lien dans <em>Courriels</em>, premier code), puis inviter un collaborateur.</td><td>Un code déjà servi est refusé ; l'invitation part.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">S. ONANA</td><td><em>Comptes et habilitations</em> : associer le second facteur (lien dans la page des courriels retenus, premier code), puis inviter un collaborateur.</td><td>Un code déjà servi est refusé ; l'invitation part.</td><td class="c"><span class="case"></span></td></tr>
 <tr><td class="qui">H. KAMGA</td><td><em>Matrice des rôles</em> : créer un rôle sur mesure ; accorder une grâce de règlement nommée.</td><td>Le rôle est attribuable ; la grâce est au journal avec son motif.</td><td class="c"><span class="case"></span></td></tr>
 <tr><td class="qui">B. MBALLA</td><td><em>Offres de poste</em> : publier une offre ; depuis le site <em>Carrières</em>, postuler avec un CV ; répondre au candidat.</td><td>La candidature arrive avec son CV ; la réponse part du texte type relu.</td><td class="c"><span class="case"></span></td></tr>
 <tr><td class="qui">B. MBALLA</td><td><em>Pilotage</em> : dossiers à risque, charge et production, rapport mensuel.</td><td>Les chiffres concordent avec les phases jouées.</td><td class="c"><span class="case"></span></td></tr>
