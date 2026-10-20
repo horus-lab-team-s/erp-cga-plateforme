@@ -1,6 +1,6 @@
 # Guide d'utilisation de la console du cabinet
 
-**Livrable : `Guide-utilisation-console-CGA.pdf`** (A4, 70 pages, version 1.0 du 19 octobre 2026).
+**Livrable : `Guide-utilisation-console-CGA.pdf`** (A4, 73 pages, version 1.1 du 20 octobre 2026).
 
 | Fichier | Rôle |
 |---|---|
@@ -9,6 +9,7 @@
 | `captures.py` | le script qui refait les captures (une session par profil) |
 | `sessions.py` | ouverture et réutilisation des sessions, code du second facteur |
 | `construire.py` | le rendu PDF : sommaire paginé, pieds de page, signets |
+| `../collection.css`, `../mise_en_page.py` | la charte commune aux trois guides et l'impression (césure, pied, signets, compression) |
 | `polices/` | Poppins et Inter (licence OFL), `cga-logo-blanc.png` pour la couverture |
 
 ## Régénérer
@@ -33,9 +34,10 @@
 
        python3 Docs/guides/console/construire.py
 
-   Chrome sans en-tête ni pied ; les captures entrent au PDF en JPEG (1600 px) pour
-   tenir le fichier vers 14 Mo ; pypdf et reportlab ajoutent la numérotation et les
-   signets.
+   Chrome sans en-tête ni pied, texte justifié avec césure française (le dictionnaire
+   `hyph-fr.hyb` est repris du profil Chrome ou de Playwright) ; les captures entrent au
+   PDF en JPEG (1600 px), Ghostscript compresse (images à 200 ppp), puis pypdf et
+   reportlab ajoutent le pied de page, les signets et les métadonnées (environ 10 Mo).
 
 ## Règles de rédaction
 

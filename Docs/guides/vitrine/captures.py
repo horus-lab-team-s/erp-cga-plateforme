@@ -573,46 +573,67 @@ def phase_souscription(nav) -> None:
 PDF = ICI / "Guide-utilisation-site-et-espace-adherent-CGA.pdf"
 
 
-def imprimer(source: Path, cible: Path) -> None:
-    import subprocess
-
-    subprocess.run(
-        ["google-chrome", "--headless=new", "--no-pdf-header-footer", "--disable-gpu",
-         "--virtual-time-budget=8000", f"--print-to-pdf={cible}", source.as_uri()],
-        check=True, capture_output=True,
-    )
-
-
 def phase_pdf(_nav=None) -> None:
-    """Deux passes : la première situe chaque chapitre, la seconde numérote le sommaire."""
+    """Deux passes : la première situe chaque chapitre, la seconde numérote le sommaire.
+    Puis pied de page de la collection, signets et compression (../mise_en_page.py)."""
     import html as h
     import subprocess
+
+    sys.dont_write_bytecode = True
+    sys.path.insert(0, str(ICI.parent))
+    from mise_en_page import Imprimante, finir
 
     source = ICI / "guide-vitrine.html"
     texte = source.read_text(encoding="utf-8")
     brouillon = ICI / ".brouillon.pdf"
-    imprimer(source, brouillon)
-    pages = int(re.search(r"Pages:\s+(\d+)", subprocess.run(
-        ["pdfinfo", str(brouillon)], capture_output=True, text=True).stdout).group(1))
-    contenus = [subprocess.run(["pdftotext", "-layout", "-f", str(i), "-l", str(i), str(brouillon), "-"],
-                               capture_output=True, text=True).stdout for i in range(1, pages + 1)]
-    numeros = {}
-    for cible, titre in re.findall(r'<a href="#([^"]+)">([^<]+)</a>', texte):
-        titre = " ".join(h.unescape(titre).split())
-        for i, contenu in enumerate(contenus[2:], start=3):  # après la couverture et le sommaire
-            if titre[:38] in " ".join(contenu.split()):
-                numeros[cible] = i
-                break
-    manquants = [c for c in re.findall(r'data-cible="([^"]+)"', texte) if c not in numeros]
-    if manquants:
-        note(f"  ⚠️ chapitres non situés : {manquants}")
-    numerote = re.sub(r'data-cible="([^"]+)"></span>',
-                      lambda m: f'data-cible="{m.group(1)}">{numeros.get(m.group(1), "")}</span>', texte)
     temporaire = ICI / ".guide-numerote.html"
-    temporaire.write_text(numerote, encoding="utf-8")
-    imprimer(temporaire, PDF)
-    temporaire.unlink()
-    brouillon.unlink()
+    final = ICI / ".final.pdf"
+    with Imprimante() as imprimante:
+        imprimante.imprimer(source, brouillon, budget_ms=8000)
+        pages = int(re.search(r"Pages:\s+(\d+)", subprocess.run(
+            ["pdfinfo", str(brouillon)], capture_output=True, text=True).stdout).group(1))
+        contenus = [subprocess.run(["pdftotext", "-layout", "-f", str(i), "-l", str(i), str(brouillon), "-"],
+                                   capture_output=True, text=True).stdout for i in range(1, pages + 1)]
+        numeros = {}
+        titres = {}
+        for cible, titre in re.findall(r'<a href="#([^"]+)">([^<]+)</a>', texte):
+            titre = " ".join(h.unescape(titre).split())
+            titres[cible] = titre
+            for i, contenu in enumerate(contenus[2:], start=3):  # après la couverture et le sommaire
+                if titre[:38] in " ".join(contenu.split()):
+                    numeros[cible] = i
+                    break
+        manquants = [c for c in re.findall(r'data-cible="([^"]+)"', texte) if c not in numeros]
+        if manquants:
+            note(f"  ⚠️ chapitres non situés : {manquants}")
+        numerote = re.sub(r'data-cible="([^"]+)"></span>',
+                          lambda m: f'data-cible="{m.group(1)}">{numeros.get(m.group(1), "")}</span>', texte)
+        temporaire.write_text(numerote, encoding="utf-8")
+        imprimante.imprimer(temporaire, final, budget_ms=8000)
+    # Signets : les parties du sommaire, et leurs chapitres en dessous.
+    signets = []
+    bloc = texte[texte.index('<section class="sommaire'):texte.index("</section>", texte.index('<section class="sommaire'))]
+    for ligne in re.findall(r"<li[^>]*>.*?</li>", bloc):
+        partie = re.match(r'<li class="partie">(.*?)</li>', ligne)
+        if partie:
+            signets.append([1, h.unescape(partie[1]), None])
+            continue
+        m = re.search(r'<span class="num">([^<]*)</span>.*?href="#([^"]+)"', ligne)
+        if m and m[2] in numeros:
+            libelle = f"{m[1]}. {titres[m[2]]}" if m[1] else titres[m[2]]
+            dans_partie = any(s[0] == 1 for s in signets)
+            signets.append([2 if dans_partie else 1, libelle, numeros[m[2]]])
+    for k, s in enumerate(signets):  # une partie pointe sur son premier chapitre, moins sa page d'ouverture
+        if s[2] is None:
+            suivant = next((t[2] for t in signets[k + 1:] if t[2]), pages)
+            s[2] = max(suivant - 1, 1) if s[1].startswith("Partie") else suivant
+    pages = finir(final, PDF, pied="CGA Broad Range Consulting Group · Guide du site et de l'espace adhérent · v1.1",
+                  polices=ICI / "polices", signets=[tuple(s) for s in signets],
+                  metadonnees={"/Title": "Guide du site et de l'espace adhérent",
+                               "/Author": "CGA Broad Range Consulting Group",
+                               "/Subject": "Version 1.1, 20 octobre 2026"})
+    for f in (temporaire, brouillon, final):
+        f.unlink(missing_ok=True)
     note(f"  ✓ {PDF.name} : {pages} pages")
 
 

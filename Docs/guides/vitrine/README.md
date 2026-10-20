@@ -5,11 +5,12 @@ et l'espace client (routes `(adherent)` de `erp-cga-console` : « Ma création �
 
 | Fichier | Rôle |
 |---|---|
-| `Guide-utilisation-site-et-espace-adherent-CGA.pdf` | Le livrable (A4, 48 pages, version 1.0 du 19 octobre 2026) |
+| `Guide-utilisation-site-et-espace-adherent-CGA.pdf` | Le livrable (A4, 51 pages, version 1.1 du 20 octobre 2026) |
 | `guide-vitrine.html` | La source du guide (texte, mise en page, charte) |
 | `captures/*.png` | Les écrans réels, pris contre la pile de démonstration |
 | `captures.py` | Prend les captures, puis construit le PDF |
 | `polices/`, `cga-logo-*.{jpg,png}` | Poppins, Inter et le logo, copiés des dépôts |
+| `../collection.css`, `../mise_en_page.py` | La charte commune aux trois guides et l'impression (césure, pied, signets, compression) |
 
 ## Régénérer
 

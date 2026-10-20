@@ -1,0 +1,298 @@
+/* Charte commune aux trois guides d'utilisation (console, site et espace adhérent, mobile).
+   Chargée après la feuille propre à chaque guide : elle en reprend la couverture, les
+   ouvertures de chapitre, la hiérarchie des titres, les encadrés, les figures, les tableaux
+   et le sommaire, pour que les trois livrets forment une seule collection.
+   Le pied de page (filet magenta, titre à gauche, numéro à droite) est tracé par
+   mise_en_page.py, pas par le navigateur. */
+
+:root {
+  --cg-indigo: #2E1B4D;
+  --cg-indigo-2: #4A2468;
+  --cg-magenta: #8C2D86;
+  --cg-lilas: #F4F2F9;
+  --cg-lilas-2: #ECE7F5;
+  --cg-zebre: #FAF9FC;
+  --cg-encre: #1f1a2b;
+  --cg-gris: #5d5770;
+  --cg-ligne: #ddd7ea;
+  --cg-pointille: #b9b0cc;
+  --cg-alerte: #a8432a;
+  --cg-alerte-fond: #fbefe9;
+  --cg-partiel: #b98a12;
+  --cg-partiel-texte: #8a6508;
+  --cg-partiel-fond: #fff7e3;
+  --cg-degrade: linear-gradient(90deg, #8C2D86 0%, #2E1B4D 100%);
+}
+
+@page { size: A4; margin: 18mm 17mm 20mm 17mm; }
+@page couverture { margin: 0; }
+
+body.guide { counter-reset: figure; color: var(--cg-encre); }
+
+/* ── Justification ───────────────────────────────────────────────────────────── */
+.guide p, .guide li, .guide dd {
+  text-align: justify;
+  text-align-last: left;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphenate-limit-chars: 7 3 3;
+  orphans: 3;
+  widows: 3;
+}
+.guide li::before, .guide li::after { text-align-last: auto; }
+.guide strong, .guide b, .guide .btn, .guide .menu, .guide kbd, .guide a, .guide code { hyphens: manual; -webkit-hyphens: manual; }
+.guide td, .guide th, .guide td *, .guide th *,
+.guide figcaption, .guide figcaption *,
+.guide .fiche dd, .guide .fiche dt,
+.guide .sommaire li, .guide .sommaire li *,
+.guide .couverture, .guide .couverture *,
+.guide .contacts, .guide .contacts *,
+.guide .chips, .guide .chip,
+.guide h1, .guide h2, .guide h3, .guide h4,
+.guide pre, .guide code {
+  text-align: left;
+  hyphens: manual;
+  -webkit-hyphens: manual;
+}
+.guide .tel figcaption, .guide .tel figcaption *, .guide-vitrine figcaption, .guide-vitrine figcaption * { text-align: center; }
+
+/* ── Couverture ─────────────────────────────────────────────────────────────── */
+.guide .couverture {
+  page: couverture;
+  position: relative;
+  width: 210mm; height: 297mm;
+  margin: 0; padding: 0;
+  overflow: hidden;
+  break-after: page;
+  display: block;
+  color: #fff;
+  background: linear-gradient(158deg, #2E1B4D 0%, #3a2160 42%, #6a2878 78%, #8C2D86 100%);
+}
+.couv-anneau { position: absolute; border-radius: 50%; border: .7mm solid rgba(255, 255, 255, .10); }
+.couv-anneau.a1 { width: 190mm; height: 190mm; right: -78mm; top: -62mm; }
+.couv-anneau.a2 { width: 124mm; height: 124mm; right: -45mm; top: -29mm; border-color: rgba(255, 255, 255, .14); }
+.couv-disque { position: absolute; width: 150mm; height: 150mm; left: -70mm; bottom: -78mm; border-radius: 50%; background: rgba(255, 255, 255, .045); }
+.couv-trame { position: absolute; left: 0; right: 0; top: 0; height: 2.2mm; background: linear-gradient(90deg, #e7b9e2 0%, #8C2D86 55%, #2E1B4D 100%); }
+.couv-logo { position: absolute; left: 22mm; top: 26mm; width: 54mm; display: block; }
+.couv-bloc { position: absolute; left: 22mm; right: 26mm; top: 118mm; }
+.couv-sur { font: 600 9.5pt "Poppins", sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #e7c6e4; display: flex; align-items: center; gap: 4mm; }
+.couv-sur::before { content: ""; width: 12mm; height: .7mm; background: #e7b9e2; display: block; }
+.guide .couverture h1 { font: 700 36pt/1.08 "Poppins", sans-serif; color: #fff; margin: 6mm 0 4mm; letter-spacing: -.01em; }
+.couv-sous { font: 500 16pt/1.35 "Poppins", sans-serif; color: #f2e6f6; margin: 0 0 9mm; max-width: 145mm; }
+.couv-filet { width: 34mm; height: 1.1mm; border-radius: .6mm; background: linear-gradient(90deg, #e7b9e2, rgba(255, 255, 255, .25)); margin: 0 0 8mm; }
+.couv-public { font: 400 10.5pt/1.65 "Inter", sans-serif; color: #e3d9ef; max-width: 132mm; margin: 0; }
+.couv-avert { position: absolute; left: 22mm; right: 22mm; bottom: 36mm; font: 400 8.4pt/1.5 "Inter", sans-serif; color: #cbbedd; max-width: 150mm; }
+.couv-pied {
+  position: absolute; left: 22mm; right: 22mm; bottom: 18mm;
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-top: .3mm solid rgba(255, 255, 255, .28); padding-top: 4mm;
+  font: 500 9pt "Inter", sans-serif; color: #ddd2ea;
+}
+.couv-pied b { color: #fff; font-weight: 600; }
+.couv-version { font: 600 9pt "Poppins", sans-serif; color: #fff; background: rgba(255, 255, 255, .12); border-radius: 5mm; padding: 1mm 4mm; }
+
+/* ── Sommaire ───────────────────────────────────────────────────────────────── */
+.guide .sommaire > h1, .guide .sommaire > h2 {
+  break-before: auto;
+  font: 700 24pt/1.1 "Poppins", sans-serif; color: var(--cg-indigo);
+  margin: 0 0 9mm; padding: 0; border: 0; background: none;
+  display: block; min-height: 0;
+}
+.guide .sommaire > h1::after, .guide .sommaire > h2::after {
+  content: ""; display: block; width: 24mm; height: 1.2mm; border-radius: .6mm;
+  background: var(--cg-degrade); margin-top: 3.5mm;
+}
+.guide .sommaire ol { list-style: none; padding: 0; margin: 0; }
+.guide .sommaire li {
+  display: flex; align-items: baseline;
+  margin: 0; padding: 1.2mm 0; border: 0;
+  font: 400 9.6pt/1.35 "Inter", sans-serif; color: var(--cg-gris);
+  break-inside: avoid;
+}
+/* points de conduite : le libellé occupe la ligne, ses pointillés vont jusqu'au numéro */
+.guide .sommaire li .t, .guide .sommaire li .lib { flex: 1 1 auto; display: flex; align-items: baseline; min-width: 0; }
+.guide .sommaire li .t::after, .guide .sommaire li .lib::after {
+  content: ""; flex: 1 1 auto; min-width: 8mm; margin: 0 2.5mm;
+  border-bottom: .3mm dotted var(--cg-pointille); transform: translateY(-.9mm);
+}
+.guide .sommaire li .pts { flex: 1 1 auto; min-width: 8mm; margin: 0 2.5mm; border-bottom: .3mm dotted var(--cg-pointille); transform: translateY(-.9mm); }
+.guide .sommaire li .p, .guide .sommaire li .page, .guide-mobile .sommaire li .num {
+  min-width: 8mm; text-align: right; font: 600 9.6pt "Poppins", sans-serif; color: var(--cg-indigo);
+}
+.guide .sommaire li .n, .guide-vitrine .sommaire li .num, .guide-mobile .sommaire li .no {
+  flex: 0 0 auto; width: 10mm; display: inline-block;
+  font: 600 10.5pt "Poppins", sans-serif; color: var(--cg-magenta);
+}
+.guide .sommaire li.chap, .guide-vitrine .sommaire li:not(.partie), .guide-mobile .sommaire li {
+  font: 600 10.5pt/1.35 "Poppins", sans-serif; color: var(--cg-indigo); padding: 1.7mm 0;
+}
+.guide-console .sommaire li.chap { margin-top: 2.2mm; }
+.guide-console .sommaire li.chap:first-child { margin-top: 0; }
+.guide .sommaire li.sec { padding: .45mm 0 .45mm 10mm; font: 400 8.9pt/1.35 "Inter", sans-serif; color: var(--cg-gris); }
+.guide .sommaire li.sec .p { font: 500 8.9pt "Inter", sans-serif; color: var(--cg-gris); }
+.guide .sommaire li.sec .t::after { border-bottom-color: #d8d2e4; }
+.guide-vitrine .sommaire li.partie {
+  display: block; margin: 5mm 0 1.2mm; padding: 0 0 1.2mm;
+  font: 600 8.6pt "Poppins", sans-serif; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--cg-magenta); border-bottom: .3mm solid var(--cg-lilas-2);
+}
+.guide-vitrine .sommaire a { color: inherit; }
+.guide-vitrine .sommaire li:not(.partie) { padding: 1.05mm 0; font-size: 10pt; }
+.guide-vitrine .sommaire li.partie { margin-top: 4mm; }
+.guide-mobile .sommaire li .t { flex: 0 1 auto; display: inline; font-weight: inherit; }
+.guide-mobile .sommaire li .t::after { content: none; }
+.guide-mobile .sommaire .aide { margin-top: 12mm; }
+
+/* ── Ouvertures de chapitre ─────────────────────────────────────────────────── */
+.guide-console > h2, .guide-mobile h2[id^="ch"], .guide-vitrine .chapitre__tete {
+  break-before: page;
+  break-after: avoid;
+  display: flex; align-items: center;
+  min-height: 22mm;
+  margin: 0 0 5mm; padding: 4.2mm 7mm 5.4mm 6mm;
+  border: 0; border-radius: 3mm 3mm 0 0;
+  background: var(--cg-degrade) left bottom / 100% 1.2mm no-repeat, var(--cg-lilas);
+  font: 700 18pt/1.2 "Poppins", sans-serif; color: var(--cg-indigo);
+}
+.guide-vitrine .chapitre__tete h1 { font: 700 18pt/1.2 "Poppins", sans-serif; color: var(--cg-indigo); margin: 0; }
+.guide-console > h2 .num, .guide-mobile h2[id^="ch"] .no, .guide-vitrine .chapitre__num {
+  flex: 0 0 auto;
+  font: 600 30pt/1 "Poppins", sans-serif; color: var(--cg-magenta);
+  margin: 0 5.5mm 0 0; padding: 0 5.5mm 0 0;
+  border-right: .5mm solid rgba(140, 45, 134, .28);
+  background: none; width: auto; height: auto; border-radius: 0; display: block;
+}
+.guide-vitrine .chapitre { break-before: page; }
+.guide-vitrine .chapitre > .chapitre__tete { break-before: auto; }
+.guide-vitrine .chapitre__tete { padding-left: 7mm; }
+
+.guide .chapo {
+  font: 400 11pt/1.6 "Inter", sans-serif; color: var(--cg-gris);
+  margin: 0 0 5mm; padding: 0 2mm 0 0;
+}
+
+/* Ouvertures de partie (site et espace adhérent) */
+.guide-vitrine .partie-ouverture {
+  break-before: page;
+  margin-top: 62mm; padding: 16mm 14mm 15mm;
+  border: 0; border-radius: 4mm;
+  background: linear-gradient(150deg, #2E1B4D 0%, #4A2468 60%, #8C2D86 100%);
+  color: #fff; position: relative; overflow: hidden;
+}
+.guide-vitrine .partie-ouverture::after {
+  content: ""; position: absolute; right: -28mm; top: -28mm; width: 80mm; height: 80mm;
+  border-radius: 50%; border: .7mm solid rgba(255, 255, 255, .14);
+}
+.guide-vitrine .partie-ouverture .sur { font: 600 9pt "Poppins", sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #e7c6e4; }
+.guide-vitrine .partie-ouverture h1 { font: 700 28pt/1.15 "Poppins", sans-serif; color: #fff; margin: 3mm 0 6mm; }
+.guide-vitrine .partie-ouverture p { font: 400 11pt/1.65 "Inter", sans-serif; color: #e6dcf1; margin: 0; max-width: 140mm; }
+
+/* ── Titres de section et sous-titres ───────────────────────────────────────── */
+.guide-console h3, .guide-mobile h3, .guide-vitrine .chapitre h2, .guide-vitrine .suite > h2 {
+  font: 600 13pt/1.3 "Poppins", sans-serif; color: var(--cg-indigo);
+  margin: 6.5mm 0 2.6mm; padding: 0 0 1.4mm;
+  border-bottom: .3mm solid var(--cg-ligne);
+  display: flex; align-items: baseline; gap: 0;
+  break-after: avoid; break-inside: avoid;
+}
+.guide-console h3::before, .guide-mobile h3::before, .guide-vitrine .chapitre h2::before, .guide-vitrine .suite > h2::before {
+  content: ""; flex: 0 0 auto; width: 2.2mm; height: 2.2mm; border-radius: .5mm;
+  background: var(--cg-magenta); margin-right: 2.8mm; transform: translateY(-.35mm);
+}
+.guide-console h4, .guide-vitrine .chapitre h3, .guide-mobile .faq h3 {
+  font: 600 10.5pt/1.35 "Poppins", sans-serif; color: var(--cg-magenta);
+  margin: 5mm 0 1.6mm; padding: 0; border: 0; display: block;
+  break-after: avoid;
+}
+.guide-mobile .faq h3::before { content: none; }
+
+/* ── Fiches « À quoi ça sert / Qui » ────────────────────────────────────────── */
+.guide-console .fiche, .guide-vitrine .sert {
+  background: var(--cg-lilas); border-radius: 2.5mm;
+  border-top: .9mm solid var(--cg-lilas-2);
+  padding: 3.2mm 4.5mm; margin: 2mm 0 4mm; break-inside: avoid;
+  break-after: avoid; /* la fiche reste avec la première étape ou la capture qui la suit */
+}
+.guide-console .fiche dt, .guide-vitrine .sert b {
+  font: 600 8.2pt/1.6 "Poppins", sans-serif; letter-spacing: .07em; text-transform: uppercase; color: var(--cg-magenta);
+}
+
+/* ── Encadrés ───────────────────────────────────────────────────────────────── */
+.guide-console .note, .guide-console .piege, .guide-console .partiel,
+.guide-mobile .astuce, .guide-mobile .attention,
+.guide-vitrine .note, .guide-vitrine .attention, .guide-vitrine .ensuite {
+  position: relative;
+  margin: 3.5mm 0 4.5mm; padding: 3mm 4.5mm 3.2mm 13mm;
+  border: 0; border-left: 1mm solid var(--accent);
+  border-radius: 0 2.5mm 2.5mm 0;
+  background: var(--icone) no-repeat 4.3mm 3.1mm / 5mm 5mm, var(--teinte);
+  font-size: 9.4pt; line-height: 1.5;
+  break-inside: avoid;
+}
+.guide-console .note, .guide-mobile .astuce, .guide-vitrine .note {
+  --accent: var(--cg-indigo); --teinte: var(--cg-lilas); --titre: var(--cg-indigo);
+  --icone: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='10' fill='%232E1B4D'/%3E%3Crect x='8.75' y='8.4' width='2.5' height='7.2' rx='1.1' fill='%23fff'/%3E%3Ccircle cx='10' cy='5.5' r='1.55' fill='%23fff'/%3E%3C/svg%3E");
+}
+.guide-console .piege, .guide-mobile .attention, .guide-vitrine .attention {
+  --accent: var(--cg-alerte); --teinte: var(--cg-alerte-fond); --titre: var(--cg-alerte);
+  --icone: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 1.2c.5 0 .95.27 1.2.7l8.4 14.9c.5.9-.15 2-1.2 2H1.6c-1.05 0-1.7-1.1-1.2-2L8.8 1.9c.25-.43.7-.7 1.2-.7z' fill='%23a8432a'/%3E%3Crect x='8.8' y='6.4' width='2.4' height='6.6' rx='1.1' fill='%23fff'/%3E%3Ccircle cx='10' cy='15.4' r='1.4' fill='%23fff'/%3E%3C/svg%3E");
+}
+.guide-console .partiel {
+  --accent: var(--cg-partiel); --teinte: var(--cg-partiel-fond); --titre: var(--cg-partiel-texte);
+  --icone: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8.8' fill='%23fff' stroke='%23b98a12' stroke-width='2.4'/%3E%3Cpath d='M10 3.6a6.4 6.4 0 0 1 0 12.8z' fill='%23b98a12'/%3E%3C/svg%3E");
+}
+.guide-vitrine .ensuite {
+  --accent: var(--cg-magenta); --teinte: #fff; --titre: var(--cg-magenta);
+  --icone: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='10' fill='%238C2D86'/%3E%3Cpath d='M5.5 10h8M10.5 6.5 14 10l-3.5 3.5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  border-top: .3mm solid var(--cg-ligne); border-right: .3mm solid var(--cg-ligne); border-bottom: .3mm solid var(--cg-ligne);
+}
+.guide-console .note::before, .guide-console .piege::before, .guide-console .partiel::before {
+  display: block; font: 600 8.4pt/1.5 "Poppins", sans-serif; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--titre); margin: .15mm 0 .9mm;
+}
+.guide-mobile .astuce b, .guide-mobile .attention b {
+  display: block; font: 600 9.6pt/1.5 "Poppins", sans-serif; color: var(--titre); margin: 0 0 .8mm;
+}
+.guide-vitrine .note b, .guide-vitrine .attention b, .guide-vitrine .ensuite b { color: var(--titre); font-weight: 600; }
+
+/* ── Figures ────────────────────────────────────────────────────────────────── */
+.guide figure { break-inside: avoid; }
+.guide-console figure { margin: 4mm 0 5mm; }
+/* Cadre : un passe-partout lilas autour de l'écran. Pas d'ombre portée : Chrome en laisse
+   un fantôme en bas de la page précédente quand la figure est repoussée. */
+.guide-console figure img, .guide-vitrine figure img {
+  padding: 1.3mm; background: var(--cg-lilas);
+  border: .3mm solid #e0d9eb; border-radius: 2.4mm;
+  box-shadow: none;
+}
+.guide figcaption {
+  counter-increment: figure;
+  font: 400 8.3pt/1.45 "Inter", sans-serif; color: var(--cg-gris);
+  margin-top: 2.4mm;
+}
+.guide figcaption::before {
+  content: "Figure " counter(figure) "\00a0\00b7\00a0";
+  font: 600 7.9pt "Poppins", sans-serif; letter-spacing: .03em; color: var(--cg-magenta);
+}
+.guide figcaption b { color: var(--cg-indigo); font-weight: 600; }
+
+/* ── Tableaux ───────────────────────────────────────────────────────────────── */
+.guide table { width: 100%; border-collapse: collapse; margin: 3mm 0 5mm; font-size: 8.9pt; line-height: 1.45; }
+.guide th {
+  background: var(--cg-lilas-2); color: var(--cg-indigo);
+  font: 600 8.4pt/1.35 "Poppins", sans-serif; text-transform: none; letter-spacing: .01em;
+  text-align: left; padding: 2mm 2.6mm 1.8mm;
+  border: 0; border-bottom: .5mm solid var(--cg-magenta);
+}
+.guide td { padding: 1.7mm 2.6mm; border: 0; border-bottom: .25mm solid var(--cg-ligne); vertical-align: top; background: #fff; }
+.guide tr:nth-child(even) td { background: var(--cg-zebre); }
+.guide tr { break-inside: avoid; }
+.guide-mobile table.gestes { font-size: 9.6pt; }
+.guide-mobile table.gestes th { background: var(--cg-lilas-2); }
+
+/* Les questions fréquentes de la console restent groupées avec leur réponse */
+.guide-console .court { break-inside: avoid; }
+
+/* Glossaire du site : entrées serrées, il tient sur une page */
+.guide-vitrine dl.glossaire div { padding: 1.45mm 0; border-bottom: .25mm solid var(--cg-ligne); }
+.guide-vitrine dl.glossaire dt { color: var(--cg-indigo); }

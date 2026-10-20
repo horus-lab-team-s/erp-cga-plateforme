@@ -241,6 +241,101 @@ def accueil_et_plus(f: t.Tournage):
     t.retour(1.2)
 
 
+# ── Film 5 (20 octobre 2026) : le nouvel accueil, et le scan PDF avec sa fiche ─────────
+
+
+def remplir(rang: int, texte: str):
+    """Le champ au rang donné : touché, rempli, puis le clavier rentré."""
+    champ = t.champs()[rang]
+    t.tap(champ[1], champ[2], 0.6)
+    t.saisir(texte)
+    time.sleep(0.6)
+    t.retour(0.8)
+
+
+def accueil_et_scan_pdf(f: t.Tournage):
+    t.attendre("Bonjour", 30)
+    time.sleep(1.5)
+    f.dire("arrive", "Le nouvel accueil : son mois en un coup d'œil, puis <b>trois chiffres</b>, "
+           "chacun sous son pictogramme.", 6)
+    f.dire("arrive", "<b>3 pièces à envoyer</b>, 8 périodes en retard, 130 documents déposés : "
+           "ce qui demande un geste est en rouge.", 6)
+    f.dire("arrive", "Une facture de la quincaillerie arrive par courriel, <b>en PDF</b>. Jusqu'ici, "
+           "seule une photo pouvait partir.", 4)
+    t.toucher("Déposer une pièce", pause=2)
+    f.dire("traite", "Trois façons de déposer : photographier, choisir dans la galerie, ou "
+           "<b>importer un scan</b>.", 5)
+    t.toucher("Importer un scan (PDF)", pause=3)
+    # ⚠️ Le NOM du fichier, exactement : « Prévisualiser le fichier … » le contient aussi, et
+    # ouvrait la visionneuse au lieu de choisir le fichier.
+    t.attendre("facture-quincaillerie-specimen.pdf", 15)
+    nom = [e for e in t.elements() if e[0] == "facture-quincaillerie-specimen.pdf"][0]
+    t.tap(nom[1], nom[2], 3.5)
+    t.attendre("Vérifier le scan", 15)
+    f.dire("traite", "<b>Vérifier le scan</b> avant l'envoi : le cabinet le recevra tel quel, "
+           "toutes ses pages comprises.", 5)
+    f.dire("traite", "Et, s'il le veut, ce qu'il sait de la pièce. <b>Tout est facultatif</b> : ce "
+           "qu'il dit ici, le comptable n'aura pas à le relire.", 4)
+    t.toucher("achat", pause=1.2)  # ⚠️ l'apostrophe de l'écran est typographique
+    remplir(0, "QUINCAILLERIE DU WOURI")
+    remplir(1, "FA-2026-0815")
+    f.dire("traite", "Le type, le fournisseur, le numéro, le montant : 178 875 F, taxes comprises.", 1)
+    t.glisser(1800, 1100, 700, 1.5)
+    remplir(2, "178875")
+    # ⚠️ `input text` ne tape pas les accents : la note n'en porte pas.
+    remplir(3, "Solde au comptant le 12/09")
+    f.dire("traite", "Un mot pour le comptable : « Solde au comptant le 12/09 ».", 3.5)
+    t.glisser(1800, 900, 700, 1.5)
+    t.toucher("Envoyer la pièce", pause=2)
+    t.attendre("Tout est parti", 30)
+    f.dire("resultat", "« <b>Tout est parti</b> » : le scan est au cabinet, avec sa fiche.", 4.5)
+    t.toucher("Mes pièces envoyées", pause=3)
+    f.dire("resultat", "Dans son historique, la facture en PDF, <b>reçue</b> : il la suivra jusqu'à "
+           "l'écriture.", 6)
+    t.retour(1.0)
+
+
+# ── Film 6 (20 octobre 2026) : le mode sombre, et l'application sans réseau ────────────
+
+
+def sombre_et_hors_ligne(f: t.Tournage):
+    t.attendre("Bonjour", 30)
+    time.sleep(1.5)
+    f.dire("arrive", "Le soir, le téléphone de l'adhérent passe en <b>mode sombre</b>.", 2)
+    t.adb("shell", "cmd", "uimode", "night", "yes")
+    time.sleep(3)
+    f.dire("traite", "L'application suit le téléphone, d'elle-même : fonds sombres, et des "
+           "couleurs d'état qui restent lisibles.", 6)
+    t.onglet("Échéances", 3)
+    f.dire("traite", "Ses échéances, en retard en rouge, déposées en vert : même sens, même "
+           "lisibilité.", 5)
+    t.onglet("Documents", 3)
+    f.dire("traite", "Ses documents. Il les a déjà ouverts une fois : l'application les "
+           "<b>garde</b> pour les relire.", 5)
+    f.dire("arrive", "Et quand le réseau tombe ? En chantier, à Bonabéri, plus de données.", 2)
+    # ⚠️ Le mode avion ne coupe pas le tunnel d'adb : l'émulateur joignait encore le serveur.
+    # Le tunnel coupé, l'application voit le cabinet injoignable, et le dit.
+    t.adb("shell", "cmd", "connectivity", "airplane-mode", "enable")
+    t.adb("reverse", "--remove", "tcp:8010")
+    time.sleep(2)
+    t.glisser(500, 1800, 400, 6)
+    f.dire("resultat", "Un bandeau le dit, avec <b>l'heure de la dernière mise à jour</b> : ses "
+           "documents restent lisibles, tels qu'il les a vus.", 6)
+    t.onglet("Échéances", 2.5)
+    t.glisser(500, 1800, 400, 5)
+    f.dire("resultat", "Ses échéances aussi, datées : une copie d'hier ne se fait jamais passer "
+           "pour celle du jour.", 6)
+    f.dire("resultat", "Une pièce photographiée maintenant <b>attendra</b>, et partira au "
+           "retour du réseau.", 4)
+    t.adb("reverse", "tcp:8010", "tcp:8010")
+    t.adb("shell", "cmd", "connectivity", "airplane-mode", "disable")
+    time.sleep(4)
+    t.glisser(500, 1800, 400, 4)
+    f.dire("resultat", "Le réseau revient : il tire l'écran, tout se remet à jour.", 5)
+    t.adb("shell", "cmd", "uimode", "night", "no")
+    time.sleep(1)
+
+
 def simuler_la_confirmation_honoraires() -> int:
     reference = subprocess.run(
         ["psql", "-h", "127.0.0.1", "-p", "55432", "-U", "cga", "-d", "cga_dev", "-Atc",
@@ -256,6 +351,8 @@ FILMS = {
     "mobile-2-regler-sans-capture": (NKOA, regler_sans_capture),
     "mobile-3-documents-et-dsf": (NGUEMA, documents_et_dsf),
     "mobile-4-accueil-et-plus": (NKOA, accueil_et_plus),
+    "mobile-5-accueil-et-scan-pdf": (NKOA, accueil_et_scan_pdf),
+    "mobile-6-sombre-et-hors-ligne": (NKOA, sombre_et_hors_ligne),
 }
 
 if __name__ == "__main__":

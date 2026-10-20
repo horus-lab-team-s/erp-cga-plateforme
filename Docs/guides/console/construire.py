@@ -6,26 +6,25 @@
 1. Rend une première fois le HTML par Chrome sans en-tête ni pied, avec un repère
    invisible dans chaque titre de chapitre (h2) et de section (h3).
 2. Lit le PDF, trouve la page de chaque repère, remplit le sommaire, rend à nouveau.
-3. Ajoute la numérotation en pied de page (sauf la couverture) et les signets.
+3. Ajoute le pied de page de la collection (sauf la couverture), les signets et les
+   métadonnées, puis compresse (mise_en_page.py, commun aux trois guides).
 """
 
 from __future__ import annotations
 
 import html
-import io
 import re
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
-from pypdf import PdfReader, PdfWriter
-from reportlab.lib.colors import HexColor
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
+from pypdf import PdfReader
 
 ICI = Path(__file__).resolve().parent
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(ICI.parent))
+from mise_en_page import Imprimante, finir  # noqa: E402
+
 SOURCE = ICI / "guide-console.html"
 SORTIE = ICI / "Guide-utilisation-console-CGA.pdf"
 TITRE = re.compile(r'<h([23]) id="([a-z0-9-]+)">(.*?)</h\1>', re.S)
@@ -35,14 +34,12 @@ def repere(ident: str) -> str:
     return "ZQ" + ident.replace("-", "") + "QZ"
 
 
-def rendre(source_html: str, pdf: Path) -> None:
+def rendre(imprimante: Imprimante, source_html: str, pdf: Path) -> None:
     with tempfile.NamedTemporaryFile("w", suffix=".html", dir=ICI, delete=False, encoding="utf-8") as f:
         f.write(source_html)
         temporaire = Path(f.name)
     try:
-        subprocess.run(["google-chrome", "--headless=new", "--no-pdf-header-footer", "--disable-gpu",
-                        "--allow-file-access-from-files", f"--print-to-pdf={pdf}", temporaire.as_uri()],
-                       check=True, capture_output=True, timeout=300)
+        imprimante.imprimer(temporaire, pdf)
     finally:
         temporaire.unlink()
 
@@ -75,7 +72,7 @@ def principal() -> int:
         return s.replace('<ol id="sommaire"><!-- rempli par construire.py --></ol>',
                          f'<ol id="sommaire">{sommaire(pages)}</ol>')
 
-    with tempfile.TemporaryDirectory() as dossier:
+    with tempfile.TemporaryDirectory() as dossier, Imprimante() as imprimante:
         # Les captures entrent au PDF en JPEG : en PNG, le guide dépasse 30 Mo.
         from PIL import Image
         images = Path(dossier) / "images"
@@ -89,7 +86,7 @@ def principal() -> int:
         brouillon = Path(dossier) / "a.pdf"
         # Premier passage : sommaire à pages fictives (même largeur), pour la pagination.
         fictives = {ident: 88 for _, ident, _ in titres}
-        rendre(avec_reperes(inserer(source, fictives)), brouillon)
+        rendre(imprimante, avec_reperes(inserer(source, fictives)), brouillon)
         pages = {}
         lecteur = PdfReader(str(brouillon))
         for i, page in enumerate(lecteur.pages):
@@ -101,37 +98,14 @@ def principal() -> int:
         if manquants:
             print("repères introuvables :", manquants, file=sys.stderr)
         final = Path(dossier) / "b.pdf"
-        rendre(inserer(source, pages), final)
-        lecteur = PdfReader(str(final))
-        nombre = len(lecteur.pages)
-
-        pdfmetrics.registerFont(TTFont("Inter", str(ICI / "polices" / "Inter-Regular.ttf")))
-        ecrivain = PdfWriter()
-        for i, page in enumerate(lecteur.pages):
-            if i > 0:
-                largeur, hauteur = float(page.mediabox.width), float(page.mediabox.height)
-                tampon = io.BytesIO()
-                c = canvas.Canvas(tampon, pagesize=(largeur, hauteur))
-                c.setFont("Inter", 7.5)
-                c.setFillColor(HexColor("#5d5770"))
-                c.drawString(45, 26, "CGA Broad Range Consulting Group · Guide de la console du cabinet · v1.0")
-                c.setFillColor(HexColor("#8C2D86"))
-                c.drawRightString(largeur - 45, 26, f"{i + 1} / {nombre}")
-                c.save()
-                page.merge_page(PdfReader(tampon).pages[0])
-            ecrivain.add_page(page)
-        parent = None
-        for niveau, ident, texte in titres:
-            if ident not in pages:
-                continue
-            if niveau == 2:
-                parent = ecrivain.add_outline_item(texte, pages[ident] - 1)
-            else:
-                ecrivain.add_outline_item(texte, pages[ident] - 1, parent=parent)
-        ecrivain.add_metadata({"/Title": "Guide d'utilisation de la console du cabinet",
-                               "/Author": "CGA Broad Range Consulting Group", "/Subject": "Version 1.0, 19 octobre 2026"})
-        with open(SORTIE, "wb") as f:
-            ecrivain.write(f)
+        rendre(imprimante, inserer(source, pages), final)
+        signets = [(1, re.sub(r"^(\d+)", r"\1. ", texte), pages[ident]) if niveau == 2 else (2, texte, pages[ident])
+                   for niveau, ident, texte in titres if ident in pages]
+        nombre = finir(final, SORTIE, pied="CGA Broad Range Consulting Group · Guide de la console du cabinet · v1.1",
+                       polices=ICI / "polices", signets=signets,
+                       metadonnees={"/Title": "Guide d'utilisation de la console du cabinet",
+                                    "/Author": "CGA Broad Range Consulting Group",
+                                    "/Subject": "Version 1.1, 20 octobre 2026"})
     print(f"{SORTIE.name} : {nombre} pages, {SORTIE.stat().st_size // 1024} Ko")
     return 0
 

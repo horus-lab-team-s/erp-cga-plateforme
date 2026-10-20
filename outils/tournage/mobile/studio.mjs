@@ -42,12 +42,14 @@ async function filmerUnCarton(fichier, demande, duree) {
   await plateau.fermer();
 }
 
+// 20 octobre 2026 : la date du film se lit dans sa description (celle du 18 par défaut).
+const jour = film.date ?? "18 octobre 2026";
 await filmerUnCarton(`${ATELIER}ouverture.mp4`, {
   type: "ouverture",
-  sur: "CGA Broad Range Consulting Group · L'application mobile · 18 octobre 2026",
+  sur: `CGA Broad Range Consulting Group · L'application mobile · ${jour}`,
   titre: film.titre,
   sous: film.sous,
-  pied: `Démonstration jouée en direct sur l'application · 18 octobre 2026<br>${PIED}`,
+  pied: `Démonstration jouée en direct sur l'application · ${jour}<br>${PIED}`,
 }, 9000);
 await filmerUnCarton(`${ATELIER}fin.mp4`, { type: "chapitre", num: "Ce que ce film montre", ...film.fin }, 9000);
 

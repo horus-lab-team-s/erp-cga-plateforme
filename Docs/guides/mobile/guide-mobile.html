@@ -29,19 +29,8 @@
   }
   :root[data-theme="dark"] { --fond: #F4F2F9; }
 
-  @page {
-    size: A4;
-    margin: 18mm 17mm 20mm 17mm;
-    @bottom-left {
-      content: "CGA BRC Group · Guide de l'application mobile adhérent";
-      font-family: "Inter"; font-size: 8pt; color: #8A829C;
-    }
-    @bottom-right {
-      content: "Page " counter(page) " sur " counter(pages);
-      font-family: "Inter"; font-size: 8pt; color: #8A829C;
-    }
-  }
-  @page couverture { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+  @page { size: A4; margin: 18mm 17mm 20mm 17mm; }
+  @page couverture { margin: 0; }
 
   * { box-sizing: border-box; }
   html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -148,19 +137,21 @@
     .contacts { grid-template-columns: 1fr; }
   }
 </style>
+<link rel="stylesheet" href="../collection.css">
 </head>
-<body>
+<body class="guide guide-mobile">
 <main>
 
 <section class="couverture">
-  <div class="logo"><img src="../../../../erp-cga-mobile/assets/marque/cga-logo-couleur.jpg" alt="CGA Broad Range Consulting Group"></div>
-  <div class="sur">Guide d'utilisation</div>
-  <h1>Application mobile adhérent</h1>
-  <p class="sous">Déposer vos pièces, suivre vos échéances et retrouver les documents du cabinet, depuis votre téléphone.</p>
-  <div class="pied">
-    <span>CGA Broad Range Consulting Group · Douala</span>
-    <span>Version 1.0 · 19 octobre 2026</span>
+  <div class="couv-trame"></div><div class="couv-anneau a1"></div><div class="couv-anneau a2"></div><div class="couv-disque"></div>
+  <img class="couv-logo" src="../../../../erp-cga-mobile/assets/marque/cga-logo-blanc.png" alt="CGA Broad Range Consulting Group">
+  <div class="couv-bloc">
+    <div class="couv-sur">Guide d'utilisation</div>
+    <h1>Application mobile adhérent</h1>
+    <div class="couv-filet"></div>
+    <p class="couv-public">Déposer vos pièces, suivre vos échéances et retrouver les documents du cabinet, depuis votre téléphone.</p>
   </div>
+  <div class="couv-pied"><span><b>CGA Broad Range Consulting Group</b> · Douala</span><span class="couv-version">Version 1.1 · 20 octobre 2026</span></div>
 </section>
 
 <section class="sommaire">
