@@ -76,7 +76,9 @@ if [ ! -f api.env ]; then
   sed "s|^CGA_CLE_CHIFFREMENT=.*|CGA_CLE_CHIFFREMENT=$(head -c 32 /dev/urandom | base64)|" api.env.modele > api.env
   echo "  api.env créé (clé de chiffrement tirée ici). ⚠️ Remplir CGA_SMTP_UTILISATEUR et CGA_SMTP_MOT_DE_PASSE."
 fi
-if ! grep -q '^CGA_SMTP_MOT_DE_PASSE=.\+' api.env; then
+if grep -q '^CGA_COURRIELS_DIFFERES=true' api.env; then
+  echo "⚠️ api.env : CGA_COURRIELS_DIFFERES=true, aucun courriel ne partira tant que le relais n'est pas posé." >&2
+elif ! grep -q '^CGA_SMTP_MOT_DE_PASSE=.\+' api.env; then
   echo "⚠️ api.env : le relais SMTP n'est pas rempli. La production refuse de démarrer sans lui." >&2
   echo "   Éditer $DISTANT/api.env, puis relancer ce déploiement." >&2
   exit 3
