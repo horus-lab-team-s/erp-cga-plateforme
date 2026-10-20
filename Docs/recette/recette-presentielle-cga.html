@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cahier de recette en présentiel · Plateforme CGA</title>
+<style>
+@font-face { font-family: "Poppins"; font-weight: 600; src: url("../guides/console/polices/Poppins-SemiBold.ttf"); }
+@font-face { font-family: "Poppins"; font-weight: 700; src: url("../guides/console/polices/Poppins-Bold.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 400; src: url("../guides/console/polices/Inter-Regular.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 600; src: url("../guides/console/polices/Inter-SemiBold.ttf"); }
+:root { --indigo: #2E1B4D; --magenta: #8C2D86; --fond: #F4F2F9; --ligne: #ddd7ea; --gris: #5d5770; --encre: #1f1a2b; --alerte: #a8432a; --alerte-fond: #fbefe9; }
+@page { size: A4; margin: 15mm 14mm 16mm 14mm; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font: 400 9.4pt/1.45 "Inter", sans-serif; color: var(--encre); }
+h1, h2, h3 { font-family: "Poppins", sans-serif; color: var(--indigo); line-height: 1.2; }
+.couverture { background: linear-gradient(135deg, #2E1B4D 0%, #5c2370 60%, #8C2D86 100%); color: #fff; border-radius: 4mm; padding: 14mm 12mm; margin-bottom: 7mm; }
+.couverture h1 { color: #fff; font-size: 22pt; margin: 2mm 0 3mm; }
+.couverture .sur { letter-spacing: .18em; text-transform: uppercase; font-size: 8pt; opacity: .85; }
+.couverture p { margin: 0 0 2mm; opacity: .92; max-width: 160mm; }
+h2 { font-size: 14pt; margin: 8mm 0 3mm; padding-bottom: 2mm; border-bottom: 2px solid var(--magenta); break-after: avoid; }
+h2 .n { color: var(--magenta); margin-right: 2mm; }
+h3 { font-size: 11pt; margin: 5mm 0 2mm; break-after: avoid; }
+p { margin: 0 0 2mm; text-align: justify; hyphens: auto; }
+table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 8.6pt; break-inside: auto; }
+th { background: #ece7f5; color: var(--indigo); text-align: left; font-weight: 600; padding: 1.6mm 2mm; border-bottom: 1.5px solid var(--magenta); }
+td { padding: 1.5mm 2mm; border-bottom: 1px solid var(--ligne); vertical-align: top; }
+tr:nth-child(even) td { background: #faf8fd; }
+tr { break-inside: avoid; }
+code { font-family: "DejaVu Sans Mono", monospace; font-size: 8.2pt; background: var(--fond); padding: .3mm 1mm; border-radius: 1mm; }
+.encadre { border-left: 3px solid var(--magenta); background: var(--fond); padding: 2.5mm 3.5mm; border-radius: 0 2mm 2mm 0; margin: 2mm 0 4mm; break-inside: avoid; }
+.attention { border-left-color: var(--alerte); background: var(--alerte-fond); }
+.case { display: inline-block; width: 3.2mm; height: 3.2mm; border: 1.2px solid var(--indigo); border-radius: .6mm; }
+td.c { width: 7mm; text-align: center; }
+td.qui { width: 30mm; font-weight: 600; color: var(--indigo); }
+.phase { break-inside: avoid-page; }
+.petit { font-size: 8pt; color: var(--gris); }
+</style>
+</head>
+<body>
+
+<section class="couverture">
+  <div class="sur">CGA Broad Range Consulting Group · Zayra Technologies</div>
+  <h1>Cahier de recette en présentiel</h1>
+  <p>Faire valider chaque parcours de la plateforme, en direct, avec un compte de chaque rôle et des clients fictifs. Chaque phase dit qui se connecte, les gestes à faire, et ce qu'on doit constater. Une case par résultat, à cocher pendant la séance.</p>
+  <p class="petit" style="color:#fff;opacity:.8">Version du 20 octobre 2026 · plateforme en ligne : https://cga-brcg.horus-lab.com · console : https://console.cga-brcg.horus-lab.com</p>
+</section>
+
+<h2><span class="n">1</span>Avant la séance</h2>
+<p>La séance se joue sur le <strong>mode de présentation</strong> : une base à part, remplie du jeu de démonstration et du jeu de la recette. La production n'est ni lue ni écrite. Les paiements mobile money s'y valident sans argent réel, et les courriels envoyés se lisent dans la console, menu <strong>Courriels</strong>.</p>
+<table>
+  <tr><th>Moment</th><th>Commande (sur le serveur, <code>ssh zayra</code>)</th><th>Effet</th></tr>
+  <tr><td>Avant la séance</td><td><code>/opt/cga/presentation.sh ouvrir</code></td><td>Base de présentation neuve : démonstration, puis l'équipe et les clients de ce cahier. À relancer avant chaque séance.</td></tr>
+  <tr><td>Ajouter des clients</td><td>compléter <code>/opt/cga/jeu-de-presentation.yaml</code>, puis <code>/opt/cga/presentation.sh completer</code></td><td>Verse les nouveaux clients et leurs adhérents, sans rien effacer.</td></tr>
+  <tr><td>Vérifier</td><td><code>/opt/cga/presentation.sh etat</code></td><td>Dit si la présentation ou la production est servie.</td></tr>
+  <tr><td><strong>Juste après la séance</strong></td><td><code>/opt/cga/presentation.sh fermer</code></td><td>La production revient, la base de présentation et ses fichiers sont détruits.</td></tr>
+</table>
+<div class="encadre attention"><strong>Le limiteur de connexions.</strong> Le serveur refuse les connexions au-delà de 30 tentatives en cinq minutes, depuis une même adresse. Une séance qui change souvent de compte, sur le wifi d'un même bureau, peut l'atteindre : la connexion répond alors « trop de tentatives ». Attendre cinq minutes, ou relancer <code>presentation.sh ouvrir</code> (ce qui remet aussi la base à neuf). Conseil : un navigateur par rôle (ou des fenêtres de navigation privée), pour ne pas se déconnecter à chaque changement.</div>
+<div class="encadre"><strong>L'application mobile.</strong> Elle se télécharge depuis le site, page <strong>Application mobile</strong> (Android 7 ou plus récent). Pendant la présentation, elle se connecte aux comptes adhérents de ce cahier.</div>
+
+<h2 style="break-before: page"><span class="n">2</span>Les comptes</h2>
+<p>Mot de passe de <strong>tous</strong> les comptes ci-dessous : <code>cabinet brcg douala 2026</code>. Les gestes sensibles (comptes, matrice des rôles, dépôts de déclarations) demandent en plus le second facteur : à la première fois, la console propose de l'associer, le lien d'activation se lit dans <strong>Courriels</strong>.</p>
+<table>
+  <tr><th>Rôle</th><th>Personne</th><th>Adresse de connexion</th><th>Ce qu'elle voit</th></tr>
+  <tr><td>Super administrateur</td><td>Hervé KAMGA</td><td><code>h.kamga@cga-brcg.cm</code></td><td>Matrice des rôles, grâces de règlement. Aucun dossier.</td></tr>
+  <tr><td>Administrateur</td><td>Serge ONANA</td><td><code>s.onana@cga-brcg.cm</code></td><td>Comptes et habilitations, exploitation.</td></tr>
+  <tr><td>Direction</td><td>Bernadette MBALLA</td><td><code>b.mballa@cga-brcg.cm</code></td><td>Tout le cabinet : pilotage, tarifs, validations, offres de poste.</td></tr>
+  <tr><td>Réviseure</td><td>Aïcha BOUBA</td><td><code>a.bouba@cga-brcg.cm</code></td><td>Tous les dossiers : revue, quittances, dépôts, DSF.</td></tr>
+  <tr><td>Comptable (portefeuille A)</td><td>Léonard FOTSO</td><td><code>l.fotso@cga-brcg.cm</code></td><td>Bâtiment Plus, La Colombe, Agro-Nkolo, Quincaillerie Moderne.</td></tr>
+  <tr><td>Comptable (portefeuille B)</td><td>Christelle NDONGO</td><td><code>c.ndongo@cga-brcg.cm</code></td><td>Tchoumba &amp; Fils, Nguema Conseil, Pharmacie du Littoral, Nana Couture.</td></tr>
+  <tr><td>Fiscaliste</td><td>Roger EBOLO</td><td><code>r.ebolo@cga-brcg.cm</code></td><td>Référentiel fiscal : taux, seuils, règles de contrôle.</td></tr>
+  <tr><td>Chargée de clientèle et de formalités</td><td>Patricia MOUKOURI</td><td><code>p.moukouri@cga-brcg.cm</code></td><td>Demandes entrantes, portefeuille, création d'entreprise.</td></tr>
+  <tr><td>Juriste (formalités)</td><td>Julienne ATEBA</td><td><code>j.ateba@cga-brcg.cm</code></td><td>Créations, prestations ponctuelles (contrats).</td></tr>
+  <tr><td>Responsable de caisse</td><td>Nadège ESSAMA</td><td><code>n.essama@cga-brcg.cm</code></td><td>Caisse : règlements au guichet, journal de caisse.</td></tr>
+  <tr><td>Inspecteur (externe)</td><td>Georges ATANGANA</td><td><code>g.atangana@inspection.cm</code></td><td>Agro-Nkolo seul, en lecture : aucune écriture.</td></tr>
+  <tr><td>Client en création</td><td>Estelle MBARGA</td><td><code>e.mbarga@technoservices.cm</code></td><td>Son dossier de création CR-2026-0012 (Techno Services SARL).</td></tr>
+</table>
+<h3>Les adhérents (espace client et application mobile)</h3>
+<table>
+  <tr><th>Entreprise</th><th>NIU</th><th>Régime</th><th>Adhérent</th><th>Adresse</th></tr>
+  <tr><td>SARL BATIMENT PLUS</td><td>M081234567890P</td><td>Réel</td><td>Jean-Pierre NKOA</td><td><code>jp.nkoa@batimentplus.cm</code></td></tr>
+  <tr><td>BOULANGERIE LA COLOMBE SARL</td><td>M071122334455J</td><td>Réel</td><td>Marie-Claire ESSOMBA</td><td><code>mc.essomba@lacolombe.cm</code></td></tr>
+  <tr><td>CABINET NGUEMA CONSEIL</td><td>P027788990011M</td><td>Réel</td><td>Sylvain NGUEMA</td><td><code>s.nguema@nguemaconseil.cm</code></td></tr>
+  <tr><td>AGRO-NKOLO SA</td><td>M065544332211L</td><td>Réel</td><td>Thérèse NKOLO</td><td><code>t.nkolo@agronkolo.cm</code></td></tr>
+  <tr><td>CLINIQUE LE BON SAMARITAIN</td><td>M093344556677N</td><td>Réel</td><td>Pascal AMOUGOU</td><td><code>p.amougou@bonsamaritain.cm</code></td></tr>
+  <tr><td>QUINCAILLERIE MODERNE DE BONABERI SARL</td><td>M041122334455Q</td><td>Réel</td><td>Samuel NDJOCK</td><td><code>s.ndjock@quincaillerie-moderne.cm</code></td></tr>
+  <tr><td>PHARMACIE DU LITTORAL SARLU</td><td>M052233445566R</td><td>Réel</td><td>Grâce EKANE</td><td><code>g.ekane@pharmacie-littoral.cm</code></td></tr>
+  <tr><td>ETS NANA COUTURE</td><td>P063344556677S</td><td>Impôt synthétique</td><td>Rosine NANA</td><td><code>r.nana@nanacouture.cm</code></td></tr>
+  <tr><td>ETS TCHOUMBA &amp; FILS</td><td>P019876543210K</td><td>Réel</td><td>Émile TCHOUMBA</td><td><code>e.tchoumba@tchoumbaetfils.cm</code> · <em>pas encore activé : sert la phase 3</em></td></tr>
+</table>
+<p class="petit">Les entreprises Bâtiment Plus, La Colombe et Nguema portent un historique complet (pièces, écritures, échéances, honoraires). Les trois nouveaux clients partent d'un dossier neuf : on y joue les premiers gestes (contrat d'honoraires, premières pièces).</p>
+
+<h2><span class="n">3</span>Les phases</h2>
+<p>Chaque phase se coche ligne par ligne. Un résultat qui diffère se note dans la colonne de droite de la fiche des écarts (section 4), avec l'heure et le compte.</p>
+
+<div class="phase"><h3>Phase 1 · Le visiteur, du site à la demande</h3>
+<table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
+<tr><td class="qui">Visiteur</td><td>Site, <em>Nos services</em> › Assistance juridique : remplir la demande, l'envoyer, puis <em>Joindre un document</em> (PDF ou photo).</td><td>« Votre demande est enregistrée », puis le document « joint à votre demande ».</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">P. MOUKOURI</td><td>Console › <em>Demandes entrantes</em> : ouvrir la demande.</td><td>Affectée d'elle-même en quelques secondes ; « Documents joints par le visiteur » s'ouvre.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">P. MOUKOURI</td><td>Créer une SARL depuis le site (<em>Créer mon entreprise</em>), puis ouvrir la demande : qualification, chiffrage, proforma.</td><td>Qualification déjà remplie par les réponses du client ; prix justifié ; proforma envoyée (courriel lisible dans <em>Courriels</em>).</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">Client</td><td>Ouvrir le lien de la proforma (dans <em>Courriels</em>) : l'accepter, payer par mobile money.</td><td>Paiement simulé validé ; le dossier passe « payé ».</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">N. ESSAMA</td><td>Caisse : constater un règlement au guichet sur une autre proforma.</td><td>Le règlement entre au journal de caisse ; la proforma passe réglée.</td><td class="c"><span class="case"></span></td></tr>
+</table></div>
+
+<div class="phase"><h3>Phase 2 · La création d'entreprise</h3>
+<table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
+<tr><td class="qui">J. ATEBA</td><td>Console › <em>Création d'entreprise</em> : suivre un dossier d'étape en étape (pièces reçues, dépôt CFCE, immatriculation).</td><td>Chaque étape se date ; une pièce manquante bloque l'étape suivante avec son motif.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">E. MBARGA</td><td>Se connecter : son dossier CR-2026-0012, y verser une pièce.</td><td>Elle ne voit que son dossier ; la pièce arrive chez la juriste.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">J. ATEBA</td><td>Porter le NIU délivré, puis convertir le dossier livré en entreprise du portefeuille.</td><td>L'entreprise apparaît au portefeuille, sans ressaisie.</td><td class="c"><span class="case"></span></td></tr>
+</table></div>
+
+<div class="phase"><h3>Phase 3 · Le portefeuille et l'accès adhérent</h3>
+<table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
+<tr><td class="qui">P. MOUKOURI</td><td>Portefeuille › Tchoumba &amp; Fils : renvoyer le lien d'accès à l'adhérent.</td><td>Le courriel d'activation part (<em>Courriels</em>).</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">É. TCHOUMBA</td><td>Ouvrir le lien, choisir son mot de passe, se connecter.</td><td>Son espace s'ouvre sur son seul dossier.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">S. NDJOCK</td><td>Espace › <em>Entreprise</em> : renseigner la fiche signalétique, la soumettre.</td><td>« Soumise au cabinet ».</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">A. BOUBA</td><td>Valider la fiche, ou la renvoyer avec un motif.</td><td>L'adhérent lit « Validée », ou le motif du renvoi.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">B. MBALLA</td><td>Fixer le contrat d'honoraires de la Quincaillerie Moderne.</td><td>Les périodes d'honoraires apparaissent chez l'adhérent.</td><td class="c"><span class="case"></span></td></tr>
+</table></div>
+
+<div class="phase"><h3>Phase 4 · L'adhérent au quotidien (web et application mobile)</h3>
+<table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
+<tr><td class="qui">J-P. NKOA</td><td>Application mobile : <em>Déposer une pièce</em> › photo, galerie, puis <em>Importer un scan (PDF)</em> avec sa fiche.</td><td>« Tout est parti » ; la pièce « Reçue » dans <em>Mes pièces envoyées</em>.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">J-P. NKOA</td><td>Échéances : CNPS de juillet, « J'ai déjà payé », joindre la quittance.</td><td>« Preuve envoyée : le cabinet la vérifie ».</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">A. BOUBA</td><td>Obligations › Bâtiment Plus : relever le montant de la quittance, valider (avec motif si écart).</td><td>L'écart à l'accusé s'affiche ; l'adhérent lit « Payée ».</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">J-P. NKOA</td><td>Honoraires : payer par mobile money.</td><td>Paiement simulé ; la période passe « Réglée », la caisse le voit.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">S. NGUEMA</td><td>Mobile : <em>Ma déclaration annuelle</em>, envoyer l'état des stocks ; <em>Documents</em>, ouvrir un reçu.</td><td>Pièce DSF « Reçue » ; le reçu se lit sur le téléphone.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">Adhérent</td><td>Mobile, réseau coupé : ouvrir <em>Documents</em>.</td><td>Bandeau « Hors ligne », documents toujours lisibles.</td><td class="c"><span class="case"></span></td></tr>
+</table></div>
+
+<div class="phase"><h3>Phase 5 · La comptabilité</h3>
+<table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
+<tr><td class="qui">L. FOTSO</td><td><em>Pièces justificatives</em> : lire une pièce reçue (facture), confirmer ses montants.</td><td>La pastille de conformité paraît ; l'écriture se propose.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">L. FOTSO</td><td>Valider l'écriture, puis <em>Comptabilité</em> : grand livre, balance, balances auxiliaires.</td><td>L'écriture est au journal ; les livres s'éditent en PDF.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">L. FOTSO</td><td>Rapprochement bancaire, immobilisations, clôture du mois, transmission au réviseur.</td><td>Le mois se clôt et passe en revue.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">C. NDONGO</td><td>Tenter d'ouvrir le dossier Bâtiment Plus.</td><td><strong>Introuvable</strong> : il n'est pas dans son portefeuille.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">A. BOUBA</td><td>Réviser le mois : remarques, réponse, clôture.</td><td>La revue se trace au journal d'audit.</td><td class="c"><span class="case"></span></td></tr>
+</table></div>
+
+<div class="phase"><h3>Phase 6 · La paie et la CNPS</h3>
+<table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
+<tr><td class="qui">L. FOTSO</td><td><em>Social et paie</em> › Bâtiment Plus : arrêter les charges du mois, éditer les bulletins.</td><td>Bulletins conformes au barème 2026, en PDF.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">L. FOTSO</td><td>Arrêter puis appeler la CNPS (mandat de paiement du cabinet).</td><td>L'adhérent voit le montant à régler par mobile money.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">J-P. NKOA</td><td>Régler la CNPS appelée, depuis l'application.</td><td>« Fonds reçus par le cabinet », sans capture d'écran.</td><td class="c"><span class="case"></span></td></tr>
+</table></div>
+
+<div class="phase"><h3>Phase 7 · Les obligations fiscales et la DSF</h3>
+<table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
+<tr><td class="qui">L. FOTSO</td><td><em>Déclarations de TVA</em> : préparer le mois.</td><td>Les lignes viennent des journaux ; les contrôles bloquants se lisent.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">A. BOUBA</td><td>Déposer la TVA et consigner l'accusé (second facteur demandé).</td><td>L'échéance passe « Déclarée » ; l'adhérent voit l'accusé dans ses documents.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">L. FOTSO</td><td><em>Clôture annuelle</em> › DSF 2025 : préparer, joindre les pièces, télécharger au format DGI.</td><td>Le fichier DSF se télécharge ; les pièces manquantes sont listées.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">A. BOUBA</td><td>Valider la DSF, puis consigner son dépôt.</td><td>L'adhérent lit « Déposée », avec l'accusé.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">G. ATANGANA</td><td>Inspecteur : ouvrir Agro-Nkolo, puis un autre dossier.</td><td>Agro-Nkolo en lecture seule ; tout autre dossier introuvable.</td><td class="c"><span class="case"></span></td></tr>
+</table></div>
+
+<div class="phase"><h3>Phase 8 · Les prestations ponctuelles et la DSF en ligne</h3>
+<table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
+<tr><td class="qui">J. ATEBA</td><td><em>Prestations ponctuelles</em> : ouvrir une analyse de contrat (adresse du client renseignée), ajouter et retenir des points, soumettre.</td><td>Le client reçoit son lien de suivi (<em>Courriels</em>) : « En cours ».</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">B. MBALLA</td><td>Valider et livrer.</td><td>Le même lien dit « C'est prêt » ; le livrable s'ouvre sur papier à en-tête.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">B. MBALLA</td><td><em>Tarifs de l'offre</em> : fixer le prix de la DSF (impôt libératoire), avec un motif.</td><td>Sur le site, <em>Souscrire en ligne</em> propose la DSF à ce prix, payable.</td><td class="c"><span class="case"></span></td></tr>
+</table></div>
+
+<div class="phase"><h3>Phase 9 · Le gouvernement du cabinet</h3>
+<table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
+<tr><td class="qui">S. ONANA</td><td><em>Comptes et habilitations</em> : associer le second facteur (lien dans <em>Courriels</em>, premier code), puis inviter un collaborateur.</td><td>Un code déjà servi est refusé ; l'invitation part.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">H. KAMGA</td><td><em>Matrice des rôles</em> : créer un rôle sur mesure ; accorder une grâce de règlement nommée.</td><td>Le rôle est attribuable ; la grâce est au journal avec son motif.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">B. MBALLA</td><td><em>Offres de poste</em> : publier une offre ; depuis le site <em>Carrières</em>, postuler avec un CV ; répondre au candidat.</td><td>La candidature arrive avec son CV ; la réponse part du texte type relu.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">B. MBALLA</td><td><em>Pilotage</em> : dossiers à risque, charge et production, rapport mensuel.</td><td>Les chiffres concordent avec les phases jouées.</td><td class="c"><span class="case"></span></td></tr>
+</table></div>
+
+<div class="phase"><h3>Phase 10 · Le cloisonnement, à prouver devant la cliente</h3>
+<table><tr><th>Qui</th><th>Geste</th><th>On constate</th><th></th></tr>
+<tr><td class="qui">R. NANA</td><td>Espace adhérent : tenter l'adresse d'un autre dossier (remplacer le NIU dans la barre d'adresse).</td><td>« Introuvable », jamais « interdit » : l'autre dossier n'existe pas pour elle.</td><td class="c"><span class="case"></span></td></tr>
+<tr><td class="qui">C. NDONGO / L. FOTSO</td><td>Chacun cherche un dossier de l'autre portefeuille (recherche globale).</td><td>Rien ne remonte de l'autre portefeuille.</td><td class="c"><span class="case"></span></td></tr>
+</table></div>
+
+<h2><span class="n">4</span>Fiche des écarts</h2>
+<table>
+  <tr><th style="width:16mm">Heure</th><th style="width:20mm">Phase</th><th style="width:34mm">Compte</th><th>Ce qui a été constaté</th><th style="width:26mm">Gravité</th></tr>
+  <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr><tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr><tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr><tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr><tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+</table>
+<p class="petit">Après la séance : <code>/opt/cga/presentation.sh fermer</code>. Les données de la présentation sont fictives ; aucune ne passe en production.</p>
+</body>
+</html>

@@ -54,7 +54,7 @@ echo "== Fichiers de déploiement"
 ssh "$SERVEUR" "mkdir -p $DISTANT/nginx && chmod 700 $DISTANT"
 scp -q "$ICI/docker-compose.yml" "$ICI/docker-compose.presentation.yml" "$ICI/env.modele" \
   "$ICI/api.env.modele" "$ICI/poser-nginx.sh" "$ICI/certificats.sh" "$ICI/sauvegarde.sh" \
-  "$ICI/presentation.sh" "$SERVEUR:$DISTANT/"
+  "$ICI/presentation.sh" "$ICI/jeu-de-presentation.yaml" "$SERVEUR:$DISTANT/"
 scp -q "$ICI/nginx/"*.conf "$SERVEUR:$DISTANT/nginx/"
 scp -q "$DEPOTS/erp-cga-backend/outils/roles-postgresql.sql" "$SERVEUR:$DISTANT/"
 

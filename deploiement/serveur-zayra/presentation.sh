@@ -2,6 +2,7 @@
 # Le mode de présentation : ouvrir avant la séance chez la cliente, FERMER juste après.
 #
 #     /opt/cga/presentation.sh ouvrir      base de présentation neuve, jeu de démonstration, API basculée
+#     /opt/cga/presentation.sh completer   verse `jeu-de-presentation.yaml` (clients ajoutés), sans rien effacer
 #     /opt/cga/presentation.sh fermer      API remise sur la production, base de présentation détruite
 #     /opt/cga/presentation.sh etat        lequel des deux modes tourne
 #
@@ -10,6 +11,11 @@ set -euo pipefail
 cd "$(dirname "$0")"
 COMPOSE=(docker compose --env-file .env)
 PRESENTATION=(docker compose --env-file .env -f docker-compose.yml -f docker-compose.presentation.yml)
+# Le jeu de la recette (équipe complète, clients fictifs), par-dessus la démonstration.
+verser_le_jeu() {
+  "${PRESENTATION[@]}" run --rm --no-deps -v "$PWD/jeu-de-presentation.yaml:/jeu.yaml:ro" api \
+    python -m app.jeu_de_presentation /jeu.yaml
+}
 psql_cga() { docker exec -i cga-db-1 psql -v ON_ERROR_STOP=1 -U cga -d cga -qAt "$@"; }
 
 case "${1:-etat}" in
@@ -21,11 +27,18 @@ case "${1:-etat}" in
     "${PRESENTATION[@]}" run --rm --no-deps api sh -c \
       'rm -rf /application/fichiers/presentation && mkdir -p /application/fichiers/presentation \
        && alembic upgrade head && python -c "from app.amorcage import amorcer; print(amorcer())"'
+    echo "== Jeu de la recette"
+    verser_le_jeu
     echo "== API et ordonnanceur sur la présentation"
     "${PRESENTATION[@]}" up -d --no-deps api ordonnanceur
     echo
     echo "Mode de présentation OUVERT. Comptes de démonstration, mot de passe « cabinet brcg douala 2026 »."
     echo "⚠️ À fermer dès la séance finie : $0 fermer"
+    ;;
+  completer)
+    "${PRESENTATION[@]}" exec -T api printenv CGA_URL_BASE_DE_DONNEES | grep -q cga_presentation \
+      || { echo "La présentation n'est pas ouverte : $0 ouvrir" >&2; exit 1; }
+    verser_le_jeu
     ;;
   fermer)
     echo "== API et ordonnanceur remis sur la production"
@@ -42,5 +55,5 @@ case "${1:-etat}" in
       echo "PRODUCTION (base cga)."
     fi
     ;;
-  *) echo "usage : $0 ouvrir | fermer | etat" >&2; exit 2 ;;
+  *) echo "usage : $0 ouvrir | completer | fermer | etat" >&2; exit 2 ;;
 esac
