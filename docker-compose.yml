@@ -244,6 +244,8 @@ services:
       # ⚠️ Voir la console : à la construction, jamais au démarrage.
       args:
         NEXT_PUBLIC_ADRESSE_CONSOLE: http://localhost:${PORT_CONSOLE:-3000}
+        # Vide : la page « Application mobile » dit « bientôt disponible ».
+        NEXT_PUBLIC_LIEN_APPLICATION_ANDROID: ${LIEN_APPLICATION_ANDROID:-}
     environment:
       API_URL: http://api:8000
     ports:
