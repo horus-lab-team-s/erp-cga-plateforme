@@ -1,0 +1,152 @@
+# CGA BRCG en production, sur le serveur partagé de Zayra (81.0.246.144), le 20 octobre 2026.
+#
+#   https://cga-brcg.horus-lab.com            le site public (vitrine)
+#   https://console.cga-brcg.horus-lab.com    la console du cabinet et l'espace adhérent
+#   https://api.cga-brcg.horus-lab.com        l'API (l'application mobile l'appelle)
+#
+# ⚠️ AUCUN PORT N'EST PUBLIÉ. Le nginx du serveur (conteneur backend-nginx-1) tient 80 et 443
+# pour une dizaine de projets ; il joint les services de CGA par leur alias sur le réseau
+# `cga_default`, auquel il est rattaché une fois :
+#
+#     docker network connect cga_default backend-nginx-1
+#
+# ⚠️ DES NOMS PROPRES À CGA SUR LE RÉSEAU (cga-api, cga-console, cga-vitrine) : le nginx est
+# rattaché aux réseaux de plusieurs projets, et un alias générique comme « api » pourrait y
+# désigner le service d'un autre.
+#
+# ⚠️ DES PLAFONDS DE MÉMOIRE : la machine a 11 Go pour une trentaine de conteneurs. Un service
+# qui s'emballe est arrêté par Docker, au lieu de pousser le noyau à tuer celui d'un autre projet.
+#
+# Les images sont construites sur le poste et chargées ici (voir `deployer.sh`) : le serveur ne
+# compile rien, et l'étiquette dit exactement quel commit tourne.
+#
+#     docker compose --env-file .env up -d
+name: cga
+
+x-api: &api
+  image: cga-api:${ETIQUETTE}
+  # ⚠️ Deux fichiers, et non un : `.env` ne sert qu'à composer ce fichier (mots de passe des
+  # rôles, étiquette) ; `api.env` porte les secrets de l'application (clé de chiffrement,
+  # relais SMTP, Tara). Le mot de passe du propriétaire de la base n'entre pas dans l'API.
+  env_file: api.env
+  environment: &environnement-api
+    CGA_ENVIRONNEMENT: production
+    CGA_PERSISTANCE: postgresql
+    CGA_URL_BASE_DE_DONNEES: postgresql+psycopg://cga_app:${MOT_DE_PASSE_APP}@cga-db:5432/cga
+    CGA_DOSSIER_FICHIERS: /application/fichiers
+    CGA_ADRESSE_PUBLIQUE: https://api.cga-brcg.horus-lab.com
+    CGA_ADRESSE_PUBLIQUE_SITE: https://console.cga-brcg.horus-lab.com
+    CGA_ADRESSE_PUBLIQUE_VITRINE: https://cga-brcg.horus-lab.com
+    CGA_ORIGINES_CORS: '["https://console.cga-brcg.horus-lab.com","https://cga-brcg.horus-lab.com"]'
+    # L'API n'est joignable que par le réseau interne, où seul le nginx du serveur parle en
+    # mandataire : ses en-têtes X-Forwarded-* sont les seuls à arriver ici.
+    FORWARDED_ALLOW_IPS: "*"
+  volumes:
+    - fichiers:/application/fichiers
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cga
+      POSTGRES_PASSWORD: ${MOT_DE_PASSE_PROPRIETAIRE}
+      POSTGRES_DB: cga
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - donnees_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cga -d cga"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      default:
+        aliases: [cga-db]
+    mem_limit: 512m
+    restart: unless-stopped
+
+  # Les deux rôles de l'application : `cga_migration` possède le schéma, `cga_app` n'a que les
+  # droits d'usage et subit le cloisonnement par ligne. Idempotent : rejoué à chaque montée.
+  roles:
+    image: postgres:16-alpine
+    volumes:
+      - ./roles-postgresql.sql:/roles.sql:ro
+    environment:
+      PGPASSWORD: ${MOT_DE_PASSE_PROPRIETAIRE}
+    command: >-
+      psql -v ON_ERROR_STOP=1 -h cga-db -U cga -d cga
+           -v mot_de_passe_migration="'${MOT_DE_PASSE_MIGRATION}'"
+           -v mot_de_passe_app="'${MOT_DE_PASSE_APP}'"
+           -f /roles.sql
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  migration:
+    <<: *api
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      <<: *environnement-api
+      CGA_URL_BASE_DE_DONNEES: postgresql+psycopg://cga_migration:${MOT_DE_PASSE_MIGRATION}@cga-db:5432/cga
+    depends_on:
+      roles:
+        condition: service_completed_successfully
+    mem_limit: 384m
+    restart: "no"
+
+  api:
+    <<: *api
+    environment:
+      <<: *environnement-api
+      CGA_ORDONNANCEUR_EN_PROCESSUS: "false"
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    networks:
+      default:
+        aliases: [cga-api]
+    mem_limit: 768m
+
+  # Les travaux périodiques (affectation des demandes, relances, avis) : une seule instance,
+  # pour qu'aucun travail ne tourne deux fois.
+  ordonnanceur:
+    <<: *api
+    environment:
+      <<: *environnement-api
+      CGA_ORDONNANCEUR_EN_PROCESSUS: "true"
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    mem_limit: 512m
+
+  console:
+    image: cga-console:${ETIQUETTE}
+    environment:
+      API_URL: http://cga-api:8000
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      default:
+        aliases: [cga-console]
+    mem_limit: 384m
+    restart: unless-stopped
+
+  vitrine:
+    image: cga-vitrine:${ETIQUETTE}
+    environment:
+      API_URL: http://cga-api:8000
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      default:
+        aliases: [cga-vitrine]
+    mem_limit: 384m
+    restart: unless-stopped
+
+volumes:
+  donnees_postgres:
+  fichiers:

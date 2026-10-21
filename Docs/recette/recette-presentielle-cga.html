@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Recette en présentiel · Plateforme CGA</title>
+<style>
+@font-face { font-family: "Poppins"; font-weight: 600; src: url("../guides/console/polices/Poppins-SemiBold.ttf"); }
+@font-face { font-family: "Poppins"; font-weight: 700; src: url("../guides/console/polices/Poppins-Bold.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 400; src: url("../guides/console/polices/Inter-Regular.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 600; src: url("../guides/console/polices/Inter-SemiBold.ttf"); }
+:root { --indigo: #2E1B4D; --magenta: #8C2D86; --fond: #F4F2F9; --ligne: #ddd7ea; --gris: #5d5770; --encre: #1f1a2b; }
+@page { size: A4; margin: 15mm 14mm 16mm 14mm; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font: 400 9.6pt/1.45 "Inter", sans-serif; color: var(--encre); }
+h1, h2, h3 { font-family: "Poppins", sans-serif; color: var(--indigo); line-height: 1.2; }
+.couverture { background: linear-gradient(135deg, #2E1B4D 0%, #5c2370 60%, #8C2D86 100%); color: #fff; border-radius: 4mm; padding: 13mm 12mm; margin-bottom: 7mm; }
+.couverture h1 { color: #fff; font-size: 22pt; margin: 2mm 0 3mm; }
+.couverture .sur { letter-spacing: .18em; text-transform: uppercase; font-size: 8pt; opacity: .85; }
+.couverture p { margin: 0; opacity: .92; max-width: 165mm; text-align: justify; }
+h2 { font-size: 14pt; margin: 7mm 0 3mm; padding-bottom: 2mm; border-bottom: 2px solid var(--magenta); break-after: avoid; }
+h2 .n { color: var(--magenta); margin-right: 2mm; }
+h3 { font-size: 10.8pt; margin: 0 0 1.5mm; break-after: avoid; }
+p { margin: 0 0 2mm; }
+table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 8.8pt; }
+th { background: #ece7f5; color: var(--indigo); text-align: left; font-weight: 600; padding: 1.7mm 2mm; border-bottom: 1.5px solid var(--magenta); }
+td { padding: 1.6mm 2mm; border-bottom: 1px solid var(--ligne); vertical-align: top; }
+tr:nth-child(even) td { background: #faf8fd; }
+tr { break-inside: avoid; }
+code { font-family: "DejaVu Sans Mono", monospace; font-size: 8.4pt; background: var(--fond); padding: .3mm 1mm; border-radius: 1mm; }
+.acces { display: grid; grid-template-columns: 44mm 1fr; gap: 1.6mm 4mm; background: var(--fond); border-radius: 3mm; padding: 4mm 5mm; margin: 2mm 0 4mm; }
+.acces dt { font-weight: 600; color: var(--indigo); }
+.acces dd { margin: 0; }
+.role { border: 1px solid var(--ligne); border-left: 3px solid var(--magenta); border-radius: 0 2.5mm 2.5mm 0; padding: 3mm 4mm 2mm; margin: 0 0 3mm; break-inside: avoid; }
+.role .qui { font-size: 8.6pt; color: var(--gris); margin: 0 0 1.5mm; }
+.role ul { margin: 0; padding-left: 0; list-style: none; }
+.role li { display: flex; gap: 2.5mm; margin-bottom: 1.2mm; text-align: justify; }
+.case { flex: 0 0 auto; display: inline-block; width: 3.2mm; height: 3.2mm; margin-top: .6mm; border: 1.2px solid var(--indigo); border-radius: .6mm; }
+.note { font-size: 8.4pt; color: var(--gris); }
+</style>
+</head>
+<body>
+
+<section class="couverture">
+  <div class="sur">CGA Broad Range Consulting Group</div>
+  <h1>Recette en présentiel</h1>
+  <p>Ce document réunit les comptes de test de la plateforme et, pour chacun, les actions à vérifier. Toutes les données sont fictives : entreprises, personnes et montants. Les paiements mobile money de la séance sont simulés : aucun argent ne circule.</p>
+</section>
+
+<h2><span class="n">1</span>Les accès</h2>
+<dl class="acces">
+  <dt>Site du cabinet</dt><dd><code>https://cga-brcg.horus-lab.com</code></dd>
+  <dt>Console et espace adhérent</dt><dd><code>https://console.cga-brcg.horus-lab.com</code></dd>
+  <dt>Application mobile (Android)</dt><dd>page <code>https://cga-brcg.horus-lab.com/application</code>, bouton de téléchargement</dd>
+  <dt>Courriels de la séance</dt><dd><code>https://console.cga-brcg.horus-lab.com/courriels</code> : les messages que la plateforme enverrait (liens d'activation, propositions, avis)</dd>
+  <dt>Mot de passe</dt><dd><strong>le même pour tous les comptes : <code>cabinet brcg douala 2026</code></strong></dd>
+</dl>
+
+<h2><span class="n">2</span>Les comptes et leurs rôles</h2>
+<h3>L'équipe du cabinet</h3>
+<table>
+  <tr><th style="width:42mm">Rôle</th><th style="width:34mm">Personne</th><th style="width:52mm">Identifiant</th><th>Périmètre</th></tr>
+  <tr><td>Direction</td><td>Bernadette MBALLA</td><td><code>b.mballa@cga-brcg.cm</code></td><td>Tout le cabinet</td></tr>
+  <tr><td>Administrateur</td><td>Serge ONANA</td><td><code>s.onana@cga-brcg.cm</code></td><td>Comptes et habilitations</td></tr>
+  <tr><td>Super administrateur</td><td>Hervé KAMGA</td><td><code>h.kamga@cga-brcg.cm</code></td><td>Matrice des rôles, faveurs</td></tr>
+  <tr><td>Réviseure</td><td>Aïcha BOUBA</td><td><code>a.bouba@cga-brcg.cm</code></td><td>Tous les dossiers</td></tr>
+  <tr><td>Comptable</td><td>Léonard FOTSO</td><td><code>l.fotso@cga-brcg.cm</code></td><td>Bâtiment Plus, La Colombe, Agro-Nkolo, Quincaillerie Moderne</td></tr>
+  <tr><td>Comptable</td><td>Christelle NDONGO</td><td><code>c.ndongo@cga-brcg.cm</code></td><td>Tchoumba &amp; Fils, Nguema Conseil, Pharmacie du Littoral, Nana Couture</td></tr>
+  <tr><td>Fiscaliste</td><td>Roger EBOLO</td><td><code>r.ebolo@cga-brcg.cm</code></td><td>Référentiel fiscal</td></tr>
+  <tr><td>Chargée de clientèle</td><td>Patricia MOUKOURI</td><td><code>p.moukouri@cga-brcg.cm</code></td><td>Demandes, portefeuille, créations</td></tr>
+  <tr><td>Juriste</td><td>Julienne ATEBA</td><td><code>j.ateba@cga-brcg.cm</code></td><td>Créations, contrats</td></tr>
+  <tr><td>Responsable de caisse</td><td>Nadège ESSAMA</td><td><code>n.essama@cga-brcg.cm</code></td><td>Caisse</td></tr>
+  <tr><td>Inspecteur (externe)</td><td>Georges ATANGANA</td><td><code>g.atangana@inspection.cm</code></td><td>Agro-Nkolo, en lecture seule</td></tr>
+</table>
+<h3>Les clients</h3>
+<table>
+  <tr><th style="width:42mm">Rôle</th><th style="width:34mm">Personne</th><th style="width:52mm">Identifiant</th><th>Entreprise</th></tr>
+  <tr><td>Adhérent</td><td>Jean-Pierre NKOA</td><td><code>jp.nkoa@batimentplus.cm</code></td><td>SARL Bâtiment Plus</td></tr>
+  <tr><td>Adhérente</td><td>Marie-Claire ESSOMBA</td><td><code>mc.essomba@lacolombe.cm</code></td><td>Boulangerie La Colombe SARL</td></tr>
+  <tr><td>Adhérent</td><td>Sylvain NGUEMA</td><td><code>s.nguema@nguemaconseil.cm</code></td><td>Cabinet Nguema Conseil</td></tr>
+  <tr><td>Adhérente</td><td>Thérèse NKOLO</td><td><code>t.nkolo@agronkolo.cm</code></td><td>Agro-Nkolo SA</td></tr>
+  <tr><td>Adhérent</td><td>Pascal AMOUGOU</td><td><code>p.amougou@bonsamaritain.cm</code></td><td>Clinique Le Bon Samaritain</td></tr>
+  <tr><td>Adhérent</td><td>Samuel NDJOCK</td><td><code>s.ndjock@quincaillerie-moderne.cm</code></td><td>Quincaillerie Moderne de Bonabéri SARL</td></tr>
+  <tr><td>Adhérente</td><td>Grâce EKANE</td><td><code>g.ekane@pharmacie-littoral.cm</code></td><td>Pharmacie du Littoral SARLU</td></tr>
+  <tr><td>Adhérente</td><td>Rosine NANA</td><td><code>r.nana@nanacouture.cm</code></td><td>Ets Nana Couture (impôt synthétique)</td></tr>
+  <tr><td>Adhérent à activer</td><td>Émile TCHOUMBA</td><td><code>e.tchoumba@tchoumbaetfils.cm</code></td><td>Ets Tchoumba &amp; Fils : reçoit son lien d'activation pendant la séance</td></tr>
+  <tr><td>Client en création</td><td>Estelle MBARGA</td><td><code>e.mbarga@technoservices.cm</code></td><td>Techno Services SARL, en cours de création</td></tr>
+</table>
+<p class="note">Les gestes sensibles (comptes, rôles, dépôts de déclarations) demandent un second facteur : la première fois, la console propose de l'associer, et le lien de confirmation arrive dans les courriels de la séance.</p>
+
+<h2 style="break-before: page"><span class="n">3</span>Les actions par rôle</h2>
+
+<div class="role"><h3>Visiteur du site (sans compte)</h3><p class="qui">Sur https://cga-brcg.horus-lab.com</p><ul>
+<li><span class="case"></span>Demander un service (Assistance juridique) et y joindre un document.</li>
+<li><span class="case"></span>Demander une création d'entreprise : les réponses du formulaire remplissent le dossier du cabinet.</li>
+<li><span class="case"></span>Recevoir sa proposition, l'accepter et la régler par mobile money.</li>
+<li><span class="case"></span>Postuler à une offre d'emploi (Carrières), avec un CV.</li>
+<li><span class="case"></span>Télécharger l'application mobile.</li></ul></div>
+
+<div class="role"><h3>Chargée de clientèle · Patricia MOUKOURI</h3><p class="qui">p.moukouri@cga-brcg.cm</p><ul>
+<li><span class="case"></span>Demandes entrantes : ouvrir une demande et lire le document joint par le visiteur.</li>
+<li><span class="case"></span>Qualifier une demande de création, chiffrer, émettre la proposition (proforma).</li>
+<li><span class="case"></span>Portefeuille › Tchoumba &amp; Fils : « Renvoyer le lien d'activation » à l'adhérent.</li></ul></div>
+
+<div class="role"><h3>Juriste · Julienne ATEBA</h3><p class="qui">j.ateba@cga-brcg.cm</p><ul>
+<li><span class="case"></span>Création d'entreprise : faire avancer un dossier d'étape en étape, verser les pièces reçues.</li>
+<li><span class="case"></span>Porter le NIU délivré, puis convertir la création livrée en dossier du portefeuille.</li>
+<li><span class="case"></span>Prestations ponctuelles : ouvrir une analyse de contrat, retenir ses points, la soumettre au second regard.</li></ul></div>
+
+<div class="role"><h3>Responsable de caisse · Nadège ESSAMA</h3><p class="qui">n.essama@cga-brcg.cm</p><ul>
+<li><span class="case"></span>Constater un règlement au guichet (proposition ou honoraires) et le retrouver au journal de caisse.</li>
+<li><span class="case"></span>Voir les règlements mobile money arriver d'eux-mêmes.</li></ul></div>
+
+<div class="role"><h3>Comptable · Léonard FOTSO</h3><p class="qui">l.fotso@cga-brcg.cm</p><ul>
+<li><span class="case"></span>Pièces justificatives : lire une facture reçue, confirmer ses montants, valider l'écriture proposée.</li>
+<li><span class="case"></span>Comptabilité : grand livre, balance, balances auxiliaires, rapprochement bancaire, immobilisations.</li>
+<li><span class="case"></span>Clôturer le mois et le transmettre à la réviseure.</li>
+<li><span class="case"></span>Social et paie : bulletins du mois, puis l'appel de la CNPS.</li>
+<li><span class="case"></span>Préparer la déclaration de TVA, puis la DSF de l'exercice (avec ses pièces).</li></ul></div>
+
+<div class="role"><h3>Comptable · Christelle NDONGO</h3><p class="qui">c.ndongo@cga-brcg.cm</p><ul>
+<li><span class="case"></span>Ouvrir ses dossiers (Pharmacie du Littoral, Nana Couture…).</li>
+<li><span class="case"></span>Vérifier qu'un dossier de son collègue (Bâtiment Plus) est introuvable pour elle.</li></ul></div>
+
+<div class="role"><h3>Réviseure · Aïcha BOUBA</h3><p class="qui">a.bouba@cga-brcg.cm</p><ul>
+<li><span class="case"></span>Réviser le mois transmis : remarques, réponse, clôture.</li>
+<li><span class="case"></span>Juger une quittance envoyée par un adhérent : l'écart à l'accusé de dépôt s'affiche, un motif est demandé.</li>
+<li><span class="case"></span>Valider ou renvoyer une fiche signalétique.</li>
+<li><span class="case"></span>Déposer la TVA et la DSF, et consigner leurs accusés (second facteur).</li></ul></div>
+
+<div class="role"><h3>Fiscaliste · Roger EBOLO</h3><p class="qui">r.ebolo@cga-brcg.cm</p><ul>
+<li><span class="case"></span>Référentiel et règles : lire les taux et les seuils, essayer une règle de contrôle sur les factures.</li></ul></div>
+
+<div class="role"><h3>Direction · Bernadette MBALLA</h3><p class="qui">b.mballa@cga-brcg.cm</p><ul>
+<li><span class="case"></span>Tarifs de l'offre : fixer un prix (par exemple la DSF) ; il devient payable sur le site.</li>
+<li><span class="case"></span>Fixer le contrat d'honoraires d'un nouveau client (Quincaillerie Moderne).</li>
+<li><span class="case"></span>Valider et livrer une prestation ponctuelle ; le client ouvre son livrable.</li>
+<li><span class="case"></span>Offres de poste : publier une offre, lire une candidature, répondre au candidat.</li>
+<li><span class="case"></span>Pilotage : dossiers à risque, charge et production, rapport mensuel.</li></ul></div>
+
+<div class="role"><h3>Administrateur · Serge ONANA</h3><p class="qui">s.onana@cga-brcg.cm</p><ul>
+<li><span class="case"></span>Associer le second facteur (application d'authentification), puis inviter un collaborateur.</li>
+<li><span class="case"></span>Suspendre et rétablir un compte.</li></ul></div>
+
+<div class="role"><h3>Super administrateur · Hervé KAMGA</h3><p class="qui">h.kamga@cga-brcg.cm</p><ul>
+<li><span class="case"></span>Matrice des rôles : créer un rôle sur mesure.</li>
+<li><span class="case"></span>Accorder une grâce de règlement à un adhérent, avec son motif.</li></ul></div>
+
+<div class="role"><h3>Inspecteur · Georges ATANGANA</h3><p class="qui">g.atangana@inspection.cm</p><ul>
+<li><span class="case"></span>Consulter Agro-Nkolo en lecture seule ; constater qu'aucun autre dossier ne lui est accessible.</li></ul></div>
+
+<div class="role"><h3>Adhérent · Jean-Pierre NKOA (web et application mobile)</h3><p class="qui">jp.nkoa@batimentplus.cm</p><ul>
+<li><span class="case"></span>Application : déposer une pièce par photo, depuis la galerie, ou en scan PDF avec sa fiche.</li>
+<li><span class="case"></span>Échéances : « J'ai déjà payé », envoyer la quittance ; lire ensuite « Payée ».</li>
+<li><span class="case"></span>Régler ses honoraires et la CNPS appelée par mobile money.</li>
+<li><span class="case"></span>Documents : ouvrir un accusé de dépôt ; sans réseau, le relire (bandeau « Hors ligne »).</li></ul></div>
+
+<div class="role"><h3>Adhérents des nouveaux clients · Samuel NDJOCK, Grâce EKANE, Rosine NANA</h3><p class="qui">s.ndjock@quincaillerie-moderne.cm · g.ekane@pharmacie-littoral.cm · r.nana@nanacouture.cm</p><ul>
+<li><span class="case"></span>Se connecter, renseigner la fiche signalétique de l'entreprise et la soumettre au cabinet.</li>
+<li><span class="case"></span>Déposer une première pièce.</li>
+<li><span class="case"></span>Vérifier que le dossier d'une autre entreprise est introuvable.</li></ul></div>
+
+<div class="role"><h3>Adhérent · Sylvain NGUEMA</h3><p class="qui">s.nguema@nguemaconseil.cm</p><ul>
+<li><span class="case"></span>Ma déclaration annuelle : envoyer une pièce de la DSF (état des stocks) et suivre l'avancement de la DSF.</li></ul></div>
+
+<div class="role"><h3>Adhérent à activer · Émile TCHOUMBA</h3><p class="qui">e.tchoumba@tchoumbaetfils.cm</p><ul>
+<li><span class="case"></span>Ouvrir le lien d'activation reçu, choisir son mot de passe, se connecter à son espace.</li></ul></div>
+
+<div class="role"><h3>Client en création · Estelle MBARGA</h3><p class="qui">e.mbarga@technoservices.cm</p><ul>
+<li><span class="case"></span>Suivre sa création étape par étape et y verser une pièce.</li></ul></div>
+
+<h2><span class="n">4</span>Remarques de la séance</h2>
+<table>
+  <tr><th style="width:42mm">Compte</th><th>Remarque</th></tr>
+  <tr><td>&nbsp;</td><td></td></tr><tr><td>&nbsp;</td><td></td></tr><tr><td>&nbsp;</td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td></tr><tr><td>&nbsp;</td><td></td></tr><tr><td>&nbsp;</td><td></td></tr>
+</table>
+</body>
+</html>
