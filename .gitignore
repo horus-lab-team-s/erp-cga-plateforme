@@ -20,3 +20,7 @@ __pycache__/
 # permet de le déployer depuis un service d'hébergement qui n'exécute que
 # `npm run build`. La chaîne de vérification, elle, rejoue l'importation et
 # compare : c'est là que se voit un contenu qui aurait dérivé de sa source.
+
+# ⚠️ Les prises de tournage : lourdes, et refaites à chaque pile neuve. Les vidéos
+# livrées vivent dans `erp-cga-brcg/Docs/demonstration/`.
+outils/tournage/sortie/

@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cartons de presentation</title>
+<style>
+  /* ────────────────────────────────────────────────────────────────────────
+     LES CARTONS DE LA VIDEO DE PRESENTATION.
+
+     Une seule page qui rend plusieurs cartons differents. Lequel est rendu
+     se lit dans le fragment de l'adresse (ce qui suit le #), ce qui permet au
+     script de tournage de les enchainer par de simples navigations, sans
+     ecrire un fichier par carton.
+
+     Les couleurs sont celles de la solution : indigo #2e1b4d et magenta
+     #8c2d86, relevees dans app/styles/tokens.css de la vitrine. Un carton qui
+     jurerait avec les ecrans filmes juste apres se verrait immediatement.
+     ──────────────────────────────────────────────────────────────────────── */
+  :root {
+    --indigo-900: #1a0f2e;
+    --indigo-800: #2e1b4d;
+    --indigo-700: #492f79;
+    --magenta: #c05fb8;
+    --magenta-fort: #8c2d86;
+    --clair: #f4f1f8;
+    --doux: #b9b0cc;
+    --discret: #8b839e;
+    --police: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1600px; height: 900px; overflow: hidden; }
+  body {
+    background:
+      radial-gradient(1200px 700px at 18% 12%, #3a2360 0%, transparent 62%),
+      radial-gradient(900px 600px at 86% 88%, #4a1f52 0%, transparent 58%),
+      var(--indigo-900);
+    color: var(--clair);
+    font-family: var(--police);
+    display: grid;
+    place-items: center;
+  }
+  /* Le filet magenta en haut de chaque carton : il relie visuellement les
+     cartons entre eux et les distingue des captures d'ecran. */
+  body::before {
+    content: ""; position: fixed; inset: 0 0 auto 0; height: 5px;
+    background: linear-gradient(90deg, var(--magenta-fort), var(--magenta) 55%, transparent);
+  }
+  .carton { width: 1600px; height: 900px; position: relative; }
+
+  /* ── Le carton d'ouverture ──────────────────────────────────────────── */
+  .ouverture { display: grid; place-content: center; padding: 0 140px; }
+  .ouverture .sur { font: 600 15px/1 var(--police); letter-spacing: .22em;
+    text-transform: uppercase; color: var(--magenta); margin-bottom: 28px; }
+  .ouverture h1 { font: 700 72px/1.08 var(--police); letter-spacing: -.025em;
+    max-width: 1180px; }
+  .ouverture h1 em { font-style: normal; color: var(--magenta); }
+  .ouverture .sous { font: 400 24px/1.5 var(--police); color: var(--doux);
+    margin-top: 30px; max-width: 920px; }
+  .ouverture .pied { position: absolute; left: 140px; bottom: 96px;
+    font: 400 16px/1.7 var(--police); color: var(--discret); }
+  .ouverture .pied b { color: var(--doux); font-weight: 600; }
+
+  /* ── Le carton de chapitre ──────────────────────────────────────────── */
+  .chapitre { display: grid; place-content: center; padding: 0 160px; }
+  .chapitre .num { font: 700 13px/1 var(--police); letter-spacing: .3em;
+    text-transform: uppercase; color: var(--magenta); margin-bottom: 26px; }
+  .chapitre h2 { font: 700 60px/1.12 var(--police); letter-spacing: -.02em;
+    max-width: 1180px; }
+  .chapitre .sous { font: 400 22px/1.6 var(--police); color: var(--doux);
+    margin-top: 26px; max-width: 980px; }
+
+  /* ── Les cartons a schema ───────────────────────────────────────────── */
+  .schema { padding: 74px 90px 70px; display: grid;
+    grid-template-rows: auto 1fr auto; gap: 26px; }
+  .schema .num { font: 700 12px/1 var(--police); letter-spacing: .3em;
+    text-transform: uppercase; color: var(--magenta); margin-bottom: 14px; }
+  .schema h2 { font: 700 40px/1.14 var(--police); letter-spacing: -.02em; }
+  .schema .dessin { display: grid; place-items: center; min-height: 0; }
+  .schema svg { width: 100%; height: auto; max-height: 560px; }
+  .schema figcaption { font: 400 17px/1.6 var(--police); color: var(--doux);
+    max-width: 1300px; }
+  .schema figcaption b { color: var(--clair); font-weight: 600; }
+
+  /* ── Le tableau des acteurs ─────────────────────────────────────────── */
+  .acteurs { padding: 70px 90px; display: grid; grid-template-rows: auto 1fr; gap: 34px; }
+  .acteurs .num { font: 700 12px/1 var(--police); letter-spacing: .3em;
+    text-transform: uppercase; color: var(--magenta); margin-bottom: 14px; }
+  .acteurs h2 { font: 700 40px/1.14 var(--police); letter-spacing: -.02em; }
+  .grille { display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 20px; align-content: center; }
+  .fiche { border: 1px solid rgba(192,95,184,.3); border-radius: 14px;
+    padding: 22px 24px 24px; background: rgba(255,255,255,.045);
+    animation: monter .55s cubic-bezier(.2,.7,.3,1) both;
+    animation-delay: calc(var(--i) * .22s); }
+  .fiche .role { font: 700 11px/1 var(--police); letter-spacing: .18em;
+    text-transform: uppercase; color: var(--magenta); }
+  .fiche .qui { font: 600 21px/1.3 var(--police); margin-top: 12px; }
+  .fiche .fait { font: 400 15px/1.55 var(--police); color: var(--doux); margin-top: 10px; }
+  .fiche .ecrans { font: 500 13px/1.7 var(--police); color: var(--discret);
+    margin-top: 14px; padding-top: 13px; border-top: 1px solid rgba(255,255,255,.1); }
+
+  /* ── Le carton de cloture, en deux colonnes ─────────────────────────── */
+  .bilan { padding: 72px 90px; display: grid; grid-template-rows: auto 1fr; gap: 34px; }
+  .bilan .num { font: 700 12px/1 var(--police); letter-spacing: .3em;
+    text-transform: uppercase; color: var(--magenta); margin-bottom: 14px; }
+  .bilan h2 { font: 700 40px/1.14 var(--police); letter-spacing: -.02em; }
+  .colonnes { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-content: center; }
+  .colonnes h3 { font: 700 15px/1 var(--police); letter-spacing: .14em;
+    text-transform: uppercase; margin-bottom: 20px; }
+  .colonnes .acquis h3 { color: #6fd3a8; }
+  .colonnes .reste h3 { color: #e9b457; }
+  .colonnes ul { list-style: none; }
+  .colonnes li { font: 400 17px/1.5 var(--police); color: var(--doux);
+    padding: 11px 0 11px 30px; position: relative;
+    animation: monter .5s ease-out both; animation-delay: calc(var(--i) * .13s); }
+  .colonnes .acquis li::before { content: ""; position: absolute; left: 4px; top: 18px;
+    width: 9px; height: 9px; border-radius: 50%; background: #6fd3a8; }
+  .colonnes .reste li::before { content: ""; position: absolute; left: 4px; top: 18px;
+    width: 9px; height: 9px; border-radius: 2px; background: #e9b457; }
+
+  @keyframes monter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  /* Les elements d'un schema paraissent un par un : c'est ce qui fait LIRE le
+     flux dans le bon sens plutot que de le decouvrir d'un bloc. */
+  .etape, .arete, .annot { animation: monter .42s ease-out both;
+    animation-delay: calc(var(--i) * .34s + .2s); }
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<script>
+/* ──────────────────────────────────────────────────────────────────────────
+   LE GENERATEUR DE SCHEMAS.
+
+   Les boites et les fleches sont CALCULEES et non dessinees a la main : une
+   chaine de huit etats posee a l'oeil ne s'aligne jamais vraiment, et le
+   decalage se voit a l'image. Ici tout tombe sur une grille.
+   ────────────────────────────────────────────────────────────────────────── */
+
+const ESPACE = "http://www.w3.org/2000/svg";
+
+function el(nom, attributs = {}, texte = null) {
+  const noeud = document.createElementNS(ESPACE, nom);
+  for (const [cle, valeur] of Object.entries(attributs)) {
+    if (valeur !== null && valeur !== undefined) noeud.setAttribute(cle, String(valeur));
+  }
+  if (texte !== null) noeud.textContent = texte;
+  return noeud;
+}
+
+/** Une boite d'etape : titre, sous-titre, et un lintel colore si elle est marquee. */
+function boite(x, y, l, h, etape, indice) {
+  const g = el("g", { class: "etape", style: `--i:${indice}` });
+  const accent = etape.accent ?? null;
+  g.appendChild(el("rect", {
+    x, y, width: l, height: h, rx: 11,
+    fill: accent === "cle" ? "rgba(192,95,184,.17)" : "rgba(255,255,255,.055)",
+    stroke: accent === "cle" ? "#c05fb8" : accent === "manque" ? "#e9b457"
+          : accent === "sortie" ? "#8b839e" : "rgba(255,255,255,.26)",
+    "stroke-width": accent ? 2 : 1.2,
+    "stroke-dasharray": accent === "manque" ? "7 5" : null,
+  }));
+  const cx = x + l / 2;
+  g.appendChild(el("text", {
+    x: cx, y: y + (etape.sous ? 36 : h / 2 + 6), "text-anchor": "middle",
+    fill: "#f4f1f8", "font-size": 17, "font-weight": 650,
+    "font-family": "Inter, Segoe UI, system-ui, sans-serif",
+  }, etape.titre));
+  if (etape.sous) {
+    g.appendChild(el("text", {
+      x: cx, y: y + 60, "text-anchor": "middle",
+      fill: accent === "manque" ? "#e9b457" : "#b9b0cc", "font-size": 13.5,
+      "font-family": "Inter, Segoe UI, system-ui, sans-serif",
+    }, etape.sous));
+  }
+  return g;
+}
+
+/**
+ * Une fleche droite, horizontale ou verticale. L'etiquette est posee a une
+ * ordonnee IMPOSEE par l'appelant, hors de la bande des boites : centree sur
+ * la fleche elle-meme, elle se superposait aux boites voisines des que le
+ * verbe depassait la largeur de l'intervalle, et c'etait illisible a l'image.
+ */
+function fleche(de, vers, texte, indice, etiquette = null) {
+  const g = el("g", { class: "arete", style: `--i:${indice}` });
+  g.appendChild(el("line", {
+    x1: de.x, y1: de.y, x2: vers.x, y2: vers.y,
+    stroke: "rgba(244,241,248,.55)", "stroke-width": 1.8,
+    "marker-end": "url(#pointe)",
+  }));
+  if (texte && etiquette) {
+    g.appendChild(el("text", {
+      x: etiquette.x, y: etiquette.y, "text-anchor": etiquette.ancre ?? "middle",
+      fill: "#c05fb8", "font-size": 13, "font-weight": 600,
+      "font-family": "Inter, Segoe UI, system-ui, sans-serif",
+    }, texte));
+  }
+  return g;
+}
+
+/**
+ * Une chaine d'etapes en serpentin : la premiere ligne se lit de gauche a
+ * droite, la seconde de droite a gauche, reliees par une descente a droite.
+ * Huit etats sur une seule ligne obligeraient a ecrire si petit que la video
+ * ne le rendrait plus.
+ *
+ * Les verbes de la ligne du haut se posent AU-DESSUS des boites, ceux de la
+ * ligne du bas EN DESSOUS : la bande centrale reste libre pour les
+ * annotations, qui sont ce que la cliente doit lire en premier.
+ */
+function chaine(etapes, verbes, { colonnes = 4, boiteL = 236, boiteH = 82,
+                                  pasX = 352, pasY = 250, x0 = 54, y0 = 86 } = {}) {
+  const lignes = Math.ceil(etapes.length / colonnes);
+  const hauteur = y0 + (lignes - 1) * pasY + boiteH + 62;
+  const largeur = x0 * 2 + (colonnes - 1) * pasX + boiteL;
+  const svg = el("svg", { viewBox: `0 0 ${largeur} ${hauteur}`, role: "img" });
+  const defs = el("defs");
+  const pointe = el("marker", {
+    id: "pointe", viewBox: "0 0 10 10", refX: 9, refY: 5,
+    markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse",
+  });
+  pointe.appendChild(el("path", { d: "M 0 1 L 9 5 L 0 9 z", fill: "rgba(244,241,248,.6)" }));
+  defs.appendChild(pointe);
+  svg.appendChild(defs);
+
+  const places = etapes.map((etape, i) => {
+    const ligne = Math.floor(i / colonnes);
+    const rang = i % colonnes;
+    // Le serpentin : une ligne paire se lit vers la droite, une impaire vers la gauche.
+    const colonne = ligne % 2 === 0 ? rang : colonnes - 1 - rang;
+    return { x: x0 + colonne * pasX, y: y0 + ligne * pasY, ligne, etape };
+  });
+
+  places.forEach((place, i) => {
+    const suivante = places[i + 1];
+    if (!suivante) return;
+    const verbe = verbes[i] ?? null;
+    if (place.ligne === suivante.ligne) {
+      const versLaDroite = suivante.x > place.x;
+      const depart = { x: versLaDroite ? place.x + boiteL + 10 : place.x - 10,
+                       y: place.y + boiteH / 2 };
+      const arrivee = { x: versLaDroite ? suivante.x - 10 : suivante.x + boiteL + 10,
+                        y: place.y + boiteH / 2 };
+      svg.appendChild(fleche(depart, arrivee, verbe, i, {
+        x: (depart.x + arrivee.x) / 2,
+        // Au-dessus de la boite sur la ligne du haut, en dessous sur celle du bas.
+        y: place.ligne % 2 === 0 ? place.y - 17 : place.y + boiteH + 28,
+      }));
+    } else {
+      // Le passage de ligne : une descente dans l'axe de la boite.
+      const depart = { x: place.x + boiteL / 2, y: place.y + boiteH + 10 };
+      const arrivee = { x: place.x + boiteL / 2, y: suivante.y - 10 };
+      svg.appendChild(fleche(depart, arrivee, verbe, i, {
+        x: depart.x + 16, y: (depart.y + arrivee.y) / 2 + 5, ancre: "start",
+      }));
+    }
+  });
+
+  places.forEach((place, i) =>
+    svg.appendChild(boite(place.x, place.y, boiteL, boiteH, place.etape, i)));
+
+  return { svg, places, boiteL, boiteH };
+}
+
+/** Une annotation reliee a une boite par un trait fin : elle dit POURQUOI. */
+function annoter(svg, place, texte, { boiteL, boiteH, dy = 77, couleur = "#c05fb8" }, indice) {
+  const g = el("g", { class: "annot", style: `--i:${indice}` });
+  const x = place.x + boiteL / 2;
+  g.appendChild(el("line", {
+    x1: x, y1: place.y + boiteH + 6, x2: x, y2: place.y + boiteH + dy - 30,
+    stroke: couleur, "stroke-width": 1.4, "stroke-dasharray": "4 4", opacity: .75,
+  }));
+  texte.split("\n").forEach((ligne, n) =>
+    g.appendChild(el("text", {
+      x, y: place.y + boiteH + dy - 10 + n * 22, "text-anchor": "middle",
+      fill: couleur, "font-size": 15, "font-weight": n === 0 ? 650 : 400,
+      "font-family": "Inter, Segoe UI, system-ui, sans-serif",
+    }, ligne)));
+  svg.appendChild(g);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   LES SCHEMAS, UN PAR FLUX.
+   ────────────────────────────────────────────────────────────────────────── */
+
+const SCHEMAS = {
+
+  /* Le flux commercial. Le point que la cliente veut voir : le PRIX arrive
+     apres l'echange, jamais au depot de la demande. */
+  demande() {
+    const { svg, places, boiteL, boiteH } = chaine(
+      [
+        { titre: "Déposée", sous: "le visiteur a écrit" },
+        { titre: "Affectée", sous: "un responsable, tout seul" },
+        { titre: "En conversation", sous: "le client a été joint", accent: "cle" },
+        { titre: "Qualifiée", sous: "le questionnaire est complet" },
+        { titre: "Chiffrée", sous: "un intervalle, pas un prix" },
+        { titre: "Proforma émise", sous: "le prix arrêté", accent: "cle" },
+        { titre: "Acceptée", sous: "le client a dit oui" },
+        { titre: "Payée", sous: "l'espace s'ouvre" },
+      ],
+      ["le site l'enregistre", "relais automatique", "premier échange",
+       "réponses saisies", "barème du référentiel", "le responsable arrête",
+       "lien reçu par courriel", "paiement constaté"],
+    );
+    svg.setAttribute("aria-label",
+      "La demande passe par huit états, du dépôt sur le site à l'ouverture de l'espace adhérent.");
+    annoter(svg, places[2],
+      "L'échange vient AVANT le prix\nle client parle, puis on chiffre",
+      { boiteL, boiteH }, 9);
+    return {
+      titre: "Le parcours d'une demande, du site public à l'espace adhérent",
+      legende: "Huit états, et <b>un seul chemin</b> pour passer de l'un à l'autre. Le prix n'existe qu'à la sixième étape : il se calcule sur les réponses enregistrées, après que le client a été joint, et le responsable qui s'écarte de l'intervalle doit écrire pourquoi.",
+      svg,
+    };
+  },
+
+  /* La chaine comptable, jusqu'a la DSF. Le maillon absent est dessine en
+     pointilles : le dire sur un schema vaut mieux que de le decouvrir. */
+  comptable() {
+    const { svg, places, boiteL, boiteH } = chaine(
+      [
+        { titre: "Pièces justificatives", sous: "déposées par l'adhérent" },
+        { titre: "Saisie", sous: "écritures équilibrées" },
+        { titre: "Rapprochement", sous: "banque et comptes" },
+        { titre: "Balance", sous: "soldes par compte" },
+        { titre: "Système déterminé", sous: "normal ou minimal" },
+        { titre: "États financiers", sous: "bilan, résultat, flux" },
+        { titre: "Liasse DSF", sous: "assemblée et contrôlée" },
+        { titre: "Dépôt à la DGI", sous: "canal à construire", accent: "manque" },
+      ],
+      ["l'adhérent dépose", "le comptable impute", "lettrage",
+       "clôture de l'exercice", "chiffre d'affaires", "moissonnage OHADA",
+       "passage des contrôles", "reste à faire"],
+    );
+    svg.setAttribute("aria-label",
+      "La chaîne comptable va des pièces justificatives à la liasse DSF ; le dépôt à la DGI reste à construire.");
+    annoter(svg, places[2],
+      "Le rapprochement du comptable\nse fait ici, avant la clôture",
+      { boiteL, boiteH }, 9);
+    return {
+      titre: "De la pièce justificative à la liasse fiscale",
+      legende: "Chaque maillon existe et s'éprouve, <b>jusqu'à la liasse</b>. Le dernier, en pointillés, est le canal de télédéclaration vers la DGI : la plateforme GOVIN expose une interface pour les logiciels comptables, et c'est le prochain chantier.",
+      svg,
+    };
+  },
+
+  /* La creation d'entreprise : un pipeline a part, avec ses propres etapes. */
+  creation() {
+    const { svg, places, boiteL, boiteH } = chaine(
+      [
+        { titre: "Qualification", sous: "ce que le client veut" },
+        { titre: "Constitution", sous: "statuts et pièces" },
+        { titre: "Dépôt au CFCE", sous: "guichet unique" },
+        { titre: "Suivi immatriculation", sous: "RCCM et NIU attendus" },
+        { titre: "Livraison", sous: "les numéros sont remis" },
+        { titre: "Adhérent", sous: "le dossier devient un client", accent: "cle" },
+      ],
+      ["dossier retenu", "pièces réunies", "déposé au guichet",
+       "numéros obtenus", "conversion"],
+      { colonnes: 3, boiteL: 300, pasX: 440 },
+    );
+    svg.setAttribute("aria-label",
+      "La création d'entreprise suit cinq étapes, du dossier qualifié à la livraison des numéros, puis devient un dossier adhérent.");
+    annoter(svg, places[1],
+      "À chaque étape, un compte à rebours\nun dossier qui n'avance plus se signale",
+      { boiteL, boiteH }, 8);
+    return {
+      titre: "La création d'une entreprise, étape par étape",
+      legende: "Un pipeline distinct du pipeline commercial, parce qu'il ne se termine pas par un paiement mais par <b>un RCCM et un NIU</b>. La plateforme suit l'immobilité de chaque dossier et signale celui qui n'a pas bougé.",
+      svg,
+    };
+  },
+};
+
+/* Le schema des evenements se dessine a part : ce n'est pas une chaine mais
+   un noyau qui declenche quatre choses en parallele. */
+function schemaEvenements() {
+  const svg = el("svg", { viewBox: "0 0 1390 470", role: "img",
+    "aria-label": "L'ordonnanceur déclenche quatre travaux périodiques qui aboutissent au relais de messagerie." });
+  const defs = el("defs");
+  const pointe = el("marker", { id: "pointe", viewBox: "0 0 10 10", refX: 9, refY: 5,
+    markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" });
+  pointe.appendChild(el("path", { d: "M 0 1 L 9 5 L 0 9 z", fill: "rgba(244,241,248,.6)" }));
+  defs.appendChild(pointe);
+  svg.appendChild(defs);
+
+  // Le noyau, a gauche.
+  const noyau = el("g", { class: "etape", style: "--i:0" });
+  noyau.appendChild(el("rect", { x: 40, y: 175, width: 250, height: 120, rx: 13,
+    fill: "rgba(192,95,184,.17)", stroke: "#c05fb8", "stroke-width": 2 }));
+  noyau.appendChild(el("text", { x: 165, y: 220, "text-anchor": "middle", fill: "#f4f1f8",
+    "font-size": 20, "font-weight": 650, "font-family": "Inter, system-ui, sans-serif" }, "L'ordonnanceur"));
+  noyau.appendChild(el("text", { x: 165, y: 248, "text-anchor": "middle", fill: "#b9b0cc",
+    "font-size": 14, "font-family": "Inter, system-ui, sans-serif" }, "il tourne sans qu'on"));
+  noyau.appendChild(el("text", { x: 165, y: 268, "text-anchor": "middle", fill: "#b9b0cc",
+    "font-size": 14, "font-family": "Inter, system-ui, sans-serif" }, "le lui demande"));
+  svg.appendChild(noyau);
+
+  const travaux = [
+    { titre: "Relais des demandes", sous: "une demande arrive, elle est affectée" },
+    { titre: "Veille de l'immobilité", sous: "un dossier sans mouvement change de main" },
+    { titre: "Relance des proformas", sous: "le prospect qui n'a pas répondu est relancé" },
+    { titre: "Rappels d'échéance", sous: "la TVA du 15, annoncée d'avance" },
+  ];
+  travaux.forEach((travail, i) => {
+    const y = 40 + i * 102;
+    const g = el("g", { class: "etape", style: `--i:${i + 1}` });
+    g.appendChild(el("rect", { x: 450, y, width: 460, height: 78, rx: 11,
+      fill: "rgba(255,255,255,.055)", stroke: "rgba(255,255,255,.26)", "stroke-width": 1.2 }));
+    g.appendChild(el("text", { x: 474, y: y + 32, fill: "#f4f1f8", "font-size": 17,
+      "font-weight": 650, "font-family": "Inter, system-ui, sans-serif" }, travail.titre));
+    g.appendChild(el("text", { x: 474, y: y + 56, fill: "#b9b0cc", "font-size": 13.5,
+      "font-family": "Inter, system-ui, sans-serif" }, travail.sous));
+    svg.appendChild(g);
+    // Du noyau vers le travail, puis du travail vers le relais.
+    const a = el("g", { class: "arete", style: `--i:${i + 1}` });
+    a.appendChild(el("path", {
+      d: `M 298 235 C 380 235, 380 ${y + 39}, 442 ${y + 39}`,
+      fill: "none", stroke: "rgba(244,241,248,.5)", "stroke-width": 1.8,
+      "marker-end": "url(#pointe)" }));
+    svg.appendChild(a);
+    const b = el("g", { class: "arete", style: `--i:${i + 5}` });
+    b.appendChild(el("path", {
+      d: `M 918 ${y + 39} C 980 ${y + 39}, 980 235, 1042 235`,
+      fill: "none", stroke: "rgba(244,241,248,.5)", "stroke-width": 1.8,
+      "marker-end": "url(#pointe)" }));
+    svg.appendChild(b);
+  });
+
+  // Le relais, a droite.
+  const relais = el("g", { class: "etape", style: "--i:6" });
+  relais.appendChild(el("rect", { x: 1050, y: 175, width: 300, height: 120, rx: 13,
+    fill: "rgba(111,211,168,.14)", stroke: "#6fd3a8", "stroke-width": 2 }));
+  relais.appendChild(el("text", { x: 1200, y: 215, "text-anchor": "middle", fill: "#f4f1f8",
+    "font-size": 19, "font-weight": 650, "font-family": "Inter, system-ui, sans-serif" }, "Le courriel part"));
+  relais.appendChild(el("text", { x: 1200, y: 243, "text-anchor": "middle", fill: "#b9b0cc",
+    "font-size": 14, "font-family": "Inter, system-ui, sans-serif" }, "vraiment, par SMTP,"));
+  relais.appendChild(el("text", { x: 1200, y: 263, "text-anchor": "middle", fill: "#b9b0cc",
+    "font-size": 14, "font-family": "Inter, system-ui, sans-serif" }, "et s'arrête au relais local"));
+  svg.appendChild(relais);
+
+  return {
+    titre: "Ce que la plateforme fait quand personne ne la regarde",
+    legende: "Quatre travaux périodiques tournent dans la plateforme. Ils sont la raison pour laquelle une demande déposée la nuit est <b>déjà affectée au matin</b>, et pour laquelle un prospect silencieux reçoit une relance sans que personne y pense.",
+    svg,
+  };
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+
+const ACTEURS = [
+  { role: "Le visiteur", qui: "Un prospect sur le site public",
+    fait: "Il compare les services, estime un coût, et dépose une demande sans créer de compte.",
+    ecrans: "Vitrine · Fiche de service · Estimation · Suivi de sa demande" },
+  { role: "La chargée de clientèle", qui: "Patricia MOUKOURI",
+    fait: "Elle reçoit la demande, appelle le client, qualifie, chiffre et émet la proforma.",
+    ecrans: "Demandes entrantes · Qualification · Chiffrage · Proforma" },
+  { role: "Le comptable", qui: "Léonard FOTSO",
+    fait: "Il impute les pièces, rapproche la banque, et monte la liasse fiscale de l'exercice.",
+    ecrans: "Saisie · Grand livre · Rapprochement · Obligations · Clôture" },
+  { role: "L'adhérent", qui: "Jean-Pierre NKOA, Bâtiment Plus",
+    fait: "Il dépose ses pièces, suit ses échéances et tient lui-même la paie de son entreprise.",
+    ecrans: "Mon espace · Ma paie · Mes échéances · Mes documents" },
+  { role: "La direction", qui: "Bernadette MBALLA",
+    fait: "Elle arrête les tarifs au référentiel, suit la charge des équipes et accorde les dérogations.",
+    ecrans: "Pilotage · Référentiel · Tarifs · Conformité" },
+  { role: "L'administration", qui: "Serge ONANA",
+    fait: "Il ouvre les comptes, accorde les habilitations et surveille la santé de la plateforme.",
+    ecrans: "Comptes · Habilitations · Exploitation" },
+];
+
+const BILAN = {
+  acquis: [
+    "Le site public, ses six services et sa porte d'entrée réelle",
+    "Le parcours commercial complet, du dépôt au paiement",
+    "La comptabilité, le rapprochement et la liasse DSF",
+    "La paie, au cabinet et en libre service chez l'adhérent",
+    "La création d'entreprise et son suivi d'immatriculation",
+    "Le cloisonnement entre cabinets, appliqué par la base",
+  ],
+  reste: [
+    "Le canal de télédéclaration vers la DGI",
+    "Le grand livre général et le livre d'inventaire",
+    "Les six tarifs du catalogue, à valider par la direction",
+    "Le paiement en ligne, aujourd'hui simulé",
+  ],
+};
+
+/* ──────────────────────────────────────────────────────────────────────────
+   LE RENDU : ce qui est demande dans le fragment de l'adresse.
+   ────────────────────────────────────────────────────────────────────────── */
+
+function rendre() {
+  let demande = {};
+  try { demande = JSON.parse(decodeURIComponent(location.hash.slice(1)) || "{}"); }
+  catch { demande = {}; }
+  const scene = document.getElementById("scene");
+  scene.innerHTML = "";
+  const carton = document.createElement("div");
+  carton.className = "carton";
+
+  if (demande.type === "ouverture") {
+    carton.classList.add("ouverture");
+    carton.innerHTML = `
+      <div class="sur">${demande.sur ?? ""}</div>
+      <h1>${demande.titre ?? ""}</h1>
+      <p class="sous">${demande.sous ?? ""}</p>
+      <div class="pied">${demande.pied ?? ""}</div>`;
+  } else if (demande.type === "chapitre") {
+    carton.classList.add("chapitre");
+    carton.innerHTML = `
+      <div class="num">${demande.num ?? ""}</div>
+      <h2>${demande.titre ?? ""}</h2>
+      <p class="sous">${demande.sous ?? ""}</p>`;
+  } else if (demande.type === "schema") {
+    const fabrique = demande.nom === "evenements" ? schemaEvenements : SCHEMAS[demande.nom];
+    const fait = fabrique();
+    carton.classList.add("schema");
+    const entete = document.createElement("div");
+    entete.innerHTML = `<div class="num">${demande.num ?? ""}</div><h2>${fait.titre}</h2>`;
+    const dessin = document.createElement("figure");
+    dessin.className = "dessin";
+    dessin.appendChild(fait.svg);
+    const legende = document.createElement("figcaption");
+    legende.innerHTML = fait.legende;
+    carton.appendChild(entete);
+    carton.appendChild(dessin);
+    carton.appendChild(legende);
+  } else if (demande.type === "acteurs") {
+    carton.classList.add("acteurs");
+    carton.innerHTML = `
+      <div><div class="num">${demande.num ?? ""}</div>
+        <h2>Qui se sert de la plateforme, et sur quels écrans</h2></div>
+      <div class="grille">${ACTEURS.map((a, i) => `
+        <div class="fiche" style="--i:${i}">
+          <div class="role">${a.role}</div>
+          <div class="qui">${a.qui}</div>
+          <div class="fait">${a.fait}</div>
+          <div class="ecrans">${a.ecrans}</div>
+        </div>`).join("")}</div>`;
+  } else if (demande.type === "bilan") {
+    carton.classList.add("bilan");
+    carton.innerHTML = `
+      <div><div class="num">${demande.num ?? ""}</div>
+        <h2>L'état d'avancement, sans rien arrondir</h2></div>
+      <div class="colonnes">
+        <div class="acquis"><h3>Ce qui fonctionne et s'éprouve</h3><ul>${
+          BILAN.acquis.map((t, i) => `<li style="--i:${i}">${t}</li>`).join("")}</ul></div>
+        <div class="reste"><h3>Ce qui reste à construire</h3><ul>${
+          BILAN.reste.map((t, i) => `<li style="--i:${i + 2}">${t}</li>`).join("")}</ul></div>
+      </div>`;
+  }
+
+  scene.appendChild(carton);
+}
+
+addEventListener("hashchange", rendre);
+rendre();
+</script>
+</body>
+</html>

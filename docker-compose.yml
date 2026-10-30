@@ -177,6 +177,14 @@ services:
       # ⚠️ Aucune clé de chiffrement non plus : les secrets TOTP sont écrits en
       # clair. Acceptable ici — données de démonstration —, refusé en production
       # par la configuration elle-même.
+      #
+      # Les agents comptables (ChatGPT ou Claude) : passés depuis le shell, jamais écrits ici.
+      # Sans clé, ils restent éteints et tout se fait à la main. Pour les allumer :
+      #     set -a; . ~/Cles-CGA/openai.env; set +a; docker compose up -d
+      CGA_IA_FOURNISSEUR: ${CGA_IA_FOURNISSEUR:-}
+      CGA_OPENAI_CLE_API: ${CGA_OPENAI_CLE_API:-}
+      CGA_OPENAI_MODELE: ${CGA_OPENAI_MODELE:-gpt-5.5}
+      CGA_ANTHROPIC_CLE_API: ${CGA_ANTHROPIC_CLE_API:-}
     volumes:
       # ⚠️ Sans ce volume, les justificatifs vivent dans la couche du conteneur
       # et **disparaissent au redéploiement**. La base survivrait, elle : on
@@ -244,6 +252,8 @@ services:
       # ⚠️ Voir la console : à la construction, jamais au démarrage.
       args:
         NEXT_PUBLIC_ADRESSE_CONSOLE: http://localhost:${PORT_CONSOLE:-3000}
+        # Vide : la page « Application mobile » dit « bientôt disponible ».
+        NEXT_PUBLIC_LIEN_APPLICATION_ANDROID: ${LIEN_APPLICATION_ANDROID:-}
     environment:
       API_URL: http://api:8000
     ports:
