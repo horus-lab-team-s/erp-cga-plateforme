@@ -104,7 +104,21 @@ elif ! grep -q '^CGA_SMTP_MOT_DE_PASSE=.\+' api.env; then
   exit 3
 fi
 
+# ⚠️ LE MODE DE PRÉSENTATION SURVIT AU DÉPLOIEMENT (30 octobre 2026). `up` relance l'API sur la
+# composition de production : un déploiement fait pendant que la présentation était ouverte l'a
+# refermée sans le dire, et les comptes de la recette ne répondaient plus. On note le mode avant,
+# et on le rétablit après (`presentation.sh` reste seul à l'ouvrir ou le fermer).
+EN_PRESENTATION=0
+if docker exec cga-api-1 printenv CGA_URL_BASE_DE_DONNEES 2>/dev/null | grep -q cga_presentation; then
+  EN_PRESENTATION=1
+  echo "  Mode de présentation ouvert : il sera rétabli après la relance."
+fi
 docker compose --env-file .env up -d --remove-orphans
+if [ "$EN_PRESENTATION" = 1 ]; then
+  docker compose --env-file .env -f docker-compose.yml -f docker-compose.presentation.yml up -d --no-deps --force-recreate api
+  docker compose --env-file .env stop ordonnanceur
+  echo "  Mode de présentation RÉTABLI (base cga_presentation). À fermer après la séance : ./presentation.sh fermer"
+fi
 docker network inspect cga_default --format '{{range .Containers}}{{.Name}} {{end}}' | grep -q backend-nginx-1 \
   || docker network connect cga_default backend-nginx-1
 
