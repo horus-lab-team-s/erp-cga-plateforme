@@ -12,6 +12,11 @@
 #    facteurs, un mot de passe changé couperait l'API de sa base ;
 # 5. démarre la pile, rattache le nginx partagé au réseau de CGA, planifie la sauvegarde.
 #
+# SEULEMENT=vitrine deployer.sh : ne reconstruit et n'envoie QUE le site (30 octobre 2026). Une
+# image fait plusieurs centaines de Mo et la liaison du poste monte à ~200 Ko/s : renvoyer les trois
+# pour changer le site prenait une heure. L'API et la console déjà en service sont réétiquetées sur
+# le serveur, et le script refuse si leurs commits locaux diffèrent de ceux en service.
+#
 # ⚠️ Il NE pose PAS la configuration nginx ni le certificat : c'est `certificats.sh`, une fois,
 # sur le serveur. Ni le premier administrateur : `python -m app.premier_administrateur`.
 set -euo pipefail
@@ -34,12 +39,24 @@ done
 ETIQUETTE="$(date +%Y%m%d)-$(etiquette_de erp-cga-backend)-$(etiquette_de erp-cga-console)-$(etiquette_de erp-cga-vitrine)"
 echo "== Étiquette : $ETIQUETTE"
 
-echo "== Construction des images"
-docker build -t "cga-api:$ETIQUETTE" "$DEPOTS/erp-cga-backend"
-docker build -t "cga-console:$ETIQUETTE" \
-  --build-arg NEXT_PUBLIC_ADRESSE_VITRINE="$SITE" \
-  --build-arg NEXT_PUBLIC_SITE_URL="$CONSOLE" \
-  "$DEPOTS/erp-cga-console"
+IMAGES=("cga-api:$ETIQUETTE" "cga-console:$ETIQUETTE" "cga-vitrine:$ETIQUETTE")
+if [ "${SEULEMENT:-}" = vitrine ]; then
+  EN_SERVICE="$(ssh "$SERVEUR" "sed -n 's/^ETIQUETTE=//p' $DISTANT/.env")"
+  IFS=- read -r _ api_en_service console_en_service _ <<<"$EN_SERVICE"
+  if [ "$api_en_service" != "$(etiquette_de erp-cga-backend)" ] || [ "$console_en_service" != "$(etiquette_de erp-cga-console)" ]; then
+    echo "⚠️ En service : $EN_SERVICE. L'API ou la console locale a changé : déploiement complet requis." >&2
+    exit 1
+  fi
+  IMAGES=("cga-vitrine:$ETIQUETTE")
+  echo "== Site seul : l'API et la console de $EN_SERVICE sont gardées"
+else
+  echo "== Construction des images"
+  docker build -t "cga-api:$ETIQUETTE" "$DEPOTS/erp-cga-backend"
+  docker build -t "cga-console:$ETIQUETTE" \
+    --build-arg NEXT_PUBLIC_ADRESSE_VITRINE="$SITE" \
+    --build-arg NEXT_PUBLIC_SITE_URL="$CONSOLE" \
+    "$DEPOTS/erp-cga-console"
+fi
 docker build -t "cga-vitrine:$ETIQUETTE" \
   --build-arg NEXT_PUBLIC_ADRESSE_CONSOLE="$CONSOLE" \
   --build-arg NEXT_PUBLIC_SITE_URL="$SITE" \
@@ -47,8 +64,10 @@ docker build -t "cga-vitrine:$ETIQUETTE" \
   "$DEPOTS/erp-cga-vitrine"
 
 echo "== Chargement sur $SERVEUR"
-docker save "cga-api:$ETIQUETTE" "cga-console:$ETIQUETTE" "cga-vitrine:$ETIQUETTE" \
-  | gzip -1 | ssh "$SERVEUR" 'gunzip | docker load'
+docker save "${IMAGES[@]}" | gzip -1 | ssh "$SERVEUR" 'gunzip | docker load'
+if [ "${SEULEMENT:-}" = vitrine ]; then
+  ssh "$SERVEUR" "docker tag cga-api:$EN_SERVICE cga-api:$ETIQUETTE && docker tag cga-console:$EN_SERVICE cga-console:$ETIQUETTE"
+fi
 
 echo "== Fichiers de déploiement"
 ssh "$SERVEUR" "mkdir -p $DISTANT/nginx && chmod 700 $DISTANT"
