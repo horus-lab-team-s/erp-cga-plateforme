@@ -165,7 +165,7 @@ await chapitre("5 · ce que la plateforme en fait : le TTC suffit", async () => 
   const C = "La lecture";
   await page.waitForSelector(".document-piece__apercu", { timeout: 15000 }).catch(() => undefined);
   await legende(page, C,
-    "La facture à gauche, ce qu'il faut en retenir à droite. Avec une clé d'API, l'agent remplirait ces champs ; ici, la saisie assistée.");
+    "La facture à gauche, ce qu'il faut en retenir à droite. L'agent ChatGPT peut remplir ces champs (volet des agents) ; ici, la saisie assistée.");
   await souffle(5200);
   await saisir(page, `${F} label:has-text("Fournisseur") input`, "QUINCAILLERIE DU WOURI SARL", { cadence: 18 });
   await saisir(page, `${F} label:has-text("NIU du fournisseur") input`, "M091234567890Q", { cadence: 30 });

@@ -63,8 +63,24 @@ function noterLaLecture(texte) {
    LES CARTONS
    ────────────────────────────────────────────────────────────────────────── */
 
+/**
+ * ⚠️ LA DATE DU TOURNAGE (30 octobre 2026). Chaque film porte sur ses cartons la date de sa
+ * premiere prise (« 14 octobre 2026 », « Mises a jour du 20 octobre 2026 »). Rejoues pour une
+ * nouvelle serie, ils mentiraient sur la version filmee. `TOURNAGE_DATE="30 octobre 2026"`
+ * remplace ces dates sur les cartons, sans toucher aux scenarios.
+ */
+const DATE_DU_TOURNAGE = process.env.TOURNAGE_DATE;
+function dater(demande) {
+  if (!DATE_DU_TOURNAGE) return demande;
+  const remplacer = (texte) => typeof texte !== "string" ? texte : texte
+    .replace(/Mises à jour du \d{1,2} octobre 2026/g, `Version du ${DATE_DU_TOURNAGE}`)
+    .replace(/\d{1,2} octobre 2026/g, DATE_DU_TOURNAGE);
+  return Object.fromEntries(Object.entries(demande).map(([cle, valeur]) => [cle, remplacer(valeur)]));
+}
+
 /** Affiche un carton et le laisse a l'ecran le temps qu'on le lise. */
 export async function carton(page, demande, duree = 6000) {
+  demande = dater(demande);
   await lecture();
   await page.goto(`${CARTE}#${encodeURIComponent(JSON.stringify(demande))}`,
                   { waitUntil: "load" });

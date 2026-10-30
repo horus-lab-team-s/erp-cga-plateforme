@@ -71,7 +71,7 @@ await chapitre("2 · des articles, chacun à décider", async () => {
   const C = "La rédaction";
   await projecteur(page, ".mission__cahier .mission__agent", { tenir: 2400 }).catch(() => undefined);
   await legende(page, C,
-    "Avec la clé d'API du cabinet, « Rédiger avec l'agent » propose les articles d'après le cahier. Ici, la juriste les saisit.");
+    "« Rédiger avec l'agent » fait proposer les articles par ChatGPT (volet des agents). Ici, la juriste les saisit.");
   await souffle(5200);
   await page.getByRole("button", { name: "+ Ajouter un article à la main" }).click();
   for (const [titre, texte] of ARTICLES) {

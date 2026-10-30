@@ -111,7 +111,7 @@ await chapitre("3 · le bail part d'un modèle", async () => {
   await carton(page, {
     type: "chapitre", num: "Ce que la plateforme en fait",
     titre: "Un bail à partir d'un modèle du cabinet",
-    sous: "Le canevas du cahier, et neuf articles types, chacun à décider. Sans clé d'API, le modèle suffit ; avec elle, l'agent complète.",
+    sous: "Le canevas du cahier, et neuf articles types, chacun à décider. Le modèle suffit ; l'agent ChatGPT peut compléter.",
   }, 8000);
   await page.goto(adresseDeLaMission, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => undefined);

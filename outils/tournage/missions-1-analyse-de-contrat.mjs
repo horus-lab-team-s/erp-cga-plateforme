@@ -96,7 +96,7 @@ await chapitre("2 · des points, chacun à décider", async () => {
   const C = "L'analyse";
   await projecteur(page, ".mission__agent", { tenir: 2600 });
   await legende(page, C,
-    "Avec la clé d'API du cabinet, « Lire avec l'agent » prépare ces points. Ici, la juriste les saisit : la structure est la même.");
+    "« Lire avec l'agent » fait préparer ces points par ChatGPT (volet des agents). Ici, la juriste les saisit : la structure est la même.");
   await souffle(5600);
   await page.getByRole("button", { name: "+ Ajouter un point à la main" }).click();
   await souffle(800);

@@ -76,7 +76,7 @@ await chapitre("2 · lire, le document sous les yeux", async () => {
   await souffle(4000);
   await projecteur(page, ".lecture__note", { tenir: 2600 });
   await legende(page, C,
-    "Avec la clé d'API du cabinet, « Lire automatiquement » remplit ces champs par Claude, chacun avec sa confiance. Ici, la saisie est faite à la main.");
+    "« Lire automatiquement » fait remplir ces champs par l'agent ChatGPT (voir le volet des agents). Ici, le comptable saisit à la main : les deux chemins passent par les mêmes contrôles.");
   await souffle(5200);
   await saisir(page, `${F} label:has-text("Fournisseur") input`, "QUINCAILLERIE DU WOURI SARL", { cadence: 18 });
   await saisir(page, `${F} label:has-text("NIU du fournisseur") input`, "M091234567890Q", { cadence: 30 });
@@ -150,7 +150,7 @@ await chapitre("fin", async () => {
   await carton(page, {
     type: "chapitre", num: "Ce que ce flux change",
     titre: "De la pièce à l'écriture, sans ressaisie",
-    sous: "La facture se lit une fois, se contrôle, et l'écriture en découle. Avec la clé du cabinet, Claude préremplit la lecture ; montants, date et NIU restent confirmés par le comptable.",
+    sous: "La facture se lit une fois, se contrôle, et l'écriture en découle. L'agent ChatGPT peut préremplir la lecture ; montants, date et NIU restent confirmés par le comptable.",
   }, 10000);
   await carton(page, {
     type: "ouverture",
