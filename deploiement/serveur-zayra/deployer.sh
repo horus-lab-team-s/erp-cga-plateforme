@@ -12,7 +12,7 @@
 #    facteurs, un mot de passe changé couperait l'API de sa base ;
 # 5. démarre la pile, rattache le nginx partagé au réseau de CGA, planifie la sauvegarde.
 #
-# SEULEMENT=vitrine deployer.sh : ne reconstruit et n'envoie QUE le site (30 octobre 2026). Une
+# SEULEMENT=api|console|vitrine deployer.sh : ne reconstruit et n'envoie QU'UNE image (30 octobre 2026). Une
 # image fait plusieurs centaines de Mo et la liaison du poste monte à ~200 Ko/s : renvoyer les trois
 # pour changer le site prenait une heure. L'API et la console déjà en service sont réétiquetées sur
 # le serveur, et le script refuse si leurs commits locaux diffèrent de ceux en service.
@@ -39,34 +39,54 @@ done
 ETIQUETTE="$(date +%Y%m%d)-$(etiquette_de erp-cga-backend)-$(etiquette_de erp-cga-console)-$(etiquette_de erp-cga-vitrine)"
 echo "== Étiquette : $ETIQUETTE"
 
-IMAGES=("cga-api:$ETIQUETTE" "cga-console:$ETIQUETTE" "cga-vitrine:$ETIQUETTE")
-if [ "${SEULEMENT:-}" = vitrine ]; then
+# Les trois images et le dépôt dont chacune sort.
+declare -A DEPOT=([api]=erp-cga-backend [console]=erp-cga-console [vitrine]=erp-cga-vitrine)
+construire() {
+  case "$1" in
+    api) docker build -t "cga-api:$ETIQUETTE" "$DEPOTS/erp-cga-backend" ;;
+    console) docker build -t "cga-console:$ETIQUETTE" \
+      --build-arg NEXT_PUBLIC_ADRESSE_VITRINE="$SITE" \
+      --build-arg NEXT_PUBLIC_SITE_URL="$CONSOLE" \
+      "$DEPOTS/erp-cga-console" ;;
+    vitrine) docker build -t "cga-vitrine:$ETIQUETTE" \
+      --build-arg NEXT_PUBLIC_ADRESSE_CONSOLE="$CONSOLE" \
+      --build-arg NEXT_PUBLIC_SITE_URL="$SITE" \
+      --build-arg NEXT_PUBLIC_LIEN_APPLICATION_ANDROID="$LIEN_APK" \
+      "$DEPOTS/erp-cga-vitrine" ;;
+  esac
+}
+
+if [ -n "${SEULEMENT:-}" ]; then
+  # SEULEMENT=api|console|vitrine : une seule image construite et envoyée ; les deux autres, déjà en
+  # service, sont réétiquetées sur le serveur — à condition que leurs commits soient bien ceux d'ici.
+  [ -n "${DEPOT[$SEULEMENT]:-}" ] || { echo "SEULEMENT vaut api, console ou vitrine." >&2; exit 2; }
   EN_SERVICE="$(ssh "$SERVEUR" "sed -n 's/^ETIQUETTE=//p' $DISTANT/.env")"
-  IFS=- read -r _ api_en_service console_en_service _ <<<"$EN_SERVICE"
-  if [ "$api_en_service" != "$(etiquette_de erp-cga-backend)" ] || [ "$console_en_service" != "$(etiquette_de erp-cga-console)" ]; then
-    echo "⚠️ En service : $EN_SERVICE. L'API ou la console locale a changé : déploiement complet requis." >&2
-    exit 1
-  fi
-  IMAGES=("cga-vitrine:$ETIQUETTE")
-  echo "== Site seul : l'API et la console de $EN_SERVICE sont gardées"
+  IFS=- read -r _ en_api en_console en_vitrine <<<"$EN_SERVICE"
+  declare -A EN=([api]=$en_api [console]=$en_console [vitrine]=$en_vitrine)
+  GARDEES=()
+  for partie in api console vitrine; do
+    [ "$partie" = "$SEULEMENT" ] && continue
+    if [ "${EN[$partie]}" != "$(etiquette_de "${DEPOT[$partie]}")" ]; then
+      echo "⚠️ En service : $EN_SERVICE. La partie « $partie » locale a changé : déploiement complet requis." >&2
+      exit 1
+    fi
+    GARDEES+=("$partie")
+  done
+  echo "== $SEULEMENT seul : ${GARDEES[*]} de $EN_SERVICE sont gardées"
+  construire "$SEULEMENT"
+  IMAGES=("cga-$SEULEMENT:$ETIQUETTE")
 else
   echo "== Construction des images"
-  docker build -t "cga-api:$ETIQUETTE" "$DEPOTS/erp-cga-backend"
-  docker build -t "cga-console:$ETIQUETTE" \
-    --build-arg NEXT_PUBLIC_ADRESSE_VITRINE="$SITE" \
-    --build-arg NEXT_PUBLIC_SITE_URL="$CONSOLE" \
-    "$DEPOTS/erp-cga-console"
+  for partie in api console vitrine; do construire "$partie"; done
+  IMAGES=("cga-api:$ETIQUETTE" "cga-console:$ETIQUETTE" "cga-vitrine:$ETIQUETTE")
 fi
-docker build -t "cga-vitrine:$ETIQUETTE" \
-  --build-arg NEXT_PUBLIC_ADRESSE_CONSOLE="$CONSOLE" \
-  --build-arg NEXT_PUBLIC_SITE_URL="$SITE" \
-  --build-arg NEXT_PUBLIC_LIEN_APPLICATION_ANDROID="$LIEN_APK" \
-  "$DEPOTS/erp-cga-vitrine"
 
 echo "== Chargement sur $SERVEUR"
 docker save "${IMAGES[@]}" | gzip -1 | ssh "$SERVEUR" 'gunzip | docker load'
-if [ "${SEULEMENT:-}" = vitrine ]; then
-  ssh "$SERVEUR" "docker tag cga-api:$EN_SERVICE cga-api:$ETIQUETTE && docker tag cga-console:$EN_SERVICE cga-console:$ETIQUETTE"
+if [ -n "${SEULEMENT:-}" ]; then
+  for partie in "${GARDEES[@]}"; do
+    ssh "$SERVEUR" "docker tag cga-$partie:$EN_SERVICE cga-$partie:$ETIQUETTE"
+  done
 fi
 
 echo "== Fichiers de déploiement"
