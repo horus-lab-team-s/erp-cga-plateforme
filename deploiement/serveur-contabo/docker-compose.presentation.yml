@@ -1,0 +1,28 @@
+# LE MODE DE PRÉSENTATION (20 octobre 2026) : la séance chez la cliente, où chaque parcours se
+# joue en direct. Superposé à `docker-compose.yml` par `presentation.sh`, jamais à la main.
+#
+# ⚠️ UNE AUTRE BASE, ET RIEN DE LA PRODUCTION. L'API et l'ordonnanceur passent sur
+# `cga_presentation`, remplie du jeu de démonstration (comptes fictifs, dossiers fictifs) ; la
+# base `cga` et ses comptes réels ne sont ni lus ni écrits. Les fichiers déposés vont dans un
+# sous-dossier à part, détruit à la fermeture.
+#
+# ⚠️ CE QUE CE MODE OUVRE, LE TEMPS DE LA SÉANCE : les paiements mobile money se valident seuls
+# (aucun argent ne circule), les courriels retenus se lisent dans la console (« Courriels »), et
+# les comptes de démonstration se connectent avec le mot de passe de la démonstration. C'est
+# pourquoi il se FERME aussitôt la séance finie : `presentation.sh fermer`.
+#
+# ⚠️ LES TRAVAUX DE FOND TOURNENT DANS L'API (répétition générale du 20 octobre 2026). Les
+# courriels sont retenus dans la mémoire du processus qui les émet : ceux de l'ordonnanceur
+# (ouverture du compte d'un client qui a payé, relances) restaient invisibles dans la page
+# des courriels, que sert l'API. Le client ne recevait jamais son lien d'activation. En
+# présentation, l'ordonnanceur à part est donc arrêté (`presentation.sh`), et l'API le porte.
+services:
+  api:
+    environment: &presentation
+      CGA_ENVIRONNEMENT: developpement
+      CGA_MODE_DEMONSTRATION: "true"
+      CGA_URL_BASE_DE_DONNEES: postgresql+psycopg://cga:${MOT_DE_PASSE_PROPRIETAIRE}@cga-db:5432/cga_presentation
+      CGA_DOSSIER_FICHIERS: /application/fichiers/presentation
+      CGA_ORDONNANCEUR_EN_PROCESSUS: "true"
+  ordonnanceur:
+    environment: *presentation
