@@ -151,8 +151,8 @@ if [ ! -f api.env ]; then
 fi
 if grep -q '^CGA_COURRIELS_DIFFERES=true' api.env; then
   echo "⚠️ api.env : CGA_COURRIELS_DIFFERES=true, aucun courriel ne partira tant que le relais n'est pas posé." >&2
-elif ! grep -q '^CGA_SMTP_MOT_DE_PASSE=.\+' api.env; then
-  echo "⚠️ api.env : le relais SMTP n'est pas rempli. La production refuse de démarrer sans lui." >&2
+elif ! grep -qE '^CGA_(SMTP_MOT_DE_PASSE|BREVO_CLE_API)=.+' api.env; then
+  echo "⚠️ api.env : ni la clé d'API Brevo ni le relais SMTP ne sont remplis. La production refuse de démarrer sans eux." >&2
   echo "   Le reprendre : $DISTANT/reprendre-cles.sh (voir le README), puis relancer ce déploiement." >&2
   exit 3
 fi

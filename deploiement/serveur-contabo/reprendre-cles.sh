@@ -8,7 +8,7 @@
 # Exemple (les noms de gauche sont ceux du fichier source, à relever avec --noms) :
 #
 #     sudo ./reprendre-cles.sh /chemin/du/.env \
-#         BREVO_SMTP_LOGIN=CGA_SMTP_UTILISATEUR  BREVO_SMTP_KEY=CGA_SMTP_MOT_DE_PASSE \
+#         BREVO_API_KEY=CGA_BREVO_CLE_API \
 #         TARA_API_KEY=CGA_TARA_CLE_API          TARA_BUSINESS_ID=CGA_TARA_IDENTIFIANT_MARCHAND
 #
 # ⚠️ LE FICHIER SOURCE N'EST QUE LU, et seulement les lignes nommées. Ni les valeurs ni le reste
@@ -81,9 +81,9 @@ for paire in "$@"; do
 done
 
 # Le relais posé, les courriels ne sont plus retenus.
-if grep -q '^CGA_SMTP_MOT_DE_PASSE=.\+' "$TRAVAIL" && grep -q '^CGA_COURRIELS_DIFFERES=true' "$TRAVAIL"; then
+if grep -qE '^CGA_(SMTP_MOT_DE_PASSE|BREVO_CLE_API)=.+' "$TRAVAIL" && grep -q '^CGA_COURRIELS_DIFFERES=true' "$TRAVAIL"; then
   sed -i 's/^CGA_COURRIELS_DIFFERES=true/CGA_COURRIELS_DIFFERES=false/' "$TRAVAIL"
-  echo "  CGA_COURRIELS_DIFFERES remis à false (relais SMTP posé)."
+  echo "  CGA_COURRIELS_DIFFERES remis à false (Brevo posé)."
 fi
 chmod 600 "$TRAVAIL"
 mv "$TRAVAIL" api.env

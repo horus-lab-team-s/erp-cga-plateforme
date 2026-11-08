@@ -34,29 +34,47 @@ modifie aucun fichier.
 1. **Depuis le poste**, `deploiement/serveur-contabo/deployer.sh`. À la première montée, il crée
    `.env` (mots de passe des rôles) et `api.env` (clé de chiffrement), tirés au hasard sur le
    serveur, puis s'arrête : le relais SMTP n'est pas rempli.
-2. **Sur le serveur**, reprendre les clés Brevo et Tara sans les afficher :
+2. **Sur le serveur**, reprendre les clés Brevo et Tara de Gathe Finance sans les afficher.
+   Gathe Finance n'a que la **clé d'API** Brevo (pas de clé SMTP) : CGA l'utilise telle quelle
+   (`CGA_BREVO_CLE_API`, envoi par l'API de Brevo ; voir `transport_brevo.py` dans le serveur).
 
        cd /srv/projects/cga
-       sudo ./reprendre-cles.sh --noms <fichier de réglages source>     # les noms seulement
-       sudo ./reprendre-cles.sh <fichier source> NOM_SMTP_LOGIN=CGA_SMTP_UTILISATEUR \
-            NOM_SMTP_CLE=CGA_SMTP_MOT_DE_PASSE NOM_TARA_CLE=CGA_TARA_CLE_API \
-            NOM_TARA_MARCHAND=CGA_TARA_IDENTIFIANT_MARCHAND
+       sudo ./reprendre-cles.sh --noms /home/gathe/gathe-finance/infra/.env.prod   # les noms seulement
+       sudo ./reprendre-cles.sh /home/gathe/gathe-finance/infra/.env.prod \
+            BREVO_API_KEY=CGA_BREVO_CLE_API \
+            TARA_API_KEY=CGA_TARA_CLE_API TARA_BUSINESS_ID=CGA_TARA_IDENTIFIANT_MARCHAND
 
    Le script n'écrit que `api.env` (sauvegardé avant en `api.env.avant-reprise`) et ne montre
    aucune valeur. ⚠️ Avec les clés Tara de Gathe Finance, les paiements arrivent sur ce compte
    marchand. L'adresse de rappel part avec chaque paiement : rien à déclarer chez Tara.
+   ⚠️ Brevo n'envoie que depuis un domaine authentifié dans ce compte : `cga-brcgroup.com`
+   doit y être validé (SPF, DKIM), sinon chaque envoi est refusé (visible dans le journal de l'API).
 3. **Depuis le poste**, relancer `deployer.sh` : la pile démarre, Traefik la découvre et fait
    les certificats au premier appel, la sauvegarde est planifiée (3 h 40), CGA est inscrit au
    registre `/srv/README.md`.
 4. **Le premier compte** (une seule fois ; il invite ensuite les autres depuis la console) :
 
        cd /srv/projects/cga && docker compose --env-file .env exec api \
-         python -m app.premier_administrateur --courriel … --nom … --prenom …
+         python -m app.premier_administrateur --courriel tchambaedwin@gmail.com --nom … --prenom …
+
+   Il reçoit ADMINISTRATEUR et SUPER_ADMIN, et son lien d'activation s'affiche (et part par courriel).
+   **Des comptes d'essai, un par rôle** (`tchambaedwin+comptable@gmail.com`, …), actifs, mot de
+   passe tiré au hasard et affiché une seule fois :
+
+       docker compose --env-file .env exec api python -m app.comptes_de_test --base tchambaedwin@gmail.com
+       #   --niu <NIU> ajoute ADHERENT et INSPECTEUR sur ce dossier ; --creation CRE-… CLIENT_CREATION
+       docker compose --env-file .env exec api python -m app.comptes_de_test --base tchambaedwin@gmail.com --retirer
+
+   ⚠️ Ce sont des comptes réels : `--retirer` les suspend, à faire avant l'ouverture au public.
 
 5. **L'application mobile** : une nouvelle version, compilée avec l'adresse
    `https://api.cga-brcgroup.com`, puis posée sur le site (`erp-cga-vitrine/outils/publier-apk.sh`).
 
 ## Mettre à jour
+
+⚠️ **Construire sur le serveur** quand la liaison du poste est lente :
+`construire-sur-le-serveur.sh [api] [console] [vitrine]` envoie le code des commits (quelques Mo)
+et le serveur construit les mêmes images, à la même étiquette ; `deployer.sh` les retrouve ensuite.
 
 Comme sur Zayra : `deployer.sh` (ou `SEULEMENT=api|console|vitrine deployer.sh`, ou
 `couche-api.sh` quand seul le code Python a changé). Les deux dernières étiquettes restent sur le
