@@ -101,11 +101,11 @@ def principal() -> int:
         rendre(imprimante, inserer(source, pages), final)
         signets = [(1, re.sub(r"^(\d+)", r"\1. ", texte), pages[ident]) if niveau == 2 else (2, texte, pages[ident])
                    for niveau, ident, texte in titres if ident in pages]
-        nombre = finir(final, SORTIE, pied="CGA Broad Range Consulting Group · Guide de la console du cabinet · v1.1",
+        nombre = finir(final, SORTIE, pied="CGA Broad Range Consulting Group · Guide de la console du cabinet · v1.2",
                        polices=ICI / "polices", signets=signets,
                        metadonnees={"/Title": "Guide d'utilisation de la console du cabinet",
                                     "/Author": "CGA Broad Range Consulting Group",
-                                    "/Subject": "Version 1.1, 20 octobre 2026"})
+                                    "/Subject": "Version 1.2, 2 novembre 2026"})
     print(f"{SORTIE.name} : {nombre} pages, {SORTIE.stat().st_size // 1024} Ko")
     return 0
 

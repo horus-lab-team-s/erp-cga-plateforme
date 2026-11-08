@@ -69,12 +69,12 @@ def main() -> None:
             imprimante.imprimer(brouillon, final)
         finally:
             brouillon.unlink(missing_ok=True)
-        total = finir(final, PDF, pied="CGA Broad Range Consulting Group · Guide de l'application mobile adhérent · v1.1",
+        total = finir(final, PDF, pied="CGA Broad Range Consulting Group · Guide de l'application mobile adhérent · v1.2",
                       polices=POLICES.resolve(),
                       signets=[(1, f"{n}. {CHAPITRES[n]}", pages[n]) for n in sorted(pages)],
                       metadonnees={"/Title": "Guide d'utilisation de l'application mobile adhérent",
                                    "/Author": "CGA Broad Range Consulting Group",
-                                   "/Subject": "Version 1.1, 20 octobre 2026"})
+                                   "/Subject": "Version 1.2, 2 novembre 2026"})
     print(PDF, total, "pages", pages)
 
 

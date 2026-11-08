@@ -5,7 +5,7 @@ et l'espace client (routes `(adherent)` de `erp-cga-console` : « Ma création �
 
 | Fichier | Rôle |
 |---|---|
-| `Guide-utilisation-site-et-espace-adherent-CGA.pdf` | Le livrable (A4, 51 pages, version 1.1 du 20 octobre 2026) |
+| `Guide-utilisation-site-et-espace-adherent-CGA.pdf` | Le livrable (A4, 52 pages, version 1.2 du 2 novembre 2026) |
 | `guide-vitrine.html` | La source du guide (texte, mise en page, charte) |
 | `captures/*.png` | Les écrans réels, pris contre la pile de démonstration |
 | `captures.py` | Prend les captures, puis construit le PDF |

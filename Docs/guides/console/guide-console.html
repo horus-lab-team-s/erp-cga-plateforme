@@ -103,7 +103,7 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
     <p class="couv-public">Pour le personnel du centre de gestion agréé : accueil et formalités, comptabilité, révision, fiscalité, paie, caisse, direction et administration.</p>
   </div>
   <div class="couv-avert">Les écrans reproduits ici ont été photographiés sur la plateforme réelle, avec des données de démonstration fictives. Les noms de personnes et d'entreprises sont inventés.</div>
-  <div class="couv-pied"><span><b>CGA Broad Range Consulting Group</b> · Douala</span><span class="couv-version">Version 1.1 · 20 octobre 2026</span></div>
+  <div class="couv-pied"><span><b>CGA Broad Range Consulting Group</b> · Douala</span><span class="couv-version">Version 1.2 · 2 novembre 2026</span></div>
 </section>
 
 <section class="sommaire">
@@ -352,7 +352,7 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
 </ol>
 <figure><img src="captures/08b-trace-du-controle.png" alt="Trace du contrôle"><figcaption><span class="rep">1</span>Trace du contrôle : les paramètres employés. En bas, la rectificative demandée et suivie dans les pièces attendues.</figcaption></figure>
 <div class="piege"><p>Tant qu'une anomalie <strong>bloquante</strong> subsiste (par exemple « NIU du fournisseur présent, valide et actif »), la pièce ne peut pas être comptabilisée. Il faut obtenir la pièce rectifiée, ou faire écarter le constat par le réviseur, avec un motif.</p></div>
-<div class="partiel"><p>La <strong>lecture automatique par Claude</strong> (l'agent qui préremplit les données d'une facture) est une option. Sans clé d'API configurée par le cabinet, l'écran le dit et la saisie se fait à la main, dans les mêmes champs : rien n'est bloqué. Quand elle est active, l'agent propose et le collaborateur décide. Le bandeau « ce rapport s'appuie sur des règles ou des paramètres qui n'ont pas encore été confirmés » rappelle qu'une partie du référentiel attend la validation du fiscaliste.</p></div>
+<div class="partiel"><p>La <strong>lecture automatique</strong> (l'agent qui préremplit les données d'une facture, avec Claude d'Anthropic ou ChatGPT d'OpenAI, au choix du cabinet) est une option. Sans clé d'API configurée par le cabinet, l'écran le dit et la saisie se fait à la main, dans les mêmes champs : rien n'est bloqué. Quand elle est active, l'agent propose et le collaborateur décide. Le bandeau « ce rapport s'appuie sur des règles ou des paramètres qui n'ont pas encore été confirmés » rappelle qu'une partie du référentiel attend la validation du fiscaliste.</p></div>
 
 <h3 id="s-ecarter">Écarter un constat</h3>
 <div class="fiche"><dt>Qui</dt><dd>Réviseur uniquement. Un motif est exigé avant l'acte.</dd></div>
@@ -434,7 +434,7 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
   <li>Cliquez sur un numéro de compte pour ouvrir son <strong>grand livre</strong>.</li>
 </ol>
 <figure><img src="captures/13b-balance-generale.png" alt="Balance générale"><figcaption>La balance générale, avec ses totaux contrôlés à l'affichage.</figcaption></figure>
-<div class="note"><p>Les trois contrôles disent la cohérence formelle des écritures, pas leur sincérité. <span class="btn">Demander une relecture de la balance à l'agent</span> n'est utile que si la lecture par Claude est configurée.</p></div>
+<div class="note"><p>Les trois contrôles disent la cohérence formelle des écritures, pas leur sincérité. <span class="btn">Demander une relecture de la balance à l'agent</span> n'est utile que si la lecture automatique est configurée.</p></div>
 
 <h3 id="s-pdf">Éditer les livres et les annexes</h3>
 <figure><img src="captures/13-balance-et-livres.png" alt="Livres et annexes"><figcaption><span class="rep">1</span>Livres obligatoires en PDF <span class="rep">2</span>Balances auxiliaires en Excel <span class="rep">3</span>Modèles officiels de la DGI</figcaption></figure>
@@ -595,7 +595,7 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
   <li>L'échéancier affiche « Déclarée ». L'adhérent voit « Déposée à la DGI », l'accusé, et peut télécharger sa copie.</li>
 </ol>
 <div class="partiel"><p>Le dépôt de la DSF reste <strong>manuel sur le portail de la DGI</strong> : la plateforme produit les fichiers et garde la trace, elle ne transmet pas. Les fiches R1 à R3 reprennent la fiche signalétique validée ; les notes annexes se complètent sur le portail.</p></div>
-<div class="note"><p><span class="btn">Demander une relecture à l'agent</span> propose un second regard (codes NACAM, pièces probables, fiche signalétique) quand la lecture par Claude est configurée. L'agent propose ; il ne touche à aucun chiffre.</p></div>
+<div class="note"><p><span class="btn">Demander une relecture à l'agent</span> propose un second regard (codes NACAM, pièces probables, fiche signalétique) quand la lecture automatique est configurée. L'agent propose ; il ne touche à aucun chiffre.</p></div>
 
 <!-- ═════════════════════════════════════════════════════════════════════ -->
 <h2 id="c-caisse"><span class="num">14</span>Honoraires, caisse et règlements</h2>
@@ -619,7 +619,7 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
   <li><strong>Paiements Tara non rattachés</strong> : des notifications de l'opérateur qu'aucun paiement attendu n'explique. À traiter à la main : appeler le numéro, retrouver ce qui est réglé, le constater au guichet sous la référence de l'opérateur.</li>
   <li>La direction lit le même journal, sans encaisser.</li>
 </ul>
-<div class="partiel"><p>Sur la pile de démonstration, le paiement mobile money est <strong>simulé</strong> : la plateforme n'a pas encore d'identifiants marchands Tara réels.</p></div>
+<div class="partiel"><p>Sur la pile de démonstration, le paiement mobile money est <strong>simulé</strong>. En service, tant que les identifiants marchands Tara ne sont pas posés, la demande mobile money est <strong>refusée avec un message</strong> : les règlements se constatent alors au guichet.</p></div>
 
 <h3 id="s-depassement">Retard de règlement : règle, blocage et grâce</h3>
 <div class="fiche"><dt>À quoi ça sert</dt><dd>Un dossier dont les honoraires ne sont pas réglés se lit, reçoit ses pièces et se règle ; passé le retard toléré, il ne se traite plus (saisie, déclarations et DSF refusées), sauf grâce.</dd><dt>Qui</dt><dd>Super administrateur, avec motif et second facteur.</dd></div>
@@ -814,7 +814,7 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
 <div class="court"><h4>Mes codes du second facteur sont refusés.</h4><p>Réglez l'heure du téléphone en automatique. Si l'application a été perdue, l'administrateur retire votre second facteur et vous en associez un nouveau.</p></div>
 <div class="court"><h4>La saisie, la déclaration ou la DSF d'un dossier sont refusées alors que tout est prêt.</h4><p>Le dossier est probablement « Bloqué » pour retard d'honoraires. Le bandeau du portefeuille le dit. Il faut un règlement, ou une grâce accordée par le super administrateur.</p></div>
 <div class="court"><h4>La plateforme envoie-t-elle les déclarations à la DGI ou à la CNPS ?</h4><p>Non. Elle prépare les montants et les fichiers au format attendu ; le dépôt se fait sur les portails officiels, puis se consigne dans la plateforme avec l'accusé.</p></div>
-<div class="court"><h4>Sans la lecture automatique par Claude, puis-je travailler ?</h4><p>Oui. Toutes les tâches se font à la main, dans les mêmes écrans. L'agent, quand il est configuré, ne fait que proposer.</p></div>
+<div class="court"><h4>Sans la lecture automatique, puis-je travailler ?</h4><p>Oui. Toutes les tâches se font à la main, dans les mêmes écrans. L'agent, quand il est configuré, ne fait que proposer.</p></div>
 <div class="court"><h4>Un client dit avoir payé par mobile money mais rien n'apparaît.</h4><p>Regardez <strong>Paiements Tara non rattachés</strong> dans la caisse. S'il y figure, retrouvez le règlement et constatez-le sous la référence de l'opérateur. Sinon, demandez au client sa référence de transaction.</p></div>
 <div class="court"><h4>Le lien « Retour au site » ne mène pas au site.</h4><p>Signalez-le à l'administrateur : l'adresse du site est un réglage de la plateforme (voir l'annexe).</p></div>
 
@@ -858,9 +858,9 @@ kbd { font: 600 8.5pt "Inter"; border: 1px solid var(--ligne); border-bottom-wid
   <tr><th style="width:52mm">Sujet</th><th>État au 19 octobre 2026</th></tr>
   <tr><td>Dépôt TVA, CNPS, DSF</td><td>Manuel sur les portails officiels ; la plateforme prépare et consigne l'accusé, elle ne transmet pas.</td></tr>
   <tr><td>Référentiel</td><td>17 paramètres sur 67 à valider par le fiscaliste ; paie et rapports signalent les lignes concernées.</td></tr>
-  <tr><td>Lecture automatique par Claude</td><td>Optionnelle ; sans clé d'API, saisie et analyse à la main.</td></tr>
+  <tr><td>Lecture automatique (Claude ou ChatGPT)</td><td>Optionnelle ; le fournisseur est choisi par le cabinet à l'installation ; sans clé d'API, saisie et analyse à la main.</td></tr>
   <tr><td>WhatsApp</td><td>Envoi automatique inactif (compte de la plateforme d'envoi non ouvert) ; bouton d'ouverture manuelle seulement.</td></tr>
-  <tr><td>Paiement Tara</td><td>Simulé sur la pile de démonstration (pas d'identifiants marchands réels).</td></tr>
+  <tr><td>Paiement Tara</td><td>Simulé sur la pile de démonstration ; en service, refusé avec un message tant que les identifiants marchands ne sont pas posés (le guichet reste ouvert).</td></tr>
   <tr><td>Quittances</td><td>Comparaison automatique du montant non faite : vérification humaine.</td></tr>
   <tr><td>Balances auxiliaires</td><td>Pas encore au modèle de la DGI.</td></tr>
   <tr><td>Export Sage 100</td><td>Profil non confronté à une installation réelle.</td></tr>

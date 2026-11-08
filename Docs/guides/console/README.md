@@ -1,6 +1,6 @@
 # Guide d'utilisation de la console du cabinet
 
-**Livrable : `Guide-utilisation-console-CGA.pdf`** (A4, 73 pages, version 1.1 du 20 octobre 2026).
+**Livrable : `Guide-utilisation-console-CGA.pdf`** (A4, 73 pages, version 1.2 du 2 novembre 2026).
 
 | Fichier | Rôle |
 |---|---|

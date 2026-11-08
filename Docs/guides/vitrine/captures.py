@@ -627,11 +627,11 @@ def phase_pdf(_nav=None) -> None:
         if s[2] is None:
             suivant = next((t[2] for t in signets[k + 1:] if t[2]), pages)
             s[2] = max(suivant - 1, 1) if s[1].startswith("Partie") else suivant
-    pages = finir(final, PDF, pied="CGA Broad Range Consulting Group · Guide du site et de l'espace adhérent · v1.1",
+    pages = finir(final, PDF, pied="CGA Broad Range Consulting Group · Guide du site et de l'espace adhérent · v1.2",
                   polices=ICI / "polices", signets=[tuple(s) for s in signets],
                   metadonnees={"/Title": "Guide du site et de l'espace adhérent",
                                "/Author": "CGA Broad Range Consulting Group",
-                               "/Subject": "Version 1.1, 20 octobre 2026"})
+                               "/Subject": "Version 1.2, 2 novembre 2026"})
     for f in (temporaire, brouillon, final):
         f.unlink(missing_ok=True)
     note(f"  ✓ {PDF.name} : {pages} pages")
