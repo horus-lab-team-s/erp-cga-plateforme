@@ -172,7 +172,8 @@ fi
 
 mkdir -p sauvegardes
 LIGNE="40 3 * * * GARDER=14 $DISTANT/sauvegarde.sh >> $DISTANT/sauvegardes/journal.log 2>&1  # CGA BRCG SAUVEGARDE"
-( crontab -l 2>/dev/null | grep -v '# CGA BRCG SAUVEGARDE' ; echo "$LIGNE" ) | crontab -
+# ⚠️ `|| true` : sans crontab, `crontab -l` et `grep -v` rendent 1, et `pipefail` arrêtait ici.
+( { crontab -l 2>/dev/null || true; } | { grep -v '# CGA BRCG SAUVEGARDE' || true; } ; echo "$LIGNE" ) | crontab -
 
 # Le registre des projets du serveur (tableau du README de /srv), une fois.
 if [ -w /srv/README.md ] && ! grep -q '^| cga ' /srv/README.md; then
