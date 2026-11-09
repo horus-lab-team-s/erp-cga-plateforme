@@ -1,0 +1,90 @@
+# Le jeu de la recette en présentiel (20 octobre 2026), versé PAR-DESSUS le jeu de démonstration.
+#
+#     /opt/cga/presentation.sh ouvrir      # verse la démonstration, puis ce fichier
+#
+# ⚠️ TOUT EST FICTIF : noms, NIU, adresses. Le mot de passe de chaque compte est celui de la
+# démonstration. Pour ajouter des clients d'une séance à l'autre, compléter la liste `clients`
+# et relancer `presentation.sh completer` : ce qui existe déjà est passé, rien n'est réécrit.
+#
+# Rôles : CHARGE_CLIENTELE, CHARGE_FORMALITES, COMPTABLE, REVISEUR, FISCALISTE, DIRECTION,
+# ADMINISTRATEUR, CAISSE, SUPER_ADMIN, INSPECTEUR, ADHERENT, CLIENT_CREATION.
+# Portée : « tout », une liste de NIU, ou la référence d'un dossier de création (CR-…).
+mot_de_passe: cabinet brcg douala 2026
+
+equipe:
+  # La juriste, à part de la chargée de clientèle : la qualification d'une création, les
+  # formalités, les prestations ponctuelles (analyse et rédaction de contrats).
+  - {prenom: Julienne, nom: ATEBA, courriel: j.ateba@cga-brcg.cm, role: CHARGE_FORMALITES, portee: tout,
+     precision: "Juriste du cabinet"}
+  # Le client d'une création en cours (TECHNO SERVICES SARL, étape constitution) : il suit son
+  # dossier et y verse ses pièces depuis son compte.
+  - {prenom: Estelle, nom: MBARGA, courriel: e.mbarga@technoservices.cm, role: CLIENT_CREATION,
+     portee: CR-2026-0012, precision: "Client de la création CR-2026-0012"}
+
+clients:
+  # ── Deux dossiers du jeu de démonstration qui n'avaient pas d'adhérent ──────────────────
+  - niu: M065544332211L
+    denomination: AGRO-NKOLO SA
+    adherent: {prenom: Thérèse, nom: NKOLO, courriel: t.nkolo@agronkolo.cm}
+  - niu: M093344556677N
+    denomination: CLINIQUE LE BON SAMARITAIN
+    adherent: {prenom: Pascal, nom: AMOUGOU, courriel: p.amougou@bonsamaritain.cm}
+
+  # ── Trois clients nouveaux ──────────────────────────────────────────────────────────────
+  - niu: M041122334455Q
+    denomination: QUINCAILLERIE MODERNE DE BONABERI SARL
+    forme: SARL
+    date_creation: 2019-03-14
+    rccm: RC/DLA/2019/B/1142
+    capital: 5000000
+    activite: Vente de matériaux de construction et de quincaillerie
+    nature: COMMERCIALE
+    siege: Bonabéri, Douala IV
+    regime: REEL
+    centre: CDI
+    adhesion_depuis: 2024-01-01
+    dirigeant: NDJOCK Samuel
+    adherent: {prenom: Samuel, nom: NDJOCK, courriel: s.ndjock@quincaillerie-moderne.cm,
+               telephone: "+237677881122"}
+    suivi_par:
+      - {courriel: l.fotso@cga-brcg.cm, role: COMPTABLE}
+      - {courriel: p.moukouri@cga-brcg.cm, role: CHARGE_CLIENTELE}
+
+  - niu: M052233445566R
+    denomination: PHARMACIE DU LITTORAL SARLU
+    forme: SARLU
+    date_creation: 2021-06-02
+    rccm: RC/DLA/2021/B/2207
+    capital: 1000000
+    activite: Officine de pharmacie
+    nature: LIBERALE
+    siege: Bonapriso, Douala I
+    regime: REEL
+    centre: CDI
+    adhesion_depuis: 2025-01-01
+    dirigeant: EKANE Grâce
+    qualite: Gérante
+    adherent: {prenom: Grâce, nom: EKANE, courriel: g.ekane@pharmacie-littoral.cm,
+               telephone: "+237699334455"}
+    suivi_par:
+      - {courriel: c.ndongo@cga-brcg.cm, role: COMPTABLE}
+      - {courriel: p.moukouri@cga-brcg.cm, role: CHARGE_CLIENTELE}
+
+  - niu: P063344556677S
+    denomination: ETS NANA COUTURE
+    forme: ETS
+    date_creation: 2022-09-19
+    activite: Confection et retouche de vêtements
+    nature: COMMERCIALE
+    siege: Marché Mboppi, Douala II
+    regime: IGS
+    centre: CDI
+    adhesion_depuis: 2026-01-01
+    mandat: [DSF]
+    dirigeant: NANA Rosine
+    qualite: Exploitante
+    adherent: {prenom: Rosine, nom: NANA, courriel: r.nana@nanacouture.cm,
+               telephone: "+237655667788"}
+    suivi_par:
+      - {courriel: c.ndongo@cga-brcg.cm, role: COMPTABLE}
+      - {courriel: p.moukouri@cga-brcg.cm, role: CHARGE_CLIENTELE}

@@ -1,0 +1,210 @@
+# CGA BRCG en production, sur le serveur Contabo de la cliente (169.58.69.78), novembre 2026.
+#
+#   https://cga-brcgroup.com              le site public (vitrine) ; www. y renvoie
+#   https://console.cga-brcgroup.com      la console du cabinet et l'espace adhérent
+#   https://api.cga-brcgroup.com          l'API (l'application mobile l'appelle)
+#
+# ⚠️ LE SERVEUR PORTE AUSSI GATHE FINANCE, QUI N'EST PAS À TOUCHER. Ses règles (README de
+# /srv, kit de démarrage) : un seul conteneur publié sur 80/443, Traefik (/srv/edge) ; un projet
+# = un dossier de /srv/projects et un docker-compose ; AUCUNE section `ports` ; les routeurs,
+# services et middlewares Traefik préfixés par le nom du projet (`cga-`).
+#
+# ⚠️ AUCUN SERVICE PARTAGÉ. Le kit propose le Postgres, le Redis et le MinIO communs (réseau
+# `data`), mais CGA a besoin de trois rôles (propriétaire, migration, application soumise au
+# cloisonnement par ligne) : les créer là, c'est intervenir sur la base de Gathe Finance. CGA
+# garde donc sa base à lui, et ne rejoint que `edge`, le réseau par lequel Traefik joint les sites.
+# `db` n'est que sur le réseau interne `default` : rien d'autre sur la machine ne la voit.
+#
+# ⚠️ DES NOMS PROPRES À CGA SUR LE RÉSEAU INTERNE (cga-api, cga-db…) : la console et le site
+# appellent `http://cga-api:8000`. Sur `edge`, partagé, les noms de service (api, console,
+# vitrine) ne recouvrent aucun de ceux de Gathe Finance (site, portal, admin, backend, minio).
+#
+# Les certificats : Traefik les obtient seul (résolveur `le-http`, un par nom), dès le premier
+# appel sur un nom dont le DNS pointe ici. Les images sont construites sur le poste et chargées
+# ici (voir `deployer.sh`) : le serveur ne compile rien.
+#
+#     docker compose --env-file .env up -d
+name: cga
+
+x-api: &api
+  image: cga-api:${ETIQUETTE}
+  # ⚠️ Deux fichiers, et non un : `.env` ne sert qu'à composer ce fichier (mots de passe des
+  # rôles, étiquette) ; `api.env` porte les secrets de l'application (clé de chiffrement,
+  # relais SMTP, Tara). Le mot de passe du propriétaire de la base n'entre pas dans l'API.
+  env_file: api.env
+  environment: &environnement-api
+    CGA_ENVIRONNEMENT: production
+    CGA_PERSISTANCE: postgresql
+    CGA_URL_BASE_DE_DONNEES: postgresql+psycopg://cga_app:${MOT_DE_PASSE_APP}@cga-db:5432/cga
+    CGA_DOSSIER_FICHIERS: /application/fichiers
+    CGA_ADRESSE_PUBLIQUE: https://api.${DOMAINE}
+    CGA_ADRESSE_PUBLIQUE_SITE: https://console.${DOMAINE}
+    CGA_ADRESSE_PUBLIQUE_VITRINE: https://${DOMAINE}
+    CGA_ORIGINES_CORS: '["https://console.${DOMAINE}","https://${DOMAINE}"]'
+    # Traefik retire les en-têtes X-Forwarded-* venus de l'extérieur et pose les siens. ⚠️ Le
+    # réseau `edge` est partagé : un conteneur de Gathe Finance pourrait joindre l'API sans
+    # passer par Traefik. Il n'y a là que des sites connus, et l'API limite aussi par compte.
+    FORWARDED_ALLOW_IPS: "*"
+  volumes:
+    - fichiers:/application/fichiers
+  security_opt: ["no-new-privileges:true"]
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cga
+      POSTGRES_PASSWORD: ${MOT_DE_PASSE_PROPRIETAIRE}
+      POSTGRES_DB: cga
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - donnees_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cga -d cga"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      default:
+        aliases: [cga-db]
+    mem_limit: 512m
+    restart: unless-stopped
+
+  # Les deux rôles de l'application : `cga_migration` possède le schéma, `cga_app` n'a que les
+  # droits d'usage et subit le cloisonnement par ligne. Idempotent : rejoué à chaque montée.
+  roles:
+    image: postgres:16-alpine
+    volumes:
+      - ./roles-postgresql.sql:/roles.sql:ro
+    environment:
+      PGPASSWORD: ${MOT_DE_PASSE_PROPRIETAIRE}
+    command: >-
+      psql -v ON_ERROR_STOP=1 -h cga-db -U cga -d cga
+           -v mot_de_passe_migration="'${MOT_DE_PASSE_MIGRATION}'"
+           -v mot_de_passe_app="'${MOT_DE_PASSE_APP}'"
+           -f /roles.sql
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  migration:
+    <<: *api
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      <<: *environnement-api
+      CGA_URL_BASE_DE_DONNEES: postgresql+psycopg://cga_migration:${MOT_DE_PASSE_MIGRATION}@cga-db:5432/cga
+    depends_on:
+      roles:
+        condition: service_completed_successfully
+    mem_limit: 384m
+    restart: "no"
+
+  api:
+    <<: *api
+    environment:
+      <<: *environnement-api
+      CGA_ORDONNANCEUR_EN_PROCESSUS: "false"
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    networks:
+      default:
+        aliases: [cga-api]
+      edge: {}
+    mem_limit: 768m
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=edge"
+      - "traefik.http.services.cga-api.loadbalancer.server.port=8000"
+      - "traefik.http.routers.cga-api.rule=Host(`api.${DOMAINE}`)"
+      - "traefik.http.routers.cga-api.entrypoints=websecure"
+      - "traefik.http.routers.cga-api.tls.certresolver=le-http"
+      - "traefik.http.routers.cga-api.service=cga-api"
+      - "traefik.http.routers.cga-api.middlewares=cga-corps-25m,chaine-web@file"
+      # Les routes qui vérifient un secret : 10 essais par minute et par adresse, comme le nginx
+      # de Zayra. L'API limite déjà par compte ; ceci arrête l'acharnement avant qu'il l'atteigne.
+      # Règle plus longue que la précédente : Traefik la fait passer devant.
+      - "traefik.http.routers.cga-api-secrets.rule=Host(`api.${DOMAINE}`) && PathRegexp(`^/transverse/(session|mot-de-passe|activation|second-facteur)`)"
+      - "traefik.http.routers.cga-api-secrets.entrypoints=websecure"
+      - "traefik.http.routers.cga-api-secrets.tls.certresolver=le-http"
+      - "traefik.http.routers.cga-api-secrets.service=cga-api"
+      - "traefik.http.routers.cga-api-secrets.middlewares=cga-secrets,cga-corps-25m,chaine-web@file"
+      - "traefik.http.middlewares.cga-secrets.ratelimit.average=10"
+      - "traefik.http.middlewares.cga-secrets.ratelimit.period=1m"
+      - "traefik.http.middlewares.cga-secrets.ratelimit.burst=10"
+      # Une pièce justificative ou un scan : 20 Mo au plus côté serveur.
+      - "traefik.http.middlewares.cga-corps-25m.buffering.maxRequestBodyBytes=26214400"
+
+  # Les travaux périodiques (affectation des demandes, relances, avis) : une seule instance,
+  # pour qu'aucun travail ne tourne deux fois. Pas de HTTP : pas sur `edge`.
+  ordonnanceur:
+    <<: *api
+    environment:
+      <<: *environnement-api
+      CGA_ORDONNANCEUR_EN_PROCESSUS: "true"
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    mem_limit: 512m
+
+  console:
+    image: cga-console:${ETIQUETTE}
+    environment:
+      API_URL: http://cga-api:8000
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      default:
+        aliases: [cga-console]
+      edge: {}
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 384m
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=edge"
+      - "traefik.http.services.cga-console.loadbalancer.server.port=3000"
+      - "traefik.http.routers.cga-console.rule=Host(`console.${DOMAINE}`)"
+      - "traefik.http.routers.cga-console.entrypoints=websecure"
+      - "traefik.http.routers.cga-console.tls.certresolver=le-http"
+      - "traefik.http.routers.cga-console.middlewares=cga-corps-25m,chaine-web@file"
+
+  vitrine:
+    image: cga-vitrine:${ETIQUETTE}
+    environment:
+      API_URL: http://cga-api:8000
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      default:
+        aliases: [cga-vitrine]
+      edge: {}
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 384m
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=edge"
+      - "traefik.http.services.cga-vitrine.loadbalancer.server.port=3000"
+      - "traefik.http.routers.cga-vitrine.rule=Host(`${DOMAINE}`) || Host(`www.${DOMAINE}`)"
+      - "traefik.http.routers.cga-vitrine.entrypoints=websecure"
+      - "traefik.http.routers.cga-vitrine.tls.certresolver=le-http"
+      - "traefik.http.routers.cga-vitrine.middlewares=cga-www,cga-corps-12m,chaine-web@file"
+      # www. renvoie au domaine nu (modèle du kit) ; `$$` : un seul `$` arrive à Traefik.
+      - "traefik.http.middlewares.cga-www.redirectregex.regex=^https?://www\\.${DOMAINE}/(.*)"
+      - "traefik.http.middlewares.cga-www.redirectregex.replacement=https://${DOMAINE}/$${1}"
+      - "traefik.http.middlewares.cga-www.redirectregex.permanent=true"
+      # Les documents joints à une demande : 10 Mo chacun côté serveur.
+      - "traefik.http.middlewares.cga-corps-12m.buffering.maxRequestBodyBytes=12582912"
+
+networks:
+  edge:
+    external: true
+
+volumes:
+  donnees_postgres:
+  fichiers:

@@ -30,6 +30,10 @@ data:
   # La conséquence en orchestration se lit : le conteneur redémarre en boucle.
   # Ce n'est pas un défaut de configuration à contourner, c'est le message.
   CGA_ENVIRONNEMENT: "production"
+  # Les seuls mandataires dont l'API croit `X-Forwarded-For` : le réseau des pods de
+  # l'ingress. ⚠️ À ajuster au réseau réel du cluster ; ne jamais mettre « * », qui
+  # laisserait chaque client choisir son adresse et contourner la limitation de débit.
+  FORWARDED_ALLOW_IPS: "10.0.0.0/8"
   CGA_PERSISTANCE: "postgresql"
 
   # ⚠️ **Faux ici, vrai dans le déploiement de l'ordonnanceur.** Voir
