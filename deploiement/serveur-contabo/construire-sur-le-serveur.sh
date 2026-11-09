@@ -52,7 +52,9 @@ echo "== Envoi du code"
 ssh "$SERVEUR" "mkdir -p $DISTANT"
 for partie in "${PARTIES[@]}"; do scp -q "$TRAVAIL/$partie.tar.gz" "$SERVEUR:$DISTANT/"; done
 
-ssh "$SERVEUR" ETIQUETTE="$ETIQUETTE" DISTANT="$DISTANT" DOMAINE="$DOMAINE" PARTIES="${PARTIES[*]}" bash -s <<'SUR_LE_SERVEUR'
+# ⚠️ 9 novembre 2026 : ssh recolle ses arguments en UNE ligne que le serveur relit. Sans les
+# guillemets échappés, `PARTIES=api console vitrine` y devenait la commande « console ».
+ssh "$SERVEUR" ETIQUETTE="$ETIQUETTE" DISTANT="$DISTANT" DOMAINE="$DOMAINE" "PARTIES='${PARTIES[*]}'" bash -s <<'SUR_LE_SERVEUR'
 set -euo pipefail
 cd "$DISTANT"
 for partie in $PARTIES; do
